@@ -267,8 +267,8 @@ for index in compositional_langs_indices_simlang:
     print(languages[index])
 
 
-# Hmm, so it looks like instead of there being a bug in my code, there's actually a bug in the SimLang lab 21 code
-# (or rather, in the code that generated the list of types that was copied into SimLang lab 21
+# Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21 code
+# (or rather, in the code that generated the list of types that was copied into SimLang lab 21)
 
 
 
@@ -325,4 +325,9 @@ def production(language, topic):
     print(language)
 
 
-production(compositional_lang, "02")
+
+print('')
+print('')
+print('Produce a signal using the example compositional language:')
+utterance = production(compositional_lang, "02")
+print(utterance)
