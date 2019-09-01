@@ -316,11 +316,12 @@ def production_kirby_et_al(language, topic, gamma, error):
     """
     A reproduction of the production function of Kirby et al. (2015)
 
-    :param language: list of forms that has same length as list of meanings (global variable), where each form is
-    mapped to the meaning at the corresponding index
-    :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
-    speaker intends to communicate
+    :param language: list of forms that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the speaker intends to communicate
+    :param gamma: parameter that determines the strength of the penalty on ambiguity
+    :param error: the probability of making an error in production
     :return: a form (i.e. utterance)
+    :rtype: string
     """
     for m in range(len(meanings)):
         if meanings[m] == topic:
@@ -348,9 +349,5 @@ def production_kirby_et_al(language, topic, gamma, error):
 
 
 
-print('')
-for i in range(20):
-    print('')
-    print('Produce a signal using the example language:')
-    utterance = production_kirby_et_al(degenerate_lang, "13", gamma, error)
-    print(utterance)
+def production_with_noise(language, topic, gamma, error):
+    pass
