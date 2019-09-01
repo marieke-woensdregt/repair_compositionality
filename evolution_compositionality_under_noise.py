@@ -322,75 +322,35 @@ def production_kirby_et_al(language, topic, gamma, error):
     speaker intends to communicate
     :return: a form (i.e. utterance)
     """
-    print('')
-    print('This is the production() function at work:')
-    print('')
-    print("language is:")
-    print(language)
-    print('')
-    print("meanings are:")
-    print(meanings)
     for m in range(len(meanings)):
         if meanings[m] == topic:
             topic_index = m
-    print('')
-    print("topic_index is:")
-    print(topic_index)
-    print("topic is:")
-    print(meanings[topic_index])
     correct_form = language[topic_index]
-    print("correct_form is:")
-    print(correct_form)
     error_forms = list(language)
     error_forms = remove_all_instances(error_forms, correct_form)
     if len(error_forms) == 0:  # if the list of error_forms is empty because the language is degenerate
         error_forms = language  # simply choose an error_form from the whole language
-    print("error_forms are:")
-    print(error_forms)
     ambiguity = 0
     for f in language:
         if f == correct_form:
             ambiguity += 1
     prop_to_prob_correct_form = ((1./ambiguity)**gamma)*(1.-error)
-    print('')
-    print("prop_to_prob_correct_form is:")
-    print(prop_to_prob_correct_form)
     prop_to_prob_error_form = error / (len(forms)-1)
-    print('')
-    print("prop_to_prob_error_form is:")
-    print(prop_to_prob_error_form)
-
-    prob_correct_form = prop_to_prob_correct_form / (prop_to_prob_correct_form+prop_to_prob_error_form)
-    print('')
-    print("prob_correct_form is:")
-    print(prob_correct_form)
-    prob_error_form = prop_to_prob_error_form / (prop_to_prob_correct_form + prop_to_prob_error_form)
-    print('')
-    print("prob_error_form is:")
-    print(prob_error_form)
-
     prob_per_form_array = np.zeros(len(forms))
     for i in range(len(forms)):
         if forms[i] == correct_form:
-            prob_per_form_array[i] = prob_correct_form
-        elif forms[i] in error_forms:
-            prob_per_form_array[i] = prob_error_form
-    print('')
-    print("prob_per_form_array is:")
-    print(prob_per_form_array)
-
+            prob_per_form_array[i] = prop_to_prob_correct_form
+        else:
+            prob_per_form_array[i] = prop_to_prob_error_form
+    prob_per_form_array = np.divide(prob_per_form_array, np.sum(prob_per_form_array))
     utterance = np.random.choice(forms, p=prob_per_form_array)
-    print('')
-    print("utterance is:")
-    print(utterance)
-
     return utterance
 
 
 
-
 print('')
-print('')
-print('Produce a signal using the example compositional language:')
-utterance = production_kirby_et_al(holistic_lang, "02", gamma, error)
-print(utterance)
+for i in range(20):
+    print('')
+    print('Produce a signal using the example language:')
+    utterance = production_kirby_et_al(degenerate_lang, "13", gamma, error)
+    print(utterance)
