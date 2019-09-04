@@ -1,5 +1,8 @@
 import itertools
 import numpy as np
+import random
+from scipy.special import logsumexp
+from copy import deepcopy
 
 
 # FROM SIMLANG LAB 21:
@@ -12,9 +15,13 @@ priors = [-0.9178860550328204, -10.749415928290118, -10.749415928290118, -11.272
 
 # First some parameters:
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms = ['aa', 'ab', 'ba', 'bb']  # all possible forms
+forms_without_noise = ['aa', 'ab', 'ba', 'bb']  # all possible forms, excluding their possible 'noisy variants'
+noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the forms above
+all_forms_including_noisy_variants = forms_without_noise+noisy_forms # all possible forms, including both complete forms and noisy variants
 error = 0.05  # the probability of making a production error
-gamma = 2 # parameter that determines strength of ambiguity penalty
+gamma = 2  # parameter that determines strength of ambiguity penalty
+noise = True # parameter that determines whether environmental noise is on or off
+noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
 
 # Some functions to create and classify all possible languages:
@@ -23,9 +30,9 @@ def create_all_possible_languages(meanings, forms):
 
     :param meanings: list of strings corresponding to all possible meanings
     :type meanings: list
-    :param forms: list of strings corresponding to all possible forms
+    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :type forms: list
-    :returns: list of tuples which represent languages, where each tuple consists of forms and has length len(meanings)
+    :returns: list of tuples which represent languages, where each tuple consists of forms_without_noisy_variants and has length len(meanings)
     :rtype: list
     """
     all_possible_languages = list(
@@ -38,16 +45,16 @@ def classify_language(lang, forms, meanings):
     Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
     or 'compositional' (3) (Kirby et al., 2015)
 
-    :param lang: a language; represented as a tuple of forms, where each form index maps to same index in meanings
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same index in meanings
     :type lang: tuple
-    :param forms: list of strings corresponding to all possible forms
+    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :type forms: list
     :returns: integer corresponding to category that language belongs to:
     0 = degenerate, 1 = holistic, 2 = other, 3 = compositional (here I'm following the
     numbering used in SimLang lab 21)
     :rtype: int
     """
-    # TODO: See if I can modify this function so that it can deal with any number of forms and meanings.
+    # TODO: See if I can modify this function so that it can deal with any number of forms_without_noisy_variants and meanings.
     class_degenerate = 0
     class_holistic = 1
     class_other = 2
@@ -55,7 +62,7 @@ def classify_language(lang, forms, meanings):
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(forms) != 4:
         raise ValueError(
-            "This function only works for a world in which there are 4 possible forms"
+            "This function only works for a world in which there are 4 possible forms_without_noisy_variants"
         )
     if len(forms[0]) != 2:
         raise ValueError(
@@ -67,14 +74,14 @@ def classify_language(lang, forms, meanings):
     if lang[0] == lang[1] and lang[1] == lang[2] and lang[2] == lang[3]:
         return class_degenerate
 
-    # lang is compositional if it makes use of all possible forms, *and* each form element maps to the same meaning
+    # lang is compositional if it makes use of all possible forms_without_noisy_variants, *and* each form element maps to the same meaning
     # element for each form:
     elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[
         3] in lang and lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][
         1] == lang[2][1] and lang[1][1] == lang[3][1]:
         return class_compositional
 
-    # lang is holistic if it is *not* compositional, but *does* make use of all possible forms:
+    # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
     elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[
         3] in lang:
         return class_holistic
@@ -85,7 +92,7 @@ def classify_language(lang, forms, meanings):
 
 
 # Let's try out our create_all_possible_languages() function:
-all_possible_languages = create_all_possible_languages(meanings, forms)
+all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
 # print("all_possible_languages are:")
 # print(all_possible_languages)
 print("number of possible languages is:")
@@ -96,7 +103,7 @@ degenerate_lang = ('aa', 'aa', 'aa', 'aa')
 print('')
 print("degenerate_lang is:")
 print(degenerate_lang)
-class_degenerate_lang = classify_language(degenerate_lang, forms, meanings)
+class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
 print("class_degenerate_lang is:")
 print(class_degenerate_lang)
 
@@ -104,7 +111,7 @@ holistic_lang = ('aa', 'ab', 'bb', 'ba')
 print('')
 print("holistic_lang is:")
 print(holistic_lang)
-class_holistic_lang = classify_language(holistic_lang, forms, meanings)
+class_holistic_lang = classify_language(holistic_lang, forms_without_noise, meanings)
 print("class_holistic_lang is:")
 print(class_holistic_lang)
 
@@ -112,7 +119,7 @@ other_lang = ('aa', 'aa', 'aa', 'ab')
 print('')
 print("other_lang is:")
 print(other_lang)
-class_other_lang = classify_language(other_lang, forms, meanings)
+class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
 print("class_other_lang is:")
 print(class_other_lang)
 
@@ -120,7 +127,7 @@ compositional_lang = ('aa', 'ab', 'ba', 'bb')
 print('')
 print("compositional_lang is:")
 print(compositional_lang)
-class_compositional_lang = classify_language(compositional_lang, forms,
+class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
                                              meanings)
 print("class_compositional_lang is:")
 print(class_compositional_lang)
@@ -140,7 +147,7 @@ def classify_all_languages(language_list):
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        class_per_lang[l] = classify_language(language_list[l], forms, meanings)
+        class_per_lang[l] = classify_language(language_list[l], forms_without_noise, meanings)
     return class_per_lang
 
 
@@ -173,11 +180,11 @@ print(no_of_each_class)
 
 def transform_all_languages_to_simlang_format(language_list):
     """
-    Takes a list of languages as represented by me (with only the forms listed
+    Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
     for each language, assuming the meaning for each form is specified by the
     form's index), and turning it into a list of languages as represented in
     SimLang lab 21 (which in turn is based on Kirby et al., 2015), in which a
-    <meaning, form> pair forms a tuple, and four of those tuples in a list form
+    <meaning, form> pair forms_without_noisy_variants a tuple, and four of those tuples in a list form
     a language
 
     :param language_list: list of all languages
@@ -282,11 +289,16 @@ for index in compositional_langs_indices_simlang:
 
 
 
+
+
+
+
+
 # A reproduction of the production function of Kirby et al. (2015):
 
 
 # first we need to write a quick function that removes every instance of a given element from a list (to use for
-# removing the 'correct' forms from a list of possible forms for a given topic:
+# removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given topic:
 def remove_all_instances(my_list, element_to_be_removed):
     """
     Takes a list, and removes all instances of a given element from it
@@ -311,23 +323,22 @@ def remove_all_instances(my_list, element_to_be_removed):
     return my_list
 
 
-# and now for the actual production function:
-def production_kirby_et_al(language, topic, gamma, error):
+# Now let's define a function that calculates the probabilities of producing each of the possible forms_without_noisy_variants, given a particular language and topic:
+def production_probs_kirby_et_al(language, topic, gamma, error):
     """
-    A reproduction of the production function of Kirby et al. (2015)
+    Calculates the production probabilities for each of the possible forms_without_noisy_variants given a language and topic, as defined by Kirby et al. (2015)
 
-    :param language: list of forms that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the speaker intends to communicate
     :param gamma: parameter that determines the strength of the penalty on ambiguity
     :param error: the probability of making an error in production
-    :return: a form (i.e. utterance)
-    :rtype: string
+    :return: 1D numpy array containing a production probability for each possible form (where the index of the probability corresponds to the index of the form in the global variable "forms_without_noisy_variants")
     """
     for m in range(len(meanings)):
         if meanings[m] == topic:
             topic_index = m
     correct_form = language[topic_index]
-    error_forms = list(language)
+    error_forms = list(forms_without_noise)  #This may seem a bit weird, but a speaker should be able to produce *any* form as an error form right? Not limited to only the other forms that exist within their language? (Otherwise a speaker with a degenerate language could never make a production error).
     error_forms = remove_all_instances(error_forms, correct_form)
     if len(error_forms) == 0:  # if the list of error_forms is empty because the language is degenerate
         error_forms = language  # simply choose an error_form from the whole language
@@ -336,18 +347,316 @@ def production_kirby_et_al(language, topic, gamma, error):
         if f == correct_form:
             ambiguity += 1
     prop_to_prob_correct_form = ((1./ambiguity)**gamma)*(1.-error)
-    prop_to_prob_error_form = error / (len(forms)-1)
-    prob_per_form_array = np.zeros(len(forms))
-    for i in range(len(forms)):
-        if forms[i] == correct_form:
+    prop_to_prob_error_form = error / (len(forms_without_noise) - 1)
+    prob_per_form_array = np.zeros(len(forms_without_noise))
+    for i in range(len(forms_without_noise)):
+        if forms_without_noise[i] == correct_form:
             prob_per_form_array[i] = prop_to_prob_correct_form
         else:
             prob_per_form_array[i] = prop_to_prob_error_form
     prob_per_form_array = np.divide(prob_per_form_array, np.sum(prob_per_form_array))
-    utterance = np.random.choice(forms, p=prob_per_form_array)
+    return prob_per_form_array
+
+
+
+
+def create_noisy_variants(form):
+    """
+    Takes a form and generates all its possible noisy variants. NOTE however that in its current form, this function only creates noisy variants in which only a single element of the original form is replaced with a blank! (So it creates for instance 'a_' and '_b', but not '__'.
+
+    :param form: a form (string)
+    :return: a list of possible noisy variants of that form
+    """
+    noisy_variant_list = []
+    for i in range(len(form)):
+        noisy_variant = form[:i] + '_' + form[i+1:]
+        # Instead of string slicing, another way of doing this would be to convert the string into a list, replace the element at the ith index, and then convert it back into a string using the 'join' method, see: https://www.quora.com/How-do-you-change-one-character-in-a-string-in-Python
+        noisy_variant_list.append(noisy_variant)
+    return noisy_variant_list
+
+
+
+def production_probs_with_noise(language, topic, gamma, error, noise_prob):
+    """
+    Calculates the production probabilities for each of the possible forms (including both forms without noise and all possible noisy variants) given a language and topic, and the probability of environmental noise
+
+    :param language: list of forms that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the speaker intends to communicate
+    :param gamma: parameter that determines the strength of the penalty on ambiguity
+    :param error: the probability of making an error in production
+    :param noise_prob: the probability of environmental noise masking part of the utterance
+    :return: 1D numpy array containing a production probability for each possible form (where the index of the probability corresponds to the index of the form in the global variable "all_forms_including_noisy_variants")
+    """
+
+    # print('')
+    # print("all_forms_including_noisy_variants are:")
+    # print(all_forms_including_noisy_variants)
+    # print("len(all_forms_including_noisy_variants) is:")
+    # print(len(all_forms_including_noisy_variants))
+
+    for m in range(len(meanings)):
+        if meanings[m] == topic:
+            topic_index = m
+    correct_form = language[topic_index]
+    error_forms = list(forms_without_noise)  #This may seem a bit weird, but a speaker should be able to produce *any* form as an error form right? Not limited to only the other forms that exist within their language? (Otherwise a speaker with a degenerate language could never make a production error).
+    error_forms = remove_all_instances(error_forms, correct_form)
+    if len(error_forms) == 0:  # if the list of error_forms is empty because the language is degenerate
+        error_forms = language  # simply choose an error_form from the whole language
+
+    # print("language is:")
+    # print(language)
+    #
+    # print('')
+    # print("topic is:")
+    # print(topic)
+    #
+    # print('')
+    # print("correct_form is:")
+    # print(correct_form)
+    #
+    # print('')
+    # print("error_forms are:")
+    # print(error_forms)
+
+    noisy_variants_correct_form = create_noisy_variants(correct_form)
+    # print("noisy_variants_correct_form are:")
+    # print(noisy_variants_correct_form)
+
+    noisy_variants_error_forms = []
+    for error_form in error_forms:
+        noisy_variants = create_noisy_variants(error_form)
+        noisy_variants_error_forms = noisy_variants_error_forms+noisy_variants
+    # print("noisy_variants_error_forms are:")
+    # print(noisy_variants_error_forms)
+
+    ambiguity = 0
+    for f in language:
+        if f == correct_form:
+            ambiguity += 1
+
+    prop_to_prob_correct_form_complete = ((1./ambiguity)**gamma)*(1.-error)*(1 - noise_prob)
+
+    prop_to_prob_error_form_complete = error / (len(forms_without_noise) - 1)*(1 - noise_prob)
+
+    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** gamma) * (1. - error) * (noise_prob / len(noisy_forms))
+
+    prop_to_prob_error_form_noisy = error / (len(forms_without_noise) - 1) * (1 - noise_prob) * (noise_prob / len(noisy_forms))
+
+    # print('')
+    # print('')
+    prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
+    for i in range(len(all_forms_including_noisy_variants)):
+        # print('')
+        # print("all_forms_including_noisy_variants[i] is:")
+        # print(all_forms_including_noisy_variants[i])
+        if all_forms_including_noisy_variants[i] == correct_form:
+            # print('all_forms_including_noisy_variants[i] == correct_form !')
+            prob_per_form_array[i] = prop_to_prob_correct_form_complete
+        elif all_forms_including_noisy_variants[i] in noisy_variants_correct_form:
+            # print('all_possible_forms[i] in noisy_variants_correct_form !')
+            prob_per_form_array[i] = prop_to_prob_correct_form_noisy
+        elif all_forms_including_noisy_variants[i] in noisy_variants_error_forms:
+            # print('all_possible_forms[i] in noisy_variants_error_forms !')
+            prob_per_form_array[i] = prop_to_prob_error_form_noisy
+        else:
+            # print('all_possible_forms[i] must be a complete error form !')
+            prob_per_form_array[i] = prop_to_prob_error_form_complete
+        # print("prob_per_form_array[i] is:")
+        # print(prob_per_form_array[i])
+    prob_per_form_array = np.divide(prob_per_form_array, np.sum(prob_per_form_array))
+    return prob_per_form_array
+
+
+
+print('')
+print('')
+print('THIS IS THE PRODUCTION_PROBS_WITH_NOISE() AT WORK:')
+production_probs_array_with_noise = production_probs_with_noise(other_lang, "02", gamma, error, noise_prob)
+print("production_probs_array_with_noise are:")
+print(production_probs_array_with_noise)
+print("np.sum(production_probs_array_with_noise) are:")
+print(np.sum(production_probs_array_with_noise))
+print("len(production_probs_array_with_noise) are:")
+print(len(production_probs_array_with_noise))
+
+
+
+# And finally, let's write a function that actually produces an utterance, given a language and a topic
+def produce(language, topic, gamma, error):
+    """
+    Produces an actual utterance, given a language and a topic
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the speaker intends to communicate
+    :param gamma: parameter that determines the strength of the penalty on ambiguity
+    :param error: the probability of making an error in production
+    :return: an utterance. That is, a single form chosen from either the global variable "forms_without_noise" (if noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
+        """
+    if noise:
+        prob_per_form_array = production_probs_with_noise(language, topic, gamma, error, noise_prob)
+        utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
+    else:
+        prob_per_form_array = production_probs_kirby_et_al(language, topic, gamma, error)
+        utterance = np.random.choice(forms_without_noise, p=prob_per_form_array)
     return utterance
 
 
 
-def production_with_noise(language, topic, gamma, error):
-    pass
+
+def receive(language, utterance):
+    """
+    Takes a language and an utterance, and returns an interpretation of that utterance, following the language
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param utterance: a form (string)
+    :return: an interpretation (string)
+    """
+    possible_interpretations = []
+    for i in range(len(language)):
+        if language[i] == utterance:
+            possible_interpretations.append(meanings[i])
+    interpretation = random.choice(possible_interpretations)
+    return interpretation
+
+
+
+
+def update_posterior(posterior, topic, utterance):
+
+    # in_language = np.log(1 - error)
+    # out_of_language = np.log(error / (len(utterance) - 1))
+
+    # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy variants):
+    print('')
+    print("utterance is:")
+    print(utterance)
+    print("all_forms_including_noisy_variants is:")
+    print(all_forms_including_noisy_variants)
+    for i in range(len(all_forms_including_noisy_variants)):
+        if all_forms_including_noisy_variants[i] == utterance:
+            utterance_index = i
+    print('')
+    print("utterance_index is:")
+    print(utterance_index)
+
+    # Now, let's go through each hypothesis (i.e. language), and update its posterior probability given the <topic, utterance> pair that was given as input:
+    new_posterior = []
+    for j in range(len(posterior)):
+        print('')
+        print('')
+        print("j is:")
+        print(j)
+        print("np.exp(posterior[j]) BEFORE UPDATING is:")
+        print(np.exp(posterior[j]))
+        hypothesis = all_possible_languages[j]
+        print("hypothesis is:")
+        print(hypothesis)
+        if noise:
+            print('NOISE IS ON!')
+            production_probs = production_probs_with_noise(hypothesis, topic, gamma, error, noise_prob)
+        else:
+            print('NOISE IS OFF!')
+            production_probs = production_probs_kirby_et_al(hypothesis, topic, gamma, error)
+        print("production_probs are:")
+        print(production_probs)
+        log_production_probs = np.log(production_probs)
+        print("log_production_probs are:")
+        print(log_production_probs)
+        print("np.exp(log_production_probs) are:")
+        print(np.exp(log_production_probs))
+
+
+        print('')
+        print('JUST TO RECAP:')
+        for m in range(len(meanings)):
+            if meanings[m] == topic:
+                topic_index = m
+        print("topic_index is:")
+        print(topic_index)
+
+        correct_form = hypothesis[topic_index]
+        print("correct_form is:")
+        print(correct_form)
+
+        noisy_variants_correct_form = create_noisy_variants(correct_form)
+        print("noisy_variants_correct_form are:")
+        print(noisy_variants_correct_form)
+
+        print("utterance is:")
+        print(utterance)
+
+        # if (topic, utterance) in languages[j]:
+        #     new_posterior.append(posterior[j] + in_language)
+        # else:
+        #     new_posterior.append(posterior[j] + out_of_language)
+
+        print('')
+        print("np.exp(log_production_probs[utterance_index]) is:")
+        print(np.exp(log_production_probs[utterance_index]))
+        new_posterior.append(posterior[j] + log_production_probs[utterance_index])
+
+        print('')
+        print("np.exp(new_posterior[j]) AFTER UPDATING is:")
+        print(np.exp(new_posterior[j]))
+
+
+    print('')
+    new_posterior_normalized = np.subtract(new_posterior, logsumexp(new_posterior))
+    print("np.exp(logsumexp(new_posterior_normalized)) is:")
+    print(np.exp(logsumexp(new_posterior_normalized)))
+    print("new_posterior_normalized.shape is:")
+    print(new_posterior_normalized.shape)
+
+    return new_posterior_normalized
+
+
+print('')
+print('')
+example_hypothesis_space = all_possible_languages[:10]
+print("example_hypothesis_space is:")
+print(example_hypothesis_space)
+example_prior = np.array([1./len(example_hypothesis_space) for x in range(len(example_hypothesis_space))])
+example_log_prior = np.log(example_prior)
+print("np.exp(example_log_prior) is:")
+print(np.exp(example_log_prior))
+print("np.exp(logsumexp(example_log_prior)) is:")
+print(np.exp(logsumexp(example_log_prior)))
+
+print('')
+print("NOW, LET'S TEST THE UPDATE_POSTERIOR() FUNCTION:")
+topic = '02'
+utterance = 'ab'
+new_posterior_normalized = update_posterior(example_log_prior, topic, utterance)
+
+
+
+
+def new_population(popsize):
+    """
+    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which is assumed to be defined as a global variable called 'priors')
+
+    :param popsize: the number of agents desired in the new population
+    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding prior probabilities) on the columns.
+    """
+    population = [priors for x in range(popsize)]
+    population = np.array(population)
+    return population
+
+
+
+# def population_communication(population, rounds):
+#     data = []
+#     for i in range(rounds):
+#         speaker_index = random.randrange(len(population))
+#         hearer_index = random.randrange(len(population) - 1)
+#         if hearer_index >= speaker_index:
+#             hearer_index += 1
+#         meaning = random.choice(meanings)
+#         if noise:
+#             pass
+#         else:
+#             speaker_index =
+#             signal = produce_utterance_kirby_et_al(language, topic, gamma, error)(sample(population[speaker_index]), meaning)
+#         population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
+#         data.append((meaning, signal))
+#     return data
