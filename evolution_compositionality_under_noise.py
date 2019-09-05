@@ -659,7 +659,7 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 
 
-def plot_graph(results, fig_title):
+def plot_graph(results, plot_title, fig_title):
 
     average_degenerate = []
     average_holistic = []
@@ -680,6 +680,7 @@ def plot_graph(results, fig_title):
     plt.plot(average_degenerate, color='orange', label='degenerate')
     plt.plot(average_holistic, color='green', label='holistic')
     plt.plot(average_compositional, color='purple', label='compositional')
+    plt.title(plot_title)
     plt.xlabel('generations')
     plt.ylabel('proportion')
     plt.legend()
@@ -695,7 +696,8 @@ turnover = False  # determines whether new individuals enter the population or n
 results = []
 for i in range(10):
     results.append(simulation(200, 20, 20, 2, initial)[0])
-fig_title = "Plot_avoid_ambiguity_gamma_"+str(gamma)+"_turnover_"+str(turnover)
-plot_graph(results, fig_title)
+fig_file_title = "Plot_avoid_ambiguity_gamma_" + str(gamma) + "_turnover_" + str(turnover)
+plot_title = "Expressivity only"
+plot_graph(results, fig_file_title)
 
 
