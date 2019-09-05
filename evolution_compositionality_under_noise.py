@@ -4,6 +4,7 @@ import random
 from scipy.special import logsumexp
 from copy import deepcopy
 import matplotlib.pyplot as plt
+import time
 
 
 # FROM SIMLANG LAB 21:
@@ -689,15 +690,26 @@ def plot_graph(results, plot_title, fig_file_title):
     plt.show()
 
 
+t0 = time.clock()
+
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
             # condition and gamma = 0 for condition without communication)
-turnover = True # determines whether new individuals enter the population or not
+turnover = True  # determines whether new individuals enter the population or not
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+        # used a bottleneck of 20 in the body of the paper.
+rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b
 results = []
 for i in range(10):
-    results.append(simulation(200, 20, 20, 2, initial)[0])
+    results.append(simulation(100, rounds, b, 2, initial)[0])
 fig_file_title = "Plot_avoid_ambiguity_gamma_" + str(gamma) + "_turnover_" + str(turnover)
 plot_title = "Learnability and expressivity"
 plot_graph(results, plot_title, fig_file_title)
 
 
+t1 = time.clock()
+
+print('')
+print('')
+print("number of minutes it took to run simulation:")
+print((t1-t0)/60.)
