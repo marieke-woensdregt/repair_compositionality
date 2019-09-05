@@ -137,8 +137,7 @@ print(class_compositional_lang)
 
 def classify_all_languages(language_list):
     """
-    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2)
-    or 'compositional' (3) (Kirby et al., 2015)
+    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3) (Kirby et al., 2015)
 
     :param language_list: list of all languages
     :type language_list: list
@@ -614,7 +613,7 @@ def log_roulette_wheel(normedlogs):
 
 
 def sample(posterior):
-    return languages[log_roulette_wheel(posterior)]
+    return all_possible_languages[log_roulette_wheel(posterior)]
 
 
 def population_communication(population, rounds):
@@ -688,7 +687,7 @@ def plot_graph(results, fig_title):
 
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
-communication = True
+communication = False
 turnover = True
 results = []
 for i in range(10):
