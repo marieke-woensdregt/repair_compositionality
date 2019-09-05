@@ -3,6 +3,7 @@ import numpy as np
 import random
 from scipy.special import logsumexp
 from copy import deepcopy
+import matplotlib.pyplot as plt
 
 
 # FROM SIMLANG LAB 21:
@@ -20,8 +21,10 @@ noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the for
 all_forms_including_noisy_variants = forms_without_noise+noisy_forms # all possible forms, including both complete forms and noisy variants
 error = 0.05  # the probability of making a production error
 gamma = 2  # parameter that determines strength of ambiguity penalty
-noise = True # parameter that determines whether environmental noise is on or off
+noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
+turnover = True  # determines whether new individuals enter the population or not
+
 
 
 # Some functions to create and classify all possible languages:
@@ -348,14 +351,13 @@ def production_probs_kirby_et_al(language, topic, gamma, error):
             ambiguity += 1
     prop_to_prob_correct_form = ((1./ambiguity)**gamma)*(1.-error)
     prop_to_prob_error_form = error / (len(forms_without_noise) - 1)
-    prob_per_form_array = np.zeros(len(forms_without_noise))
+    prop_to_prob_per_form_array = np.zeros(len(forms_without_noise))
     for i in range(len(forms_without_noise)):
         if forms_without_noise[i] == correct_form:
-            prob_per_form_array[i] = prop_to_prob_correct_form
+            prop_to_prob_per_form_array[i] = prop_to_prob_correct_form
         else:
-            prob_per_form_array[i] = prop_to_prob_error_form
-    prob_per_form_array = np.divide(prob_per_form_array, np.sum(prob_per_form_array))
-    return prob_per_form_array
+            prop_to_prob_per_form_array[i] = prop_to_prob_error_form
+    return prop_to_prob_per_form_array
 
 
 
@@ -444,41 +446,40 @@ def production_probs_with_noise(language, topic, gamma, error, noise_prob):
 
     # print('')
     # print('')
-    prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
+    prop_to_prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
     for i in range(len(all_forms_including_noisy_variants)):
         # print('')
         # print("all_forms_including_noisy_variants[i] is:")
         # print(all_forms_including_noisy_variants[i])
         if all_forms_including_noisy_variants[i] == correct_form:
             # print('all_forms_including_noisy_variants[i] == correct_form !')
-            prob_per_form_array[i] = prop_to_prob_correct_form_complete
+            prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_complete
         elif all_forms_including_noisy_variants[i] in noisy_variants_correct_form:
             # print('all_possible_forms[i] in noisy_variants_correct_form !')
-            prob_per_form_array[i] = prop_to_prob_correct_form_noisy
+            prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_noisy
         elif all_forms_including_noisy_variants[i] in noisy_variants_error_forms:
             # print('all_possible_forms[i] in noisy_variants_error_forms !')
-            prob_per_form_array[i] = prop_to_prob_error_form_noisy
+            prop_to_prob_per_form_array[i] = prop_to_prob_error_form_noisy
         else:
             # print('all_possible_forms[i] must be a complete error form !')
-            prob_per_form_array[i] = prop_to_prob_error_form_complete
+            prop_to_prob_per_form_array[i] = prop_to_prob_error_form_complete
         # print("prob_per_form_array[i] is:")
         # print(prob_per_form_array[i])
-    prob_per_form_array = np.divide(prob_per_form_array, np.sum(prob_per_form_array))
-    return prob_per_form_array
+    return prop_to_prob_per_form_array
 
 
 
-print('')
-print('')
-print('THIS IS THE PRODUCTION_PROBS_WITH_NOISE() AT WORK:')
-production_probs_array_with_noise = production_probs_with_noise(other_lang, "02", gamma, error, noise_prob)
-print("production_probs_array_with_noise are:")
-print(production_probs_array_with_noise)
-print("np.sum(production_probs_array_with_noise) are:")
-print(np.sum(production_probs_array_with_noise))
-print("len(production_probs_array_with_noise) are:")
-print(len(production_probs_array_with_noise))
-
+# print('')
+# print('')
+# print('THIS IS THE PRODUCTION_PROBS_WITH_NOISE() AT WORK:')
+# production_probs_array_with_noise = production_probs_with_noise(other_lang, "02", gamma, error, noise_prob)
+# print("production_probs_array_with_noise are:")
+# print(production_probs_array_with_noise)
+# print("np.sum(production_probs_array_with_noise) are:")
+# print(np.sum(production_probs_array_with_noise))
+# print("len(production_probs_array_with_noise) are:")
+# print(len(production_probs_array_with_noise))
+#
 
 
 # And finally, let's write a function that actually produces an utterance, given a language and a topic
@@ -493,10 +494,12 @@ def produce(language, topic, gamma, error):
     :return: an utterance. That is, a single form chosen from either the global variable "forms_without_noise" (if noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
         """
     if noise:
-        prob_per_form_array = production_probs_with_noise(language, topic, gamma, error, noise_prob)
+        prop_to_prob_per_form_array = production_probs_with_noise(language, topic, gamma, error, noise_prob)
+        prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
     else:
-        prob_per_form_array = production_probs_kirby_et_al(language, topic, gamma, error)
+        prop_to_prob_per_form_array = production_probs_kirby_et_al(language, topic, gamma, error)
+        prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(forms_without_noise, p=prob_per_form_array)
     return utterance
 
@@ -521,113 +524,55 @@ def receive(language, utterance):
 
 
 
-def update_posterior(posterior, topic, utterance):
-
-    # in_language = np.log(1 - error)
-    # out_of_language = np.log(error / (len(utterance) - 1))
-
+def update_posterior(log_posterior, topic, utterance):
     # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy variants):
-    print('')
-    print("utterance is:")
-    print(utterance)
-    print("all_forms_including_noisy_variants is:")
-    print(all_forms_including_noisy_variants)
     for i in range(len(all_forms_including_noisy_variants)):
         if all_forms_including_noisy_variants[i] == utterance:
             utterance_index = i
-    print('')
-    print("utterance_index is:")
-    print(utterance_index)
-
     # Now, let's go through each hypothesis (i.e. language), and update its posterior probability given the <topic, utterance> pair that was given as input:
-    new_posterior = []
-    for j in range(len(posterior)):
-        print('')
-        print('')
-        print("j is:")
-        print(j)
-        print("np.exp(posterior[j]) BEFORE UPDATING is:")
-        print(np.exp(posterior[j]))
+    new_log_posterior = []
+    for j in range(len(log_posterior)):
         hypothesis = all_possible_languages[j]
-        print("hypothesis is:")
-        print(hypothesis)
         if noise:
-            print('NOISE IS ON!')
-            production_probs = production_probs_with_noise(hypothesis, topic, gamma, error, noise_prob)
+            likelihood_per_form_array = production_probs_with_noise(hypothesis, topic, gamma, error, noise_prob)
         else:
-            print('NOISE IS OFF!')
-            production_probs = production_probs_kirby_et_al(hypothesis, topic, gamma, error)
-        print("production_probs are:")
-        print(production_probs)
-        log_production_probs = np.log(production_probs)
-        print("log_production_probs are:")
-        print(log_production_probs)
-        print("np.exp(log_production_probs) are:")
-        print(np.exp(log_production_probs))
-
-
-        print('')
-        print('JUST TO RECAP:')
+            likelihood_per_form_array = production_probs_kirby_et_al(hypothesis, topic, gamma, error)
+        log_likelihood_per_form_array = np.log(likelihood_per_form_array)
         for m in range(len(meanings)):
             if meanings[m] == topic:
                 topic_index = m
-        print("topic_index is:")
-        print(topic_index)
-
         correct_form = hypothesis[topic_index]
-        print("correct_form is:")
-        print(correct_form)
-
         noisy_variants_correct_form = create_noisy_variants(correct_form)
-        print("noisy_variants_correct_form are:")
-        print(noisy_variants_correct_form)
+        new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
-        print("utterance is:")
-        print(utterance)
+    new_log_posterior_normalized = np.subtract(new_log_posterior, logsumexp(new_log_posterior))
 
-        # if (topic, utterance) in languages[j]:
-        #     new_posterior.append(posterior[j] + in_language)
-        # else:
-        #     new_posterior.append(posterior[j] + out_of_language)
-
-        print('')
-        print("np.exp(log_production_probs[utterance_index]) is:")
-        print(np.exp(log_production_probs[utterance_index]))
-        new_posterior.append(posterior[j] + log_production_probs[utterance_index])
-
-        print('')
-        print("np.exp(new_posterior[j]) AFTER UPDATING is:")
-        print(np.exp(new_posterior[j]))
+    return new_log_posterior_normalized
 
 
-    print('')
-    new_posterior_normalized = np.subtract(new_posterior, logsumexp(new_posterior))
-    print("np.exp(logsumexp(new_posterior_normalized)) is:")
-    print(np.exp(logsumexp(new_posterior_normalized)))
-    print("new_posterior_normalized.shape is:")
-    print(new_posterior_normalized.shape)
-
-    return new_posterior_normalized
-
-
-print('')
-print('')
-example_hypothesis_space = all_possible_languages[:10]
-print("example_hypothesis_space is:")
-print(example_hypothesis_space)
-example_prior = np.array([1./len(example_hypothesis_space) for x in range(len(example_hypothesis_space))])
-example_log_prior = np.log(example_prior)
-print("np.exp(example_log_prior) is:")
-print(np.exp(example_log_prior))
-print("np.exp(logsumexp(example_log_prior)) is:")
-print(np.exp(logsumexp(example_log_prior)))
-
-print('')
-print("NOW, LET'S TEST THE UPDATE_POSTERIOR() FUNCTION:")
-topic = '02'
-utterance = 'ab'
-new_posterior_normalized = update_posterior(example_log_prior, topic, utterance)
-
+# print('')
+# print('')
+# example_prior = np.array([1./len(all_possible_languages) for x in range(len(all_possible_languages))])
+# example_log_prior = np.log(example_prior)
+# print("np.exp(example_log_prior) is:")
+# print(np.exp(example_log_prior))
+# print("np.exp(logsumexp(example_log_prior)) is:")
+# print(np.exp(logsumexp(example_log_prior)))
+#
+# print('')
+# print('')
+# print("NOW, LET'S TEST THE UPDATE_POSTERIOR() FUNCTION:")
+# topic = '02'
+# utterance = 'a_'
+# new_log_posterior_normalized = update_posterior(example_log_prior, topic, utterance)
+# print('')
+# print('')
+# print("np.exp(new_log_posterior_normalized) is:")
+# print(np.exp(new_log_posterior_normalized))
+# print("new_log_posterior_normalized.shape is:")
+# print(new_log_posterior_normalized.shape)
+# print("np.exp(logsumexp(new_log_posterior_normalized)) is:")
+# print(np.exp(logsumexp(new_log_posterior_normalized)))
 
 
 
@@ -644,19 +589,98 @@ def new_population(popsize):
 
 
 
-# def population_communication(population, rounds):
-#     data = []
-#     for i in range(rounds):
-#         speaker_index = random.randrange(len(population))
-#         hearer_index = random.randrange(len(population) - 1)
-#         if hearer_index >= speaker_index:
-#             hearer_index += 1
-#         meaning = random.choice(meanings)
-#         if noise:
-#             pass
-#         else:
-#             speaker_index =
-#             signal = produce_utterance_kirby_et_al(language, topic, gamma, error)(sample(population[speaker_index]), meaning)
-#         population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
-#         data.append((meaning, signal))
-#     return data
+
+
+def log_roulette_wheel(normedlogs):
+    r=np.log(random.random()) #generate a random number in [0,1), then convert to log
+    accumulator = normedlogs[0]
+    for i in range(len(normedlogs)):
+        if r < accumulator:
+            return i
+        accumulator = logsumexp([accumulator, normedlogs[i + 1]])
+
+
+def sample(posterior):
+    return languages[log_roulette_wheel(posterior)]
+
+
+def population_communication(population, rounds):
+    data = []
+    for i in range(rounds):
+        speaker_index = random.randrange(len(population))
+        hearer_index = random.randrange(len(population) - 1)
+        if hearer_index >= speaker_index:
+            hearer_index += 1
+        meaning = random.choice(meanings)
+        signal = produce(sample(population[speaker_index]), meaning, gamma, error)
+        population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
+        data.append((meaning, signal))
+    return data
+
+
+def language_stats(posteriors):
+    stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
+    for p in posteriors:
+        for i in range(len(p)):
+            stats[int(class_per_lang[i])] += np.exp(p[i]) / len(posteriors)
+    return stats
+
+
+def simulation(generations, rounds, bottleneck, popsize, data):
+    results = []
+    population = new_population(popsize)
+
+    for i in range(generations):
+        print('.')
+        for j in range(popsize):
+            for k in range(bottleneck):
+                meaning, signal = random.choice(data)
+                population[j] = update_posterior(population[j], meaning, signal)
+        data = population_communication(population, rounds)
+        results.append(language_stats(population))
+        if turnover:
+            population = new_population(popsize)
+
+    return results, data
+
+
+
+def plot_graph(results, fig_title):
+
+    average_degenerate = []
+    average_holistic = []
+    average_compositional = []
+
+    for i in range(len(results[0])):
+        total_degenerate = 0
+        total_holistic = 0
+        total_compositional = 0
+        for result in results:
+            total_degenerate += result[i][0]
+            total_holistic += result[i][1]
+            total_compositional += result[i][3]
+        average_degenerate.append(total_degenerate / len(results))
+        average_holistic.append(total_holistic / len(results))
+        average_compositional.append(total_compositional / len(results))
+
+    plt.plot(average_degenerate, color='orange', label='degenerate')
+    plt.plot(average_holistic, color='green', label='holistic')
+    plt.plot(average_compositional, color='purple', label='compositional')
+    plt.xlabel('generations')
+    plt.ylabel('proportion')
+    plt.legend()
+    plt.grid()
+    plt.savefig("/Users/U968195/Documents/Postdoc_Nijmegen/repair_compositionality/"+fig_title+".pdf")
+    plt.show()
+
+
+initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
+communication = False
+turnover = True
+results = []
+for i in range(10):
+    results.append(simulation(100, 20, 20, 2, initial)[0])
+fig_title = "Plot_avoid_ambiguity_"+str(communication)+"_turnover_"+str(turnover)
+plot_graph(results, fig_title)
+
+
