@@ -687,12 +687,12 @@ def plot_graph(results, fig_title):
 
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
-communication = False
+gamma = 0
 turnover = True
 results = []
 for i in range(10):
-    results.append(simulation(100, 20, 20, 2, initial)[0])
-fig_title = "Plot_avoid_ambiguity_"+str(communication)+"_turnover_"+str(turnover)
+    results.append(simulation(200, 20, 20, 2, initial)[0])
+fig_title = "Plot_avoid_ambiguity_gamma_"+str(gamma)+"_turnover_"+str(turnover)
 plot_graph(results, fig_title)
 
 
