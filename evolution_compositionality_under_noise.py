@@ -20,7 +20,9 @@ forms_without_noise = ['aa', 'ab', 'ba', 'bb']  # all possible forms, excluding 
 noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the forms above
 all_forms_including_noisy_variants = forms_without_noise+noisy_forms # all possible forms, including both complete forms and noisy variants
 error = 0.05  # the probability of making a production error
-gamma = 2  # parameter that determines strength of ambiguity penalty
+gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
+            # condition and gamma = 0 for condition without communication)
+turnover = True  # determines whether new individuals enter the population or not
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
@@ -687,8 +689,9 @@ def plot_graph(results, fig_title):
 
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
-gamma = 0
-turnover = True
+gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
+            # condition and gamma = 0 for condition without communication)
+turnover = False  # determines whether new individuals enter the population or not
 results = []
 for i in range(10):
     results.append(simulation(200, 20, 20, 2, initial)[0])
