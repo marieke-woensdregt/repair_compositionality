@@ -87,8 +87,7 @@ def classify_language(lang, forms, meanings):
         return class_compositional
 
     # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
-    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[
-        3] in lang:
+    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[3] in lang:
         return class_holistic
 
     # In all other cases, a language belongs to the 'other' category:
@@ -525,7 +524,8 @@ def receive(language, utterance):
     """
     Takes a language and an utterance, and returns an interpretation of that utterance, following the language
 
-    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable), where each form is mapped to the meaning at the corresponding index
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
     :param utterance: a form (string)
     :return: an interpretation (string)
     """
@@ -607,6 +607,13 @@ def new_population(popsize):
 
 
 def log_roulette_wheel(normedlogs):
+    """
+    Samples an index from a list of LOG probabilities, where each index has a probability proportional to their
+    probability of being chosen
+
+    :param normedlogs: a list of normalized LOG probabilities
+    :return: an index somewhere between 0 and len(normedlogs)
+    """
     r=np.log(random.random()) #generate a random number in [0,1), then convert to log
     accumulator = normedlogs[0]
     for i in range(len(normedlogs)):
@@ -615,17 +622,31 @@ def log_roulette_wheel(normedlogs):
         accumulator = logsumexp([accumulator, normedlogs[i + 1]])
 
 
-def sample(posterior):
-    return all_possible_languages[log_roulette_wheel(posterior)]
+def sample(log_posterior):
+    """
+    Samples a language based on the posterior
+
+    :param log_posterior: a list of LOG posterior probabilities
+    :return: a language (list of forms_without_noisy_variants that has same length as the global variable meanings,
+    where each form is mapped to the meaning at the corresponding index)
+    """
+    return all_possible_languages[log_roulette_wheel(log_posterior)]
 
 
 def population_communication(population, rounds):
+    """
+    Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
+    is updated every time the agent gets assigned the role of hearer)
+
+    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability distribution
+    :param rounds: the number of rounds for which the population should communicate
+    :return: the data that was produced during the communication rounds, as a list of (meaning, signal) tuples
+    """
     data = []
     for i in range(rounds):
-        speaker_index = random.randrange(len(population))
-        hearer_index = random.randrange(len(population) - 1)
-        if hearer_index >= speaker_index:
-            hearer_index += 1
+        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+        speaker_index = pair_indices[0]
+        hearer_index = pair_indices[1]
         meaning = random.choice(meanings)
         signal = produce(sample(population[speaker_index]), meaning, gamma, error)
         population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
@@ -633,11 +654,19 @@ def population_communication(population, rounds):
     return data
 
 
-def language_stats(posteriors):
+def language_stats(population):
+    """
+    Tracks how well each of the language classes is represented in the populations' posterior probability distributions
+
+    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
+    distribution
+    :return: a list containing the overall average posterior probability assigned to each class of language in the
+    population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
+    """
     stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
-    for p in posteriors:
+    for p in population:
         for i in range(len(p)):
-            stats[int(class_per_lang[i])] += np.exp(p[i]) / len(posteriors)
+            stats[int(class_per_lang[i])] += np.exp(p[i]) / len(population)
     return stats
 
 
@@ -646,7 +675,6 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     population = new_population(popsize)
 
     for i in range(generations):
-        print('.')
         for j in range(popsize):
             for k in range(bottleneck):
                 meaning, signal = random.choice(data)
@@ -693,15 +721,16 @@ def plot_graph(results, plot_title, fig_file_title):
 t0 = time.clock()
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
-gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
-            # condition and gamma = 0 for condition without communication)
+gamma = 2  #  parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability
+            #  Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions.
+            #  condition and gamma = 0 for condition without communication)
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
-        # used a bottleneck of 20 in the body of the paper.
-rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b
+        #  used a bottleneck of 20 in the body of the paper.
+rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 30  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
@@ -709,8 +738,10 @@ noise_prob = 0.1  # the probability of environmental noise masking part of an ut
 
 results = []
 for i in range(runs):
+    print('')
+    print('run '+str(i))
     results.append(simulation(200, rounds, b, popsize, initial)[0])
-fig_file_title = "Plot_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
+fig_file_title = "Plot_n_runs_"+str(runs)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
 if gamma == 0 and turnover == True:
     plot_title = "Learnability only"
 elif gamma > 0 and turnover == False:
