@@ -659,7 +659,7 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 
 
-def plot_graph(results, plot_title, fig_title):
+def plot_graph(results, plot_title, fig_file_title):
 
     average_degenerate = []
     average_holistic = []
@@ -685,19 +685,19 @@ def plot_graph(results, plot_title, fig_title):
     plt.ylabel('proportion')
     plt.legend()
     plt.grid()
-    plt.savefig(fig_title+".pdf")
+    plt.savefig(fig_file_title + ".pdf")
     plt.show()
 
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
             # condition and gamma = 0 for condition without communication)
-turnover = False  # determines whether new individuals enter the population or not
+turnover = True # determines whether new individuals enter the population or not
 results = []
 for i in range(10):
     results.append(simulation(200, 20, 20, 2, initial)[0])
 fig_file_title = "Plot_avoid_ambiguity_gamma_" + str(gamma) + "_turnover_" + str(turnover)
-plot_title = "Expressivity only"
-plot_graph(results, fig_file_title)
+plot_title = "Learnability and expressivity"
+plot_graph(results, plot_title, fig_file_title)
 
 
