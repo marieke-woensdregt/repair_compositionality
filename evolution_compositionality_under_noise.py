@@ -698,10 +698,12 @@ gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et a
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
-rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b
+rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+            # a pair of agents.
 results = []
 for i in range(10):
-    results.append(simulation(100, rounds, b, 2, initial)[0])
+    results.append(simulation(200, rounds, b, popsize, initial)[0])
 fig_file_title = "Plot_avoid_ambiguity_gamma_" + str(gamma) + "_turnover_" + str(turnover)
 plot_title = "Learnability and expressivity"
 plot_graph(results, plot_title, fig_file_title)
