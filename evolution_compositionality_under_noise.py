@@ -2,8 +2,9 @@ import itertools
 import numpy as np
 import random
 from scipy.special import logsumexp
-from copy import deepcopy
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import time
 
 
@@ -102,39 +103,41 @@ all_possible_languages = create_all_possible_languages(meanings, forms_without_n
 print("number of possible languages is:")
 print(len(all_possible_languages))
 
-# Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
-degenerate_lang = ('aa', 'aa', 'aa', 'aa')
-print('')
-print("degenerate_lang is:")
-print(degenerate_lang)
-class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
-print("class_degenerate_lang is:")
-print(class_degenerate_lang)
 
-holistic_lang = ('aa', 'ab', 'bb', 'ba')
-print('')
-print("holistic_lang is:")
-print(holistic_lang)
-class_holistic_lang = classify_language(holistic_lang, forms_without_noise, meanings)
-print("class_holistic_lang is:")
-print(class_holistic_lang)
 
-other_lang = ('aa', 'aa', 'aa', 'ab')
-print('')
-print("other_lang is:")
-print(other_lang)
-class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
-print("class_other_lang is:")
-print(class_other_lang)
-
-compositional_lang = ('aa', 'ab', 'ba', 'bb')
-print('')
-print("compositional_lang is:")
-print(compositional_lang)
-class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
-                                             meanings)
-print("class_compositional_lang is:")
-print(class_compositional_lang)
+# # Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
+# degenerate_lang = ('aa', 'aa', 'aa', 'aa')
+# print('')
+# print("degenerate_lang is:")
+# print(degenerate_lang)
+# class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
+# print("class_degenerate_lang is:")
+# print(class_degenerate_lang)
+#
+# holistic_lang = ('aa', 'ab', 'bb', 'ba')
+# print('')
+# print("holistic_lang is:")
+# print(holistic_lang)
+# class_holistic_lang = classify_language(holistic_lang, forms_without_noise, meanings)
+# print("class_holistic_lang is:")
+# print(class_holistic_lang)
+#
+# other_lang = ('aa', 'aa', 'aa', 'ab')
+# print('')
+# print("other_lang is:")
+# print(other_lang)
+# class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
+# print("class_other_lang is:")
+# print(class_other_lang)
+#
+# compositional_lang = ('aa', 'ab', 'ba', 'bb')
+# print('')
+# print("compositional_lang is:")
+# print(compositional_lang)
+# class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
+#                                              meanings)
+# print("class_compositional_lang is:")
+# print(class_compositional_lang)
 
 
 def classify_all_languages(language_list):
@@ -265,40 +268,40 @@ priors = new_log_prior
 # compositional languages. So let's first have a look at which languages it classifies as compositional:
 
 
-compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
-print('')
-print('')
-print("compositional_langs_indices_my_code MY CODE are:")
-print(compositional_langs_indices_my_code)
-print("len(compositional_langs_indices_my_code) MY CODE are:")
-print(len(compositional_langs_indices_my_code))
-
-
-for index in compositional_langs_indices_my_code:
-    print('')
-    print("index MY CODE is:")
-    print(index)
-    print("all_possible_languages[index] MY CODE is:")
-    print(all_possible_languages[index])
-
-
-# And now let's do the same for the languages from SimLang Lab 21:
-
-compositional_langs_indices_simlang = np.where(np.array(types)==3)[0]
-print('')
-print('')
-print("compositional_langs_indices_simlang SIMLANG CODE are:")
-print(compositional_langs_indices_simlang)
-print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
-print(len(compositional_langs_indices_simlang))
-
-
-for index in compositional_langs_indices_simlang:
-    print('')
-    print("index SIMLANG CODE is:")
-    print(index)
-    print("languages[index] SIMLANG CODE is:")
-    print(languages[index])
+# compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
+# print('')
+# print('')
+# print("compositional_langs_indices_my_code MY CODE are:")
+# print(compositional_langs_indices_my_code)
+# print("len(compositional_langs_indices_my_code) MY CODE are:")
+# print(len(compositional_langs_indices_my_code))
+#
+#
+# for index in compositional_langs_indices_my_code:
+#     print('')
+#     print("index MY CODE is:")
+#     print(index)
+#     print("all_possible_languages[index] MY CODE is:")
+#     print(all_possible_languages[index])
+#
+#
+# # And now let's do the same for the languages from SimLang Lab 21:
+#
+# compositional_langs_indices_simlang = np.where(np.array(types)==3)[0]
+# print('')
+# print('')
+# print("compositional_langs_indices_simlang SIMLANG CODE are:")
+# print(compositional_langs_indices_simlang)
+# print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
+# print(len(compositional_langs_indices_simlang))
+#
+#
+# for index in compositional_langs_indices_simlang:
+#     print('')
+#     print("index SIMLANG CODE is:")
+#     print(index)
+#     print("languages[index] SIMLANG CODE is:")
+#     print(languages[index])
 
 
 # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
@@ -691,6 +694,21 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 def plot_graph(results, plot_title, fig_file_title):
 
+
+
+    palette = sns.color_palette(["black", "red", "grey", "green"])
+
+    print('')
+    print('')
+    print("results are:")
+    print(results)
+    print("len(results) are:")
+    print(len(results))
+    print("len(results[0]) are:")
+    print(len(results[0]))
+    print("len(results[0][0]) are:")
+    print(len(results[0][0]))
+
     average_degenerate = []
     average_holistic = []
     average_other = []
@@ -711,10 +729,71 @@ def plot_graph(results, plot_title, fig_file_title):
         average_other.append(total_other / len(results))
         average_compositional.append(total_compositional / len(results))
 
-    plt.plot(average_degenerate, color='black', label='degenerate')
-    plt.plot(average_holistic, color='red', label='holistic')
-    plt.plot(average_other, color='grey', label='other')
-    plt.plot(average_compositional, color='green', label='compositional')
+    print('')
+    print('')
+    column_proportion = np.array(results)
+    column_proportion = column_proportion.flatten()
+    print("column_proportion is:")
+    print(column_proportion)
+    print("column_proportion.shape is:")
+    print(column_proportion.shape)
+
+    column_runs = []
+    for i in range(runs):
+        for j in range(gens):
+            for k in range(4):
+                column_runs.append(i)
+    column_runs = np.array(column_runs)
+    print("column_runs is:")
+    print(column_runs)
+    print("column_runs.shape is:")
+    print(column_runs.shape)
+
+
+    column_generation = []
+    for i in range(runs):
+        for j in range(gens):
+            for k in range(4):
+                column_generation.append(j)
+    column_generation = np.array(column_generation)
+    print("column_generation is:")
+    print(column_generation)
+    print("column_generation.shape is:")
+    print(column_generation.shape)
+
+    column_type = []
+    for i in range(runs):
+        for j in range(gens):
+            column_type.append('degenerate')
+            column_type.append('holistic')
+            column_type.append('other')
+            column_type.append('compositional')
+    print("column_type is:")
+    print(column_type)
+    print("len(column_type) is:")
+    print(len(column_type))
+
+    data = {'run': column_runs,
+            'generation': column_generation,
+            'proportion': column_proportion,
+            'class': column_type,
+            }
+
+    lang_class_prop_over_gen_df = pd.DataFrame(data)
+    print('')
+    print('')
+    print("lang_class_prop_over_gen_df is:")
+    print(lang_class_prop_over_gen_df)
+
+
+    # plt.plot(average_degenerate, color='black', label='degenerate')
+    # plt.plot(average_holistic, color='red', label='holistic')
+    # plt.plot(average_other, color='grey', label='other')
+    # plt.plot(average_compositional, color='forestgreen', label='compositional')
+
+    # sns.lineplot(x="generation", y="proportion", hue="class", err_style="bars", ci=95, data=lang_class_prop_over_gen_df)
+    sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
+    plt.ylim(-0.05, 1.05)
     plt.title(plot_title)
     plt.xlabel('Generation')
     plt.ylabel('Mean proportion')
@@ -724,7 +803,6 @@ def plot_graph(results, plot_title, fig_file_title):
     plt.show()
 
 
-t0 = time.clock()
 
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
@@ -738,23 +816,29 @@ rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 30  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 200  # the number of generations (Kirby et al., 2015 used 100)
+gens = 100  # the number of generations (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
+
+t0 = time.clock()
 
 results = []
 for i in range(runs):
     print('')
     print('run '+str(i))
-    results.append(simulation(200, rounds, b, popsize, initial)[0])
-fig_file_title = "Plot_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
+    results.append(simulation(gens, rounds, b, popsize, initial)[0])
+
+
+fig_file_title = "SNS_Plot_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
 if gamma == 0 and turnover == True:
     plot_title = "Learnability only"
 elif gamma > 0 and turnover == False:
     plot_title = "Expressivity only"
 elif gamma > 0 and turnover == True:
     plot_title = "Learnability and expressivity"
+if noise:
+    plot_title = plot_title+" Plus Noise"
 plot_graph(results, plot_title, fig_file_title)
 
 
