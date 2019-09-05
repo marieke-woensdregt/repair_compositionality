@@ -662,6 +662,7 @@ def language_stats(population):
     distribution
     :return: a list containing the overall average posterior probability assigned to each class of language in the
     population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
+    (this ordering has to correspond to that defined in the classify_language() function!)
     """
     stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
     for p in population:
@@ -692,26 +693,31 @@ def plot_graph(results, plot_title, fig_file_title):
 
     average_degenerate = []
     average_holistic = []
+    average_other = []
     average_compositional = []
 
     for i in range(len(results[0])):
         total_degenerate = 0
         total_holistic = 0
+        total_other = 0
         total_compositional = 0
         for result in results:
             total_degenerate += result[i][0]
             total_holistic += result[i][1]
+            total_other += result[i][2]
             total_compositional += result[i][3]
         average_degenerate.append(total_degenerate / len(results))
         average_holistic.append(total_holistic / len(results))
+        average_other.append(total_other / len(results))
         average_compositional.append(total_compositional / len(results))
 
-    plt.plot(average_degenerate, color='orange', label='degenerate')
-    plt.plot(average_holistic, color='green', label='holistic')
-    plt.plot(average_compositional, color='purple', label='compositional')
+    plt.plot(average_degenerate, color='black', label='degenerate')
+    plt.plot(average_holistic, color='red', label='holistic')
+    plt.plot(average_other, color='grey', label='other')
+    plt.plot(average_compositional, color='green', label='compositional')
     plt.title(plot_title)
-    plt.xlabel('generations')
-    plt.ylabel('proportion')
+    plt.xlabel('Generation')
+    plt.ylabel('Mean proportion')
     plt.legend()
     plt.grid()
     plt.savefig(fig_file_title + ".pdf")
@@ -719,6 +725,7 @@ def plot_graph(results, plot_title, fig_file_title):
 
 
 t0 = time.clock()
+
 
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
 gamma = 2  #  parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability
@@ -731,9 +738,9 @@ rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 30  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+gens = 200  # the number of generations (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
-
 
 
 results = []
@@ -741,7 +748,7 @@ for i in range(runs):
     print('')
     print('run '+str(i))
     results.append(simulation(200, rounds, b, popsize, initial)[0])
-fig_file_title = "Plot_n_runs_"+str(runs)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
+fig_file_title = "Plot_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
 if gamma == 0 and turnover == True:
     plot_title = "Learnability only"
 elif gamma > 0 and turnover == False:
