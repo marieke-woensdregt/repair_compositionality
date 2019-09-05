@@ -682,7 +682,7 @@ def plot_graph(results, fig_title):
     plt.ylabel('proportion')
     plt.legend()
     plt.grid()
-    plt.savefig("/Users/U968195/Documents/Postdoc_Nijmegen/repair_compositionality/"+fig_title+".pdf")
+    plt.savefig(fig_title+".pdf")
     plt.show()
 
 
