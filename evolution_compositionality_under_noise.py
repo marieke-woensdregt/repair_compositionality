@@ -695,17 +695,20 @@ t0 = time.clock()
 initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
             # condition and gamma = 0 for condition without communication)
-turnover = False  # determines whether new individuals enter the population or not
+turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
-rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b
+rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
+
+
 results = []
-for i in range(10):
+for i in range(runs):
     results.append(simulation(200, rounds, b, popsize, initial)[0])
 fig_file_title = "Plot_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)
 if gamma == 0 and turnover == True:
