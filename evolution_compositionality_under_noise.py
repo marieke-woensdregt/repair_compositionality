@@ -525,6 +525,14 @@ def receive(language, utterance):
 
 
 def update_posterior(log_posterior, topic, utterance):
+    """
+    Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability distribution accordingly
+
+    :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
+    :param topic: a topic (string from the global variable meanings)
+    :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is True)
+    :return: the updated (and normalized) log_posterior (1D numpy array)
+    """
     # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy
     # variants):
     for i in range(len(all_forms_including_noisy_variants)):
@@ -543,8 +551,6 @@ def update_posterior(log_posterior, topic, utterance):
         for m in range(len(meanings)):
             if meanings[m] == topic:
                 topic_index = m
-        correct_form = hypothesis[topic_index]
-        noisy_variants_correct_form = create_noisy_variants(correct_form)
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
     new_log_posterior_normalized = np.subtract(new_log_posterior, logsumexp(new_log_posterior))
@@ -580,8 +586,7 @@ def update_posterior(log_posterior, topic, utterance):
 
 def new_population(popsize):
     """
-    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which
-    is assumed to be defined as a global variable called 'priors')
+    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which is assumed to be defined as a global variable called 'priors')
 
     :param popsize: the number of agents desired in the new population
     :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding prior probabilities)
@@ -597,13 +602,12 @@ def new_population(popsize):
 
 def log_roulette_wheel(normedlogs):
     """
-    Samples an index from a list of LOG probabilities, where each index has a probability proportional to their
-    probability of being chosen
+    Samples an index from a list of LOG probabilities, where each index has a probability proportional to their probability of being chosen
 
     :param normedlogs: a list of normalized LOG probabilities
     :return: an index somewhere between 0 and len(normedlogs)
     """
-    r=np.log(random.random()) #generate a random number in [0,1), then convert to log
+    r = np.log(random.random())  # generate a random number in [0,1), then convert to log
     accumulator = normedlogs[0]
     for i in range(len(normedlogs)):
         if r < accumulator:
@@ -648,10 +652,8 @@ def language_stats(population):
     """
     Tracks how well each of the language classes is represented in the populations' posterior probability distributions
 
-    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
-    distribution
-    :return: a list containing the overall average posterior probability assigned to each class of language in the
-    population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
+    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability distribution
+    :return: a list containing the overall average posterior probability assigned to each class of language in the population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
     (this ordering has to correspond to that defined in the classify_language() function!)
     """
     stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
@@ -661,10 +663,20 @@ def language_stats(population):
     return stats
 
 
+
 def simulation(generations, rounds, bottleneck, popsize, data):
+    """
+    Runs the full simulation and returns the total amount of posterior probability that is assigned to each language class over generations (results) as well as the data that each generation produced (data)
+
+    :param generations: the desired number of generations (int)
+    :param rounds: the desired number of communication rounds *within* each generation
+    :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
+    :param popsize: the desired size of the population (int)
+    :param data: the initial data that generation 0 learns from
+    :return:
+    """
     results = []
     population = new_population(popsize)
-
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
@@ -674,16 +686,20 @@ def simulation(generations, rounds, bottleneck, popsize, data):
         results.append(language_stats(population))
         if turnover:
             population = new_population(popsize)
-
     return results, data
 
 
 
 def plot_graph(results, plot_title, fig_file_title):
+    """
+    Takes a list of language stats over generations (results) and plots a timecourse graph
 
+    :param results: A list of language stats over generations, containing n_runs sublists which each contain n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional)
+    :param plot_title: The title of the condition that should be on the plot (string)
+    :param fig_file_title: The file name that the plot should be saved under
+    :return: Nothing. Just saves the plot and then shows it.
+    """
 
-
-    palette = sns.color_palette(["black", "red", "grey", "green"])
 
     print('')
     print('')
@@ -695,26 +711,6 @@ def plot_graph(results, plot_title, fig_file_title):
     print(len(results[0]))
     print("len(results[0][0]) are:")
     print(len(results[0][0]))
-
-    average_degenerate = []
-    average_holistic = []
-    average_other = []
-    average_compositional = []
-
-    for i in range(len(results[0])):
-        total_degenerate = 0
-        total_holistic = 0
-        total_other = 0
-        total_compositional = 0
-        for result in results:
-            total_degenerate += result[i][0]
-            total_holistic += result[i][1]
-            total_other += result[i][2]
-            total_compositional += result[i][3]
-        average_degenerate.append(total_degenerate / len(results))
-        average_holistic.append(total_holistic / len(results))
-        average_other.append(total_other / len(results))
-        average_compositional.append(total_compositional / len(results))
 
     print('')
     print('')
@@ -772,14 +768,11 @@ def plot_graph(results, plot_title, fig_file_title):
     print("lang_class_prop_over_gen_df is:")
     print(lang_class_prop_over_gen_df)
 
+    palette = sns.color_palette(["black", "red", "grey", "green"])
 
-    # plt.plot(average_degenerate, color='black', label='degenerate')
-    # plt.plot(average_holistic, color='red', label='holistic')
-    # plt.plot(average_other, color='grey', label='other')
-    # plt.plot(average_compositional, color='forestgreen', label='compositional')
-
-    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
+    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
+
     plt.ylim(-0.05, 1.05)
     plt.title(plot_title)
     plt.xlabel('Generation')
@@ -792,19 +785,15 @@ def plot_graph(results, plot_title, fig_file_title):
 
 
 
-initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]
-gamma = 2  #  parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-            # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and
-            # "Learnability and Expressivity" conditions
+initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]  # this is data that would be produced by a holistic language
+gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
-b = 15  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
-        # used a bottleneck of 20 in the body of the paper.
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
 rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
-            #  a pair of agents.
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 gens = 150  # the number of generations (Kirby et al., 2015 used 100)
-noise = False  # parameter that determines whether environmental noise is on or off
+noise = True  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
 
