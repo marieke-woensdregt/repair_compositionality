@@ -204,8 +204,8 @@ def transform_all_languages_to_simlang_format(language_list):
     :rtype: list
     """
     all_langs_as_in_simlang = []
-    for l in range(len(all_possible_languages)):
-        lang_as_in_simlang = [(meanings[x], all_possible_languages[l][x]) for x in range(len(meanings))]
+    for l in range(len(language_list)):
+        lang_as_in_simlang = [(meanings[x], language_list[l][x]) for x in range(len(meanings))]
         all_langs_as_in_simlang.append(lang_as_in_simlang)
     return all_langs_as_in_simlang
 
@@ -321,34 +321,6 @@ priors = new_log_prior
 
 # A reproduction of the production function of Kirby et al. (2015):
 
-
-# first we need to write a quick function that removes every instance of a given element from a list (to use for
-# removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given
-# topic:
-def remove_all_instances(my_list, element_to_be_removed):
-    """
-    Takes a list, and removes all instances of a given element from it
-
-    :param my_list: a list
-    :param element_to_be_removed: the element to be removed; can be of any type
-    :return: the list with all instances of the target element removed
-    """
-    i = 0  # loop counter
-    length = len(my_list)  # list length
-    while (i < len(my_list)):
-        if (my_list[i] == element_to_be_removed):
-            my_list.remove(my_list[i])
-            # as an element is removed
-            # so decrease the length by 1
-            length = length - 1
-            # run loop again to check element
-            # at same index, when item removed
-            # next item will shift to the left
-            continue
-        i = i + 1
-    return my_list
-
-
 # Now let's define a function that calculates the probabilities of producing each of the possible forms_without_noisy_
 # variants, given a particular language and topic:
 def production_likelihoods_kirby_et_al(language, topic, gamma, error):
@@ -369,13 +341,6 @@ def production_likelihoods_kirby_et_al(language, topic, gamma, error):
         if meanings[m] == topic:
             topic_index = m
     correct_form = language[topic_index]
-    error_forms = list(forms_without_noise)  #This may seem a bit weird, but a speaker should be able to produce *any*
-                                            # form as an error form right? Not limited to only the other forms that
-                                            # exist within their language? (Otherwise a speaker with a degenerate
-                                            # language could never make a production error).
-    error_forms = remove_all_instances(error_forms, correct_form)
-    if len(error_forms) == 0:  # if the list of error_forms is empty because the language is degenerate
-        error_forms = language  # simply choose an error_form from the whole language
     ambiguity = 0
     for f in language:
         if f == correct_form:
@@ -411,6 +376,32 @@ def create_noisy_variants(form):
         noisy_variant_list.append(noisy_variant)
     return noisy_variant_list
 
+
+# we also need a function that removes every instance of a given element from a list (to use for
+# removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given
+# topic:
+def remove_all_instances(my_list, element_to_be_removed):
+    """
+    Takes a list, and removes all instances of a given element from it
+
+    :param my_list: a list
+    :param element_to_be_removed: the element to be removed; can be of any type
+    :return: the list with all instances of the target element removed
+    """
+    i = 0  # loop counter
+    length = len(my_list)  # list length
+    while (i < len(my_list)):
+        if (my_list[i] == element_to_be_removed):
+            my_list.remove(my_list[i])
+            # as an element is removed
+            # so decrease the length by 1
+            length = length - 1
+            # run loop again to check element
+            # at same index, when item removed
+            # next item will shift to the left
+            continue
+        i = i + 1
+    return my_list
 
 
 def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob):
@@ -548,9 +539,6 @@ def update_posterior(log_posterior, topic, utterance):
         else:
             likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, gamma, error)
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
-        for m in range(len(meanings)):
-            if meanings[m] == topic:
-                topic_index = m
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
     new_log_posterior_normalized = np.subtract(new_log_posterior, logsumexp(new_log_posterior))
@@ -697,36 +685,16 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 
 
-def plot_graph(results, plot_title, fig_file_title):
+def results_to_dataframe(results):
     """
-    Takes a list of language stats over generations (results) and plots a timecourse graph
+    Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
+    and language class)
 
-    :param results: A list of language stats over generations, containing n_runs sublists which each contain n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional)
-    :param plot_title: The title of the condition that should be on the plot (string)
-    :param fig_file_title: The file name that the plot should be saved under
-    :return: Nothing. Just saves the plot and then shows it.
+    :param results: a list containing proportions for each of the 4 language classes, for each generation, for each run
+    :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
-
-
-    print('')
-    print('')
-    print("results are:")
-    print(results)
-    print("len(results) are:")
-    print(len(results))
-    print("len(results[0]) are:")
-    print(len(results[0]))
-    print("len(results[0][0]) are:")
-    print(len(results[0][0]))
-
-    print('')
-    print('')
     column_proportion = np.array(results)
     column_proportion = column_proportion.flatten()
-    print("column_proportion is:")
-    print(column_proportion)
-    print("column_proportion.shape is:")
-    print(column_proportion.shape)
 
     column_runs = []
     for i in range(runs):
@@ -734,11 +702,6 @@ def plot_graph(results, plot_title, fig_file_title):
             for k in range(4):
                 column_runs.append(i)
     column_runs = np.array(column_runs)
-    print("column_runs is:")
-    print(column_runs)
-    print("column_runs.shape is:")
-    print(column_runs.shape)
-
 
     column_generation = []
     for i in range(runs):
@@ -746,10 +709,6 @@ def plot_graph(results, plot_title, fig_file_title):
             for k in range(4):
                 column_generation.append(j)
     column_generation = np.array(column_generation)
-    print("column_generation is:")
-    print(column_generation)
-    print("column_generation.shape is:")
-    print(column_generation.shape)
 
     column_type = []
     for i in range(runs):
@@ -758,10 +717,6 @@ def plot_graph(results, plot_title, fig_file_title):
             column_type.append('holistic')
             column_type.append('other')
             column_type.append('compositional')
-    print("column_type is:")
-    print(column_type)
-    print("len(column_type) is:")
-    print(len(column_type))
 
     data = {'run': column_runs,
             'generation': column_generation,
@@ -770,11 +725,22 @@ def plot_graph(results, plot_title, fig_file_title):
             }
 
     lang_class_prop_over_gen_df = pd.DataFrame(data)
-    print('')
-    print('')
-    print("lang_class_prop_over_gen_df is:")
-    print(lang_class_prop_over_gen_df)
 
+    return lang_class_prop_over_gen_df
+
+
+
+
+
+def plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title):
+    """
+    Takes a list of language stats over generations (results) and plots a timecourse graph
+
+    :param results: A list of language stats over generations, containing n_runs sublists which each contain n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional)
+    :param plot_title: The title of the condition that should be on the plot (string)
+    :param fig_file_title: The file name that the plot should be saved under
+    :return: Nothing. Just saves the plot and then shows it.
+    """
     palette = sns.color_palette(["black", "red", "grey", "green"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
@@ -796,41 +762,58 @@ initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]  # this is da
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
-rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
+rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 40  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+gens = 1000  # the number of generations (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
-proportion_measure = 'sampled'  # the way in which the proportion of language classes present in the population is
+proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-t0 = time.clock()
 
-results = []
-for i in range(runs):
+
+if __name__ == '__main__':
+
+    t0 = time.clock()
+
+    results = []
+    for i in range(runs):
+        print('')
+        print('run '+str(i))
+        results.append(simulation(gens, rounds, b, popsize, initial)[0])
+
+
+    lang_class_prop_over_gen_df = results_to_dataframe(results)
     print('')
-    print('run '+str(i))
-    results.append(simulation(gens, rounds, b, popsize, initial)[0])
+    print('')
+    print("lang_class_prop_over_gen_df is:")
+    print(lang_class_prop_over_gen_df)
 
 
-fig_file_title = "Plot_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)+"_prop_measure_"+proportion_measure
-if gamma == 0 and turnover == True:
-    plot_title = "Learnability only"
-elif gamma > 0 and turnover == False:
-    plot_title = "Expressivity only"
-elif gamma > 0 and turnover == True:
-    plot_title = "Learnability and expressivity"
-if noise:
-    plot_title = plot_title+" Plus Noise"
-plot_graph(results, plot_title, fig_file_title)
+    pickle_file_title = "Pickle_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)+"_prop_measure_"+proportion_measure
+    lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
+
+    # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-t1 = time.clock()
+    fig_file_title = "Plot_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)+"_prop_measure_"+proportion_measure
+    if gamma == 0 and turnover == True:
+        plot_title = "Learnability only"
+    elif gamma > 0 and turnover == False:
+        plot_title = "Expressivity only"
+    elif gamma > 0 and turnover == True:
+        plot_title = "Learnability and expressivity"
+    if noise:
+        plot_title = plot_title+" Plus Noise"
+    plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title)
 
-print('')
-print('')
-print("number of minutes it took to run simulation:")
-print((t1-t0)/60.)
+
+    t1 = time.clock()
+
+    print('')
+    print('')
+    print("number of minutes it took to run simulation:")
+    print((t1-t0)/60.)
