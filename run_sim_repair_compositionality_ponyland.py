@@ -18,10 +18,10 @@ meanings = ['02', '03', '12', '13']  # all possible meanings
 forms_without_noise = ['aa', 'ab', 'ba', 'bb']  # all possible forms, excluding their possible 'noisy variants'
 noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the forms above
 all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all possible forms, including both complete
-                                                                    # forms and noisy variants
-error = 0.05  # the probability of making a production error
+# forms and noisy variants
+error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
-            # condition and gamma = 0 for condition without communication)
+# condition and gamma = 0 for condition without communication)
 turnover = True  # determines whether new individuals enter the population or not
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
@@ -97,6 +97,8 @@ def classify_language(lang, forms, meanings):
         return class_other
 
 
+# Let's try out our create_all_possible_languages() function:
+all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
 
 
 def classify_all_languages(language_list):
@@ -117,7 +119,24 @@ def classify_all_languages(language_list):
     return class_per_lang
 
 
+# Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
+# get with the SimLang lab 21:
 
+types = np.array(types)
+no_of_each_type = np.bincount(types)
+
+class_per_lang = classify_all_languages(all_possible_languages)
+
+no_of_each_class = np.bincount(class_per_lang.astype(int))
+
+
+
+# Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
+# create_all_languages() function, or in my classify_lang() function?
+# To find out, let's compare my list of all languages to that from SimLang lab 21:
+
+# First, we need to change the way we represent the list of all languages to match
+# that of lab 21:
 
 def transform_all_languages_to_simlang_format(language_list):
     """
@@ -138,6 +157,9 @@ def transform_all_languages_to_simlang_format(language_list):
         lang_as_in_simlang = [(meanings[x], language_list[l][x]) for x in range(len(meanings))]
         all_langs_as_in_simlang.append(lang_as_in_simlang)
     return all_langs_as_in_simlang
+
+
+all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
 
 
 def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
@@ -163,36 +185,13 @@ def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
     return checks_per_lang, new_log_prior
 
 
+checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages)
+
+priors = new_log_prior
+
+
 
 # A reproduction of the production function of Kirby et al. (2015):
-
-
-# first we need to write a quick function that removes every instance of a given element from a list (to use for
-# removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given
-# topic:
-def remove_all_instances(my_list, element_to_be_removed):
-    """
-    Takes a list, and removes all instances of a given element from it
-
-    :param my_list: a list
-    :param element_to_be_removed: the element to be removed; can be of any type
-    :return: the list with all instances of the target element removed
-    """
-    i = 0  # loop counter
-    length = len(my_list)  # list length
-    while (i < len(my_list)):
-        if (my_list[i] == element_to_be_removed):
-            my_list.remove(my_list[i])
-            # as an element is removed
-            # so decrease the length by 1
-            length = length - 1
-            # run loop again to check element
-            # at same index, when item removed
-            # next item will shift to the left
-            continue
-        i = i + 1
-    return my_list
-
 
 # Now let's define a function that calculates the probabilities of producing each of the possible forms_without_noisy_
 # variants, given a particular language and topic:
@@ -250,6 +249,32 @@ def create_noisy_variants(form):
     return noisy_variant_list
 
 
+# we also need a function that removes every instance of a given element from a list (to use for
+# removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given
+# topic:
+def remove_all_instances(my_list, element_to_be_removed):
+    """
+    Takes a list, and removes all instances of a given element from it
+
+    :param my_list: a list
+    :param element_to_be_removed: the element to be removed; can be of any type
+    :return: the list with all instances of the target element removed
+    """
+    i = 0  # loop counter
+    length = len(my_list)  # list length
+    while (i < len(my_list)):
+        if (my_list[i] == element_to_be_removed):
+            my_list.remove(my_list[i])
+            # as an element is removed
+            # so decrease the length by 1
+            length = length - 1
+            # run loop again to check element
+            # at same index, when item removed
+            # next item will shift to the left
+            continue
+        i = i + 1
+    return my_list
+
 
 def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob):
     """
@@ -300,6 +325,7 @@ def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
         else:
             prop_to_prob_per_form_array[i] = prop_to_prob_error_form_complete
     return prop_to_prob_per_form_array
+
 
 
 
@@ -381,7 +407,6 @@ def update_posterior(log_posterior, topic, utterance):
 
 
 
-
 def new_population(popsize):
     """
     Creates a new population of agents, where each agent simply consists of the prior probability distribution (which is assumed to be defined as a global variable called 'priors')
@@ -434,16 +459,77 @@ def population_communication(population, rounds):
     :param rounds: the number of rounds for which the population should communicate
     :return: the data that was produced during the communication rounds, as a list of (meaning, signal) tuples
     """
+    random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-        speaker_index = pair_indices[0]
-        hearer_index = pair_indices[1]
+        if len(population) == 2:
+            if i % 2 == 0:
+                speaker_index = 0
+                hearer_index = 1
+            else:
+                speaker_index = 1
+                hearer_index = 0
+        else:
+            pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+            speaker_index = pair_indices[0]
+            hearer_index = pair_indices[1]
         meaning = random.choice(meanings)
-        signal = produce(sample(population[speaker_index]), meaning, gamma, error)
-        population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
-        data.append((meaning, signal))
+        signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
+        # to produce a signal, they first sample a language from their posterior probability distribution. So each agent
+        # keeps updating their language according to the data they receive from their communication partner.
+        population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)  # (Thus, in this
+        # simplified version of the model, agents are still able to "track changes in their partners' linguistic
+        # behaviour over time
+        if speaker_index == random_parent_index:
+            data.append((meaning, signal))
     return data
+
+
+
+def dataset_from_language(language):
+    """
+    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly once, combined with its corresponding form.
+
+    :param language: a language (list of forms_without_noisy_variants that has same length as the global variable
+    meanings, where each form is mapped to the meaning at the corresponding index)
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form)
+    """
+    meaning_form_pairs = []
+    for i in range(len(language)):
+        meaning = meanings[i]
+        form = language[i]
+        meaning_form_pairs.append((meaning, form))
+    return meaning_form_pairs
+
+
+def create_initial_dataset(desired_class, b):
+    """
+    Creates a balanced dataset from a randomly chosen language of the desired class.
+
+    :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form) from a randomly chosen language of the desired class
+    """
+    if desired_class == 'degenerate':
+        class_index = 0
+    elif desired_class == 'holistic':
+        class_index = 1
+    elif desired_class == 'other':
+        class_index = 2
+    elif desired_class == 'compositional':
+        class_index = 3
+    language_class_indices = np.where(class_per_lang == class_index)[0]
+    class_languages = []
+    for index in language_class_indices:
+        class_languages.append(all_possible_languages[index])
+    random_language = random.choice(class_languages)
+    meaning_form_pairs = dataset_from_language(random_language)
+    if b % len(meaning_form_pairs) != 0:
+        raise ValueError("OOPS! b needs to be a multiple of the number of meanings in order for this function to create a balanced dataset.")
+    dataset = []
+    for i in range(int(b/len(meaning_form_pairs))):
+        dataset = dataset+meaning_form_pairs
+    return dataset
+
 
 
 def language_stats(population):
@@ -458,12 +544,12 @@ def language_stats(population):
     stats = np.zeros(4)  # degenerate, holistic, other, compositional
     for p in population:
         for i in range(len(p)):
-            if proportion_measure == 'posterior':
+            # if proportion_measure == 'posterior':
                 # stats[int(class_per_lang[i])] += np.exp(p[i]) / len(population)
-                stats[int(class_per_lang[i])] += np.exp(p[i])
-            elif proportion_measure == 'sampled':
-                sampled_lang_index = log_roulette_wheel(p)
-                stats[int(class_per_lang[sampled_lang_index])] += 1
+            stats[int(class_per_lang[i])] += np.exp(p[i])
+            # elif proportion_measure == 'sampled':
+            #     sampled_lang_index = log_roulette_wheel(p)
+            #     stats[int(class_per_lang[sampled_lang_index])] += 1
     stats = np.divide(stats, len(population))
     return stats
 
@@ -480,12 +566,16 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     :param data: the initial data that generation 0 learns from
     :return:
     """
+
     results = []
     population = new_population(popsize)
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
-                meaning, signal = random.choice(data)
+                if bottleneck != len(data):
+                    raise ValueError(
+                        "UH-OH! data should have the same size as the bottleneck b")
+                meaning, signal = data[k]
                 population[j] = update_posterior(population[j], meaning, signal)
         data = population_communication(population, rounds)
         results.append(language_stats(population))
@@ -541,17 +631,17 @@ def results_to_dataframe(results):
 
 
 
-initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]  # this is data that would be produced by a holistic language
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
-rounds = 1*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
+rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 100  # the number of generations (Kirby et al., 2015 used 100)
+gens = 10  # the number of generations (Kirby et al., 2015 used 100)
+initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
-proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
+# proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
@@ -560,25 +650,15 @@ proportion_measure = 'posterior'  # the way in which the proportion of language 
 
 if __name__ == '__main__':
 
-    all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
-
-    class_per_lang = classify_all_languages(all_possible_languages)
-
-    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
-
-    checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages)
-    priors = new_log_prior
-
     results = []
     for i in range(runs):
-        results.append(simulation(gens, rounds, b, popsize, initial)[0])
+        results.append(simulation(gens, rounds, b, popsize, initial_dataset)[0])
 
 
     lang_class_prop_over_gen_df = results_to_dataframe(results)
 
-    pickle_file_title = "Pickle_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)+"_prop_measure_"+proportion_measure
+
+    pickle_file_title = "Pickle_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)#+"_prop_measure_"+proportion_measure
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
-
-
