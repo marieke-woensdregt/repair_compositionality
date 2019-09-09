@@ -1,8 +1,8 @@
 import itertools
 import numpy as np
 import random
-from scipy.special import logsumexp
-import pandas as pd
+import scipy.misc
+import pickle
 
 
 
@@ -22,12 +22,6 @@ noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the for
 all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all possible forms, including both complete
 # forms and noisy variants
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
-gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al. used gamma = 2 for communication
-# condition and gamma = 0 for condition without communication)
-turnover = True  # determines whether new individuals enter the population or not
-noise = False  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
-
 
 
 # Some functions to create and classify all possible languages:
@@ -409,7 +403,7 @@ def update_posterior(log_posterior, topic, utterance):
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
-    new_log_posterior_normalized = np.subtract(new_log_posterior, logsumexp(new_log_posterior))
+    new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.misc.logsumexp(new_log_posterior))
 
     return new_log_posterior_normalized
 
@@ -441,7 +435,7 @@ def log_roulette_wheel(normedlogs):
     for i in range(len(normedlogs)):
         if r < accumulator:
             return i
-        accumulator = logsumexp([accumulator, normedlogs[i + 1]])
+        accumulator = scipy.misc.logsumexp([accumulator, normedlogs[i + 1]])
 
 
 
@@ -594,58 +588,14 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 
 
-def results_to_dataframe(results):
-    """
-    Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
-    and language class)
-
-    :param results: a list containing proportions for each of the 4 language classes, for each generation, for each run
-    :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
-    """
-    column_proportion = np.array(results)
-    column_proportion = column_proportion.flatten()
-
-    column_runs = []
-    for i in range(runs):
-        for j in range(gens):
-            for k in range(4):
-                column_runs.append(i)
-    column_runs = np.array(column_runs)
-
-    column_generation = []
-    for i in range(runs):
-        for j in range(gens):
-            for k in range(4):
-                column_generation.append(j)
-    column_generation = np.array(column_generation)
-
-    column_type = []
-    for i in range(runs):
-        for j in range(gens):
-            column_type.append('degenerate')
-            column_type.append('holistic')
-            column_type.append('other')
-            column_type.append('compositional')
-
-    data = {'run': column_runs,
-            'generation': column_generation,
-            'proportion': column_proportion,
-            'class': column_type,
-            }
-
-    lang_class_prop_over_gen_df = pd.DataFrame(data)
-
-    return lang_class_prop_over_gen_df
-
-
 
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 10  # the number of generations (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+gens = 1500  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
@@ -662,9 +612,8 @@ if __name__ == '__main__':
     for i in range(runs):
         results.append(simulation(gens, rounds, b, popsize, initial_dataset)[0])
 
-    lang_class_prop_over_gen_df = results_to_dataframe(results)
 
-    pickle_file_title = "Pickle_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)#+"_prop_measure_"+proportion_measure
-    lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
+    pickle_file_title = "Pickle_results_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)#+"_prop_measure_"+proportion_measure
 
-    # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
+    pickle.dump(results, open(pickle_file_title+".p", "wb"))
+
