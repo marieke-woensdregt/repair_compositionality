@@ -624,24 +624,20 @@ def population_communication(population, rounds):
     :param rounds: the number of rounds for which the population should communicate
     :return: the data that was produced during the communication rounds, as a list of (meaning, signal) tuples
     """
+    random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-        # pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-        # speaker_index = pair_indices[0]
-        # hearer_index = pair_indices[1]
-        print('')
-        print("i is:")
-        print(i)
-        if i % 2 == 0:
-            speaker_index = 0
-            hearer_index = 1
+        if len(population) == 2:
+            if i % 2 == 0:
+                speaker_index = 0
+                hearer_index = 1
+            else:
+                speaker_index = 1
+                hearer_index = 0
         else:
-            speaker_index = 1
-            hearer_index = 0
-        print("speaker_index is:")
-        print(speaker_index)
-        print("hearer_index is:")
-        print(hearer_index)
+            pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+            speaker_index = pair_indices[0]
+            hearer_index = pair_indices[1]
         meaning = random.choice(meanings)
         signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
         # to produce a signal, they first sample a language from their posterior probability distribution. So each agent
@@ -649,7 +645,8 @@ def population_communication(population, rounds):
         population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)  # (Thus, in this
         # simplified version of the model, agents are still able to "track changes in their partners' linguistic
         # behaviour over time
-        data.append((meaning, signal))
+        if speaker_index == random_parent_index:
+            data.append((meaning, signal))
     return data
 
 
@@ -687,12 +684,16 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     :param data: the initial data that generation 0 learns from
     :return:
     """
+
     results = []
     population = new_population(popsize)
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
-                meaning, signal = random.choice(data)
+                if bottleneck != len(data):
+                    raise ValueError(
+                        "UH-OH! data should have the same size as the bottleneck b")
+                meaning, signal = data[k]
                 population[j] = update_posterior(population[j], meaning, signal)
         data = population_communication(population, rounds)
         results.append(language_stats(population))
@@ -775,29 +776,26 @@ def plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title):
 
 def dataset_from_language(language):
     """
-    Takes a language and generates a balanced data set from it, in which each possible meaning occurs exactly once,
-    combined with its corresponding form.
+    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly once, combined with its corresponding form.
 
     :param language: a language (list of forms_without_noisy_variants that has same length as the global variable
     meanings, where each form is mapped to the meaning at the corresponding index)
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
-    the form)
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form)
     """
-    data = []
+    meaning_form_pairs = []
     for i in range(len(language)):
         meaning = meanings[i]
         form = language[i]
-        data.append((meaning, form))
-    return data
+        meaning_form_pairs.append((meaning, form))
+    return meaning_form_pairs
 
 
-def create_initial_dataset(desired_class):
+def create_initial_dataset(desired_class, b):
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
     :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
-    the form) from a randomly chosen language of the desired class
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form) from a randomly chosen language of the desired class
     """
     if desired_class == 'degenerate':
         class_index = 0
@@ -812,11 +810,15 @@ def create_initial_dataset(desired_class):
     for index in language_class_indices:
         class_languages.append(all_possible_languages[index])
     random_language = random.choice(class_languages)
-    data = dataset_from_language(random_language)
-    return data
+    meaning_form_pairs = dataset_from_language(random_language)
+    if b % len(meaning_form_pairs) != 0:
+        raise ValueError("OOPS! b needs to be a multiple of the number of meanings in order for this function to create a balanced dataset.")
+    dataset = []
+    for i in range(int(b/len(meaning_form_pairs))):
+        dataset = dataset+meaning_form_pairs
+    return dataset
 
 
-initial = create_initial_dataset('holistic')  # the data that the first generation learns from
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
@@ -824,6 +826,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 gens = 10  # the number of generations (Kirby et al., 2015 used 100)
+initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
@@ -841,7 +844,7 @@ if __name__ == '__main__':
     for i in range(runs):
         print('')
         print('run '+str(i))
-        results.append(simulation(gens, rounds, b, popsize, initial)[0])
+        results.append(simulation(gens, rounds, b, popsize, initial_dataset)[0])
 
 
     lang_class_prop_over_gen_df = results_to_dataframe(results)
