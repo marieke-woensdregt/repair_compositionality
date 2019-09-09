@@ -650,6 +650,53 @@ def population_communication(population, rounds):
     return data
 
 
+
+def dataset_from_language(language):
+    """
+    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly once, combined with its corresponding form.
+
+    :param language: a language (list of forms_without_noisy_variants that has same length as the global variable
+    meanings, where each form is mapped to the meaning at the corresponding index)
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form)
+    """
+    meaning_form_pairs = []
+    for i in range(len(language)):
+        meaning = meanings[i]
+        form = language[i]
+        meaning_form_pairs.append((meaning, form))
+    return meaning_form_pairs
+
+
+def create_initial_dataset(desired_class, b):
+    """
+    Creates a balanced dataset from a randomly chosen language of the desired class.
+
+    :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form) from a randomly chosen language of the desired class
+    """
+    if desired_class == 'degenerate':
+        class_index = 0
+    elif desired_class == 'holistic':
+        class_index = 1
+    elif desired_class == 'other':
+        class_index = 2
+    elif desired_class == 'compositional':
+        class_index = 3
+    language_class_indices = np.where(class_per_lang == class_index)[0]
+    class_languages = []
+    for index in language_class_indices:
+        class_languages.append(all_possible_languages[index])
+    random_language = random.choice(class_languages)
+    meaning_form_pairs = dataset_from_language(random_language)
+    if b % len(meaning_form_pairs) != 0:
+        raise ValueError("OOPS! b needs to be a multiple of the number of meanings in order for this function to create a balanced dataset.")
+    dataset = []
+    for i in range(int(b/len(meaning_form_pairs))):
+        dataset = dataset+meaning_form_pairs
+    return dataset
+
+
+
 def language_stats(population):
     """
     Tracks how well each of the language classes is represented in the populations' posterior probability distributions
@@ -773,50 +820,6 @@ def plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     plt.savefig(fig_file_title + ".pdf")
     plt.show()
 
-
-def dataset_from_language(language):
-    """
-    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly once, combined with its corresponding form.
-
-    :param language: a language (list of forms_without_noisy_variants that has same length as the global variable
-    meanings, where each form is mapped to the meaning at the corresponding index)
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form)
-    """
-    meaning_form_pairs = []
-    for i in range(len(language)):
-        meaning = meanings[i]
-        form = language[i]
-        meaning_form_pairs.append((meaning, form))
-    return meaning_form_pairs
-
-
-def create_initial_dataset(desired_class, b):
-    """
-    Creates a balanced dataset from a randomly chosen language of the desired class.
-
-    :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form) from a randomly chosen language of the desired class
-    """
-    if desired_class == 'degenerate':
-        class_index = 0
-    elif desired_class == 'holistic':
-        class_index = 1
-    elif desired_class == 'other':
-        class_index = 2
-    elif desired_class == 'compositional':
-        class_index = 3
-    language_class_indices = np.where(class_per_lang == class_index)[0]
-    class_languages = []
-    for index in language_class_indices:
-        class_languages.append(all_possible_languages[index])
-    random_language = random.choice(class_languages)
-    meaning_form_pairs = dataset_from_language(random_language)
-    if b % len(meaning_form_pairs) != 0:
-        raise ValueError("OOPS! b needs to be a multiple of the number of meanings in order for this function to create a balanced dataset.")
-    dataset = []
-    for i in range(int(b/len(meaning_form_pairs))):
-        dataset = dataset+meaning_form_pairs
-    return dataset
 
 
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
