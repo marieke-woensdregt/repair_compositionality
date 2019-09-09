@@ -804,8 +804,6 @@ def create_initial_dataset(desired_class):
 
 
 initial = create_initial_dataset('holistic')  # the data that the first generation learns from
-print("initial is:")
-print(initial)
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
