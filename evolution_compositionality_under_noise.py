@@ -770,37 +770,33 @@ def dataset_from_language(language):
     :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
     the form)
     """
-    print("language is:")
-    print(language)
     data = []
     for i in range(len(language)):
-        print('')
-        print("i is:")
-        print(i)
-        form = language[i]
-        print("form is:")
-        print(form)
         meaning = meanings[i]
-        print("meaning is:")
-        print(meaning)
+        form = language[i]
         data.append((meaning, form))
     return data
 
-print('')
-print('')
-holistic_language_indices = np.where(class_per_lang == 1)
-print("holistic_language_indices are:")
-print(holistic_language_indices)
-holistic_languages = all_possible_languages[holistic_language_indices]
-print("holistic_languages are:")
-print(holistic_languages)
-random_holistic_language = random.choice(holistic_languages)
-print("random_holistic_language is:")
-print(random_holistic_language)
-data_from_random_holistic_language = dataset_from_language(random_holistic_language)
-print("data_from_random_holistic_language is:")
-print(data_from_random_holistic_language)
-initial = [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')]  # this is data that would be produced by a holistic language
+
+def create_initial_dataset(desired_class):
+    if desired_class == 'degenerate':
+        class_index = 0
+    elif desired_class == 'holistic':
+        class_index = 1
+    elif desired_class == 'other':
+        class_index = 2
+    elif desired_class == 'compositional':
+        class_index = 3
+    language_class_indices = np.where(class_per_lang == class_index)[0]
+    class_languages = []
+    for index in language_class_indices:
+        class_languages.append(all_possible_languages[index])
+    random_language = random.choice(class_languages)
+    data = dataset_from_language(random_language)
+    return data
+
+
+initial = create_initial_dataset('holistic')  # the data that the first generation learns from
 gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
