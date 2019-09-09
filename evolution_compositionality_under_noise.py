@@ -626,9 +626,22 @@ def population_communication(population, rounds):
     """
     data = []
     for i in range(rounds):
-        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-        speaker_index = pair_indices[0]
-        hearer_index = pair_indices[1]
+        # pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+        # speaker_index = pair_indices[0]
+        # hearer_index = pair_indices[1]
+        print('')
+        print("i is:")
+        print(i)
+        if i % 2 == 0:
+            speaker_index = 0
+            hearer_index = 1
+        else:
+            speaker_index = 1
+            hearer_index = 0
+        print("speaker_index is:")
+        print(speaker_index)
+        print("hearer_index is:")
+        print(hearer_index)
         meaning = random.choice(meanings)
         signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
         # to produce a signal, they first sample a language from their posterior probability distribution. So each agent
