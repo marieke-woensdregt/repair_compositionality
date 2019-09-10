@@ -825,7 +825,7 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+generations = 1500  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
@@ -853,14 +853,17 @@ if __name__ == '__main__':
     print("lang_class_prop_over_gen_df is:")
     print(lang_class_prop_over_gen_df)
 
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    print("timestr is:")
+    print(timestr)
 
-    pickle_file_title = "Pickle_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)#+"_prop_measure_"+proportion_measure
+    pickle_file_title = "Pickle_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "Plot_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)#+"_prop_measure_"+proportion_measure
+    fig_file_title = "Plot_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)
     if gamma == 0 and turnover == True:
         plot_title = "Learnability only"
     elif gamma > 0 and turnover == False:
