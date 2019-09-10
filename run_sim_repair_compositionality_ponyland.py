@@ -461,20 +461,20 @@ def population_communication(population, rounds):
     :param rounds: the number of rounds for which the population should communicate
     :return: the data that was produced during the communication rounds, as a list of (meaning, signal) tuples
     """
-    random_parent_index = np.random.choice(np.arange(len(population)))
+    # random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-        if len(population) == 2:
-            if i % 2 == 0:
-                speaker_index = 0
-                hearer_index = 1
-            else:
-                speaker_index = 1
-                hearer_index = 0
-        else:
-            pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-            speaker_index = pair_indices[0]
-            hearer_index = pair_indices[1]
+        # if len(population) == 2:
+        #     if i % 2 == 0:
+        #         speaker_index = 0
+        #         hearer_index = 1
+        #     else:
+        #         speaker_index = 1
+        #         hearer_index = 0
+        # else:
+        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+        speaker_index = pair_indices[0]
+        hearer_index = pair_indices[1]
         meaning = random.choice(meanings)
         signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
         # to produce a signal, they first sample a language from their posterior probability distribution. So each agent
@@ -482,8 +482,9 @@ def population_communication(population, rounds):
         population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)  # (Thus, in this
         # simplified version of the model, agents are still able to "track changes in their partners' linguistic
         # behaviour over time
-        if speaker_index == random_parent_index:
-            data.append((meaning, signal))
+
+        # if speaker_index == random_parent_index:
+        data.append((meaning, signal))
     return data
 
 
@@ -575,10 +576,11 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
-                if bottleneck != len(data):
-                    raise ValueError(
-                        "UH-OH! data should have the same size as the bottleneck b")
-                meaning, signal = data[k]
+                # if bottleneck != len(data):
+                #     raise ValueError(
+                #         "UH-OH! data should have the same size as the bottleneck b")
+                # meaning, signal = data[k]
+                meaning, signal = random.choice(data)
                 population[j] = update_posterior(population[j], meaning, signal)
         data = population_communication(population, rounds)
         results.append(language_stats(population))
@@ -594,8 +596,8 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 1500  # the number of generations (Kirby et al., 2015 used 100)
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+gens = 1000  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
