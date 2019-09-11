@@ -600,7 +600,7 @@ popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a populati
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 gens = 1500  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
-noise = False  # parameter that determines whether environmental noise is on or off
+noise = True  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
