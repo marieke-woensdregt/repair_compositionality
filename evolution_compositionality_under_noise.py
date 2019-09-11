@@ -541,6 +541,111 @@ def receive_without_repair(language, utterance):
 
 
 
+
+def noisy_to_complete_forms(noisy_form, forms_without_noise):
+    possible_complete_forms = []
+    amount_of_noise = noisy_form.count('_')
+    for complete_form in forms_without_noise:
+        similarity_score = 0
+        for i in range(len(noisy_form)):
+            if noisy_form[i] == complete_form[i]:
+                similarity_score += 1
+        if similarity_score == len(complete_form)-amount_of_noise:
+            possible_complete_forms.append(complete_form)
+    return possible_complete_forms
+
+
+
+def find_possible_interpretations(language, compatible_forms):
+    possible_interpretations = []
+    for i in range(len(language)):
+        if language[i] in compatible_forms:
+            possible_interpretations.append(meanings[i])
+    return possible_interpretations
+
+
+
+def find_partial_meaning(language, noisy_form):
+    part_meanings_as_ints = []
+    for i in range(len(meanings)):
+        for j in range(len(meanings[0])):
+            part_meanings_as_ints.append(int(meanings[i][j]))
+    max_part_meaning = max(part_meanings_as_ints)
+    count_per_partial_meaning = np.zeros(max_part_meaning+1)
+    for i in range(len(noisy_form)):
+        if noisy_form[i] != '_':
+            for j in range(len(language)):
+                if language[j][i] == noisy_form[i]:
+                    count_per_partial_meaning[int(meanings[j][i])] += 1
+    n_features = 0
+    for i in range(len(meanings)):
+        if meanings[i][0] == meanings[0][0]:
+            n_features += 1
+    if np.sum(count_per_partial_meaning) == n_features:
+        part_meaning_index = np.where(count_per_partial_meaning==n_features)[0]
+    else:
+        part_meaning_index = []
+    if len(part_meaning_index) == 1:
+        return part_meaning_index
+    else:
+        return []
+
+
+
+def receive_with_repair(language, utterance, mutual_understanding, minimal_effort, cost_vector):
+    if not mutual_understanding and not minimal_effort:
+        raise ValueError(
+            "Sorry, this function has only been implemented for at least one of either mutual_understanding or minimal_effort being True"
+        )
+    if '_' in utterance:
+        compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
+        possible_interpretations = find_possible_interpretations(language, compatible_forms)
+        if len(possible_interpretations) == 0:
+            possible_interpretations = meanings
+        partial_meaning = find_partial_meaning(language, utterance)
+        if mutual_understanding and minimal_effort:
+            prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
+            if len(partial_meaning) == 1:
+                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[1]
+                repair_initiator = str(partial_meaning[0])+'?'
+            elif len(partial_meaning) == 0:
+                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[2]
+                repair_initiator = '??'
+        elif mutual_understanding and not minimal_effort:
+            if len(possible_interpretations) > 1:
+                prop_to_prob_no_repair = 0.
+                prop_to_prob_repair = 1.
+                if len(partial_meaning) == 1:
+                    repair_initiator = str(partial_meaning[0])+'?'
+                elif len(partial_meaning) == 0:
+                    repair_initiator = '??'
+            elif len(possible_interpretations) == 1:
+                prop_to_prob_no_repair = 1.
+                prop_to_prob_repair = 0.
+        elif not mutual_understanding and minimal_effort:
+            prop_to_prob_no_repair = 1.
+            prop_to_prob_repair = 0.
+            if len(partial_meaning) == 1:
+                repair_initiator = str(partial_meaning[0])+'?'
+            elif len(partial_meaning) == 0:
+                repair_initiator = '??'
+        prop_to_prob_per_response = np.array([prop_to_prob_no_repair, prop_to_prob_repair])
+        for i in range(len(prop_to_prob_per_response)):
+            if prop_to_prob_per_response[i] < 0.0:
+                prop_to_prob_per_response[i] = 0.0
+        normalized_response_probs = np.divide(prop_to_prob_per_response, np.sum(prop_to_prob_per_response))
+        selected_response = np.random.choice(np.arange(2), p=normalized_response_probs)
+        if selected_response == 0:
+            response = random.choice(possible_interpretations)
+        elif selected_response == 1:
+            response = repair_initiator
+    else:
+        response = receive_without_repair(language, utterance)
+    return response
+
+
+
+
 def update_posterior(log_posterior, topic, utterance):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability distribution accordingly
@@ -893,13 +998,17 @@ popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a populati
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
-noise = False  # parameter that determines whether environmental noise is on or off
+noise = True  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
+minimal_effort = True
+mutual_understanding = True
+cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
+
 
 
 if __name__ == '__main__':
