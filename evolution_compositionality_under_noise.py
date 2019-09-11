@@ -6,6 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+from copy import deepcopy
+from math import log
 
 
 # FROM SIMLANG LAB 21:
@@ -491,6 +493,35 @@ def produce(language, topic, gamma, error):
 
 
 
+def produce_simlang(language, meaning):
+
+    # Added by me:
+    if gamma > 0.:
+        communication = True
+    else:
+        communication = False
+    signals = forms_without_noise
+    noise = error
+    language_simlang_style = []
+    for i in range(len(language)):
+        language_simlang_style.append((meanings[i], language[i]))
+
+    for m, s in language_simlang_style:
+        if m == meaning:
+            signal = s
+    if communication:
+        speaker_meaning = receive_without_repair(language, signal) # changed this to receive_without_repair() instead of receive()
+        if speaker_meaning != meaning:
+            signal = random.choice(signals)
+    if random.random() < noise:
+        other_signals = deepcopy(signals)
+        other_signals.remove(signal)
+        return random.choice(other_signals)
+    return signal
+
+
+
+
 def receive_without_repair(language, utterance):
     """
     Takes a language and an utterance, and returns an interpretation of that utterance, following the language
@@ -539,6 +570,34 @@ def update_posterior(log_posterior, topic, utterance):
     new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.special.logsumexp(new_log_posterior))
 
     return new_log_posterior_normalized
+
+
+
+
+def normalize_logprobs_simlang(logprobs):
+    logtotal = scipy.special.logsumexp(logprobs) #calculates the summed log probabilities
+    normedlogs = []
+    for logp in logprobs:
+        normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the normal domain
+    return normedlogs
+
+
+
+def update_posterior_simlang(posterior, meaning, signal):
+
+    # added by me:
+    signals = forms_without_noise
+    noise = error
+
+    in_language = log(1 - noise)
+    out_of_language = log(noise / (len(signals) - 1))
+    new_posterior = []
+    for i in range(len(posterior)):
+        if (meaning, signal) in all_langs_as_in_simlang[i]:
+            new_posterior.append(posterior[i] + in_language)
+        else:
+            new_posterior.append(posterior[i] + out_of_language)
+    return normalize_logprobs_simlang(new_posterior)
 
 
 # print('')
@@ -634,14 +693,18 @@ def population_communication(population, rounds):
         speaker_index = pair_indices[0]
         hearer_index = pair_indices[1]
         meaning = random.choice(meanings)
-        signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
+        if production == 'simlang':
+            signal = produce_simlang(sample(population[speaker_index]), meaning)
+        else:
+            signal = produce(sample(population[speaker_index]), meaning, gamma, error)  # whenever a speaker is called upon
         # to produce a signal, they first sample a language from their posterior probability distribution. So each agent
         # keeps updating their language according to the data they receive from their communication partner.
-        population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)  # (Thus, in this
-        # simplified version of the model, agents are still able to "track changes in their partners' linguistic
-        # behaviour over time
+        if production == 'simlang':
+            population[hearer_index] = update_posterior_simlang(population[hearer_index], meaning, signal)  # (Thus, in this simplified version of the model, agents are still able to "track changes in their partners' linguistic behaviour over time
+        else:
+            population[hearer_index] = update_posterior(population[hearer_index], meaning, signal)
 
-        # if speaker_index == random_parent_index:
+            # if speaker_index == random_parent_index:
         data.append((meaning, signal))
     return data
 
@@ -738,7 +801,10 @@ def simulation(generations, rounds, bottleneck, popsize, data):
                 #         "UH-OH! data should have the same size as the bottleneck b")
                 # meaning, signal = data[k]
                 meaning, signal = random.choice(data)
-                population[j] = update_posterior(population[j], meaning, signal)
+                if production == 'simlang':
+                    population[j] = update_posterior_simlang(population[j], meaning, signal)
+                else:
+                    population[j] = update_posterior(population[j], meaning, signal)
         data = population_communication(population, rounds)
         results.append(language_stats(population))
         if turnover:
@@ -825,7 +891,7 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1500  # the number of generations (Kirby et al., 2015 used 100)
+generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
 initial_dataset = create_initial_dataset('holistic', b)  # the data that the first generation learns from
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
@@ -833,7 +899,7 @@ noise_prob = 0.1  # the probability of environmental noise masking part of an ut
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
-
+production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
 
 if __name__ == '__main__':
@@ -847,7 +913,7 @@ if __name__ == '__main__':
         results.append(simulation(generations, rounds, b, popsize, initial_dataset)[0])
 
 
-    lang_class_prop_over_gen_df = results_to_dataframe(results)
+    lang_class_prop_over_gen_df = results_to_dataframe(results, runs, generations)
     print('')
     print('')
     print("lang_class_prop_over_gen_df is:")
@@ -857,13 +923,13 @@ if __name__ == '__main__':
     print("timestr is:")
     print(timestr)
 
-    pickle_file_title = "Pickle_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+timestr
+    pickle_file_title = "Pickle_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "Plot_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)
+    fig_file_title = "Plot_n_runs_" + str(runs) +"_n_gens_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
     if gamma == 0 and turnover == True:
         plot_title = "Learnability only"
     elif gamma > 0 and turnover == False:
