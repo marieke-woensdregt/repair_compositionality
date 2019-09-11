@@ -18,32 +18,44 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-gens = 100  # the number of generations (Kirby et al., 2015 used 100)
+gens = 1500  # the number of generations (Kirby et al., 2015 used 100)
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
+batches = 9
 
 
+all_results = []
+for i in range(batches):
+    pickle_file_title = "Pickle_results_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)+"_"+str(i)
+
+    results = pickle.load(open(pickle_file_title+".p", "rb"))
+
+    for j in range(len(results)):
+        all_results.append(results[j])
 
 
-pickle_file_title = "Pickle_results_n_runs_"+str(runs)+"_n_gens_"+str(gens)+"_b_"+str(b)+"_rounds_"+str(rounds)+"_gamma_" + str(gamma) + "_turnover_" + str(turnover)+"_noise_"+str(noise)+"_noise_prob_"+str(noise_prob)#+"_prop_measure_"+proportion_measure
+print('')
+print("len(all_results) are:")
+print(len(all_results))
+print("len(all_results[0]) are:")
+print(len(all_results[0]))
+print("len(all_results[0][0]) are:")
+print(len(all_results[0][0]))
 
 
-results = pickle.load( open( pickle_file_title+".p", "rb" ) )
-
-lang_class_prop_over_gen_df = results_to_dataframe(results, runs, gens)
+lang_class_prop_over_gen_df = results_to_dataframe(all_results, runs*batches, gens)
 print('')
 print('')
 print("lang_class_prop_over_gen_df is:")
 print(lang_class_prop_over_gen_df)
 
 
-fig_file_title = "Plot_n_runs_" + str(runs) + "_n_gens_" + str(gens) + "_b_" + str(b) + "_rounds_" + str(
-    rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(
-    noise_prob)  # +"_prop_measure_"+proportion_measure
+fig_file_title = "Plot_n_runs_" + str(runs*batches) + "_n_gens_" + str(gens) + "_b_" + str(b) + "_rounds_" + str(
+    rounds) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)  # +"_prop_measure_"+proportion_measure
 if gamma == 0 and turnover == True:
     plot_title = "Learnability only"
 elif gamma > 0 and turnover == False:
