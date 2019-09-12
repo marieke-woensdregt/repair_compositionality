@@ -494,6 +494,15 @@ def produce(language, topic, gamma, error, noise_switch):
 
 
 def produce_simlang(language, meaning):
+    """
+    This function is copied directly from lab 21 of the SimLang course of 2019. I only renamed and reformatted some of
+    the variables below, in order to make it work with my code (under the "# Added by me" comment).
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
+    :param meaning: a meaning (string) that the speaker wants to communicate
+    :return: an utterance (string)
+    """
 
     # Added by me:
     if gamma > 0.:
@@ -545,6 +554,13 @@ def receive_without_repair(language, utterance):
 
 
 def noisy_to_complete_forms(noisy_form, forms_without_noise):
+    """
+    Takes a noisy form and returns all possible complete forms that it's compatible with.
+
+    :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
+    :param forms_without_noise: The full set of possible complete forms
+    :return: A list of complete forms that the noisy form is compatible with
+    """
     possible_complete_forms = []
     amount_of_noise = noisy_form.count('_')
     for complete_form in forms_without_noise:
@@ -558,16 +574,33 @@ def noisy_to_complete_forms(noisy_form, forms_without_noise):
 
 
 
-def find_possible_interpretations(language, compatible_forms):
+def find_possible_interpretations(language, forms):
+    """
+    Finds all meanings that the forms given as input are mapped to in the language given as input
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
+    :param forms: list of forms
+    :return: list of meanings (type: string) that the forms given as input are mapped to in the language given as input
+    """
     possible_interpretations = []
     for i in range(len(language)):
-        if language[i] in compatible_forms:
+        if language[i] in forms:
             possible_interpretations.append(meanings[i])
     return possible_interpretations
 
 
 
 def find_partial_meaning(language, noisy_form):
+    """
+    Checks whether the noisy_form given as input maps unambiguously to a partial meaning in the language given as
+    input, and if so, returns that partial meaning.
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
+    :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
+    :return: a list containing the partial meaning that the noisy_form maps unambiguously to, if there is one
+    """
     part_meanings_as_ints = []
     for i in range(len(meanings)):
         for j in range(len(meanings[0])):
@@ -595,6 +628,20 @@ def find_partial_meaning(language, noisy_form):
 
 
 def receive_with_repair(language, utterance):
+    """
+    Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
+    these two response types are to happen depends on the settings of the paremeters 'mutual_understanding' and
+    'minimal_effort' (and, if minimal_effort is set to True, the parameter 'cost_vector'). These three parameters are
+    all assumed to be global variables.
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
+    :param utterance: an utterance (string)
+    :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator. A repair initiator
+    can be of two types: if the listener has grasped part of the meaning, it will be a restricted request, which is a
+    string containing the partial meaning that the listener did grasp, followed by a question mark. If the listener did
+    not grasp any of the meaning, it will be an open request, which is simply '??'
+    """
     if not mutual_understanding and not minimal_effort:
         raise ValueError(
             "Sorry, this function has only been implemented for at least one of either mutual_understanding or minimal_effort being True"
@@ -682,6 +729,12 @@ def update_posterior(log_posterior, topic, utterance):
 
 
 def normalize_logprobs_simlang(logprobs):
+    """
+    This function is copied directly from lab 21 of the SimLang course of 2019.
+
+    :param logprobs: a list of LOG probabilities
+    :return: a list of normalised LOG probabilities
+    """
     logtotal = scipy.special.logsumexp(logprobs) #calculates the summed log probabilities
     normedlogs = []
     for logp in logprobs:
@@ -691,6 +744,16 @@ def normalize_logprobs_simlang(logprobs):
 
 
 def update_posterior_simlang(posterior, meaning, signal):
+    """
+    This function is copied directly from lab 21 of the SimLang course of 2019. I only renamed some of the variables
+    below, in order to make it work with my code (under the "# Added by me" comment).
+
+    :param posterior: a list of LOG posterior probabilities
+    :param meaning: the meaning from the meaning-signal pair that was observed (string)
+    :param signal: the signal from the meaning-signal pair that was observed (string)
+    :return: a list of normalised LOG posterior probabilities, updated based on the meaning-signal pair that was
+    observed
+    """
 
     # added by me:
     signals = forms_without_noise
@@ -1028,7 +1091,7 @@ initial_language_type = 'degenerate'  # set the language class that the first ge
 initial_dataset = create_initial_dataset(initial_language_type, b)  # the data that the first generation learns from
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.4  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
