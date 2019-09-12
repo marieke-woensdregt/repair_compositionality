@@ -1149,10 +1149,6 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
 
     sns.set_style("whitegrid")
 
-    print('')
-    print('')
-    print('THIS IS THE plot_barplot() FUNCTION:')
-
     proportion_column = np.array(lang_class_prop_over_gen_df['proportion'])
 
     proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, 4))
@@ -1191,10 +1187,6 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
             }
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
-    print('')
-    print('')
-    print("lang_class_prop_over_gen_df_from_starting_gen is:")
-    print(lang_class_prop_over_gen_df_from_starting_gen)
 
     palette = sns.color_palette(["black", "red", "grey", "green"])
 
@@ -1218,7 +1210,7 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 200  # the number of generations (Kirby et al., 2015 used 100)
