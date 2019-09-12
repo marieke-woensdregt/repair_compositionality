@@ -1146,7 +1146,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     :return: Nothing. Just saves the plot and then shows it.
     """
 
-    sns.set(style="whitegrid")
+    sns.set_style("whitegrid")
 
     print('')
     print('')
@@ -1220,8 +1220,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 200  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
