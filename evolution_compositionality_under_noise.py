@@ -1112,6 +1112,8 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     :param fig_file_title: The file name that the plot should be saved under
     :return: Nothing. Just saves the plot and then shows it.
     """
+    sns.set_style("whitegrid")
+
     palette = sns.color_palette(["black", "red", "grey", "green"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
@@ -1122,7 +1124,6 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     plt.xlabel('Generation')
     plt.ylabel('Mean proportion')
     plt.legend()
-    plt.grid()
     plt.savefig("Timecourse_plot_"+fig_file_title + ".pdf")
     plt.show()
 
@@ -1208,7 +1209,6 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     plt.title(plot_title)
     plt.xlabel('Language class')
     plt.ylabel('Mean proportion')
-    plt.grid()
     plt.savefig("Barplot_"+fig_file_title + ".pdf")
     plt.show()
 
