@@ -536,15 +536,6 @@ def receive_without_repair(language, utterance):
         if language[i] == utterance:
             possible_interpretations.append(meanings[i])
     if len(possible_interpretations) == 0:
-        print('')
-        print('')
-        print("THIS IS THE RECEIVE_WITHOUT_REPAIR FUNCTION  , and len(possible_interpretations) == 0")
-        print("meanings are:")
-        print(meanings)
-        print("language is:")
-        print(language)
-        print("utterance is:")
-        print(utterance)
         possible_interpretations = meanings
     interpretation = random.choice(possible_interpretations)
     return interpretation
@@ -747,10 +738,10 @@ def new_population(popsize):
     Creates a new population of agents, where each agent simply consists of the prior probability distribution (which is assumed to be defined as a global variable called 'priors')
 
     :param popsize: the number of agents desired in the new population
-    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding prior probabilities)
+    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding LOG prior probabilities)
     on the columns.
     """
-    population = [priors_simlang for x in range(popsize)]
+    population = [priors for x in range(popsize)]
     population = np.array(population)
     return population
 
@@ -792,19 +783,9 @@ def population_communication(population, rounds):
     :param rounds: the number of rounds for which the population should communicate
     :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
     """
-
-    print('')
-    print('')
-    print('This is the population_communication() function:')
-
     # random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-
-        print('')
-        print('round is:')
-        print(i)
-
         # if len(population) == 2:
         #     if i % 2 == 0:
         #         speaker_index = 0
@@ -817,85 +798,34 @@ def population_communication(population, rounds):
         speaker_index = pair_indices[0]
         hearer_index = pair_indices[1]
         topic = random.choice(meanings)
-
-        print("topic is:")
-        print(topic)
-
         if mutual_understanding:
-
-            print("Alllrighty, mutual_understanding is ON!")
-
             speaker_language = sample(population[speaker_index])
             hearer_language = sample(population[hearer_index])
-
-            print("meanings are:")
-            print(meanings)
-
-            print("speaker_language is:")
-            print(speaker_language)
-
-            print("hearer_language is:")
-            print(hearer_language)
-
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
                 utterance = produce(speaker_language, topic, gamma, error, noise)  # whenever a speaker is called upon
             # to produce a utterance, they first sample a language from their posterior probability distribution. So each agent
             # keeps updating their language according to the data they receive from their communication partner.
-
-            print("utterance BEFORE REPAIR is:")
-            print(utterance)
-
             listener_response = receive_with_repair(hearer_language, utterance)
-
-            print("listener_response is:")
-            print(listener_response)
-
             counter = 0
             while '?' in listener_response:
-
                 if counter == 3:  # After 3 attempts, the listener stops trying to do repair
                     break
-
-                print("UH-OH! THE LISTENER HAS INITIATED REPAIR")
-
-                print("counter is:")
-                print(counter)
-
                 if production == 'simlang':
                     utterance = produce_simlang(speaker_language, topic)
                 else:
                     utterance = produce(speaker_language, topic, gamma, error, noise_switch=False)  # For now, we assume that the
                                     # speaker's response to a repair initiator always comes through without noise.
-
-                print("utterance is:")
-                print(utterance)
-
                 listener_response = receive_with_repair(hearer_language, utterance)
-
-                print("listener_response is:")
-                print(listener_response)
-
                 counter += 1
-
-
-            print("utterance AFTER REPAIR is:")
-            print(utterance)
-
-
             if production == 'simlang':
                 population[hearer_index] = update_posterior_simlang(population[hearer_index], topic,
                                                                     utterance)  # (Thus, in this simplified version of the model, agents are still able to "track changes in their partners' linguistic behaviour over time
             else:
                 population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
 
-
-
         else:
-
-            print("Well ok, mutual_understanding is OFF...")
-
             if production == 'simlang':
                 utterance = produce_simlang(sample(population[speaker_index]), topic)
             else:
@@ -907,15 +837,8 @@ def population_communication(population, rounds):
             else:
                 population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
 
-
         # if speaker_index == random_parent_index:
         data.append((topic, utterance))
-
-    print('')
-    print('')
-    print("data is:")
-    print(data)
-
     return data
 
 
@@ -1099,9 +1022,9 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
-runs = 4  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 5  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 initial_dataset = create_initial_dataset(initial_language_type, b)  # the data that the first generation learns from
 
 noise = True  # parameter that determines whether environmental noise is on or off
@@ -1131,14 +1054,15 @@ if __name__ == '__main__':
     else:
         priors = np.ones(len(all_possible_languages))
         priors = np.divide(priors, np.sum(priors))
+        priors = np.log(priors)
     print('')
     print('')
-    print("priors is:")
-    print(priors)
+    # print("priors is:")
+    # print(priors)
     print("len(priors) is:")
     print(len(priors))
-    print("np.sum(priors) is:")
-    print(np.sum(priors))
+    print("np.exp(scipy.special.logsumexp(priors)) is:")
+    print(np.exp(scipy.special.logsumexp(priors)))
 
 
     results = []
