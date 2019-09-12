@@ -535,6 +535,17 @@ def receive_without_repair(language, utterance):
     for i in range(len(language)):
         if language[i] == utterance:
             possible_interpretations.append(meanings[i])
+    if len(possible_interpretations) == 0:
+        print('')
+        print('')
+        print("THIS IS THE RECEIVE_WITHOUT_REPAIR FUNCTION  , and len(possible_interpretations) == 0")
+        print("meanings are:")
+        print(meanings)
+        print("language is:")
+        print(language)
+        print("utterance is:")
+        print(utterance)
+        possible_interpretations = meanings
     interpretation = random.choice(possible_interpretations)
     return interpretation
 
@@ -784,7 +795,7 @@ def population_communication(population, rounds):
 
     print('')
     print('')
-    print('THIS IS THE POPULATION_COMMUNICATION() FUNCTION:')
+    print('This is the population_communication() function:')
 
     # random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
@@ -812,7 +823,7 @@ def population_communication(population, rounds):
 
         if mutual_understanding:
 
-            print("ALLLRIGHTY! MUTUAL_UNDERSTANDING IS ON!")
+            print("Alllrighty, mutual_understanding is ON!")
 
             speaker_language = sample(population[speaker_index])
             hearer_language = sample(population[hearer_index])
@@ -883,7 +894,7 @@ def population_communication(population, rounds):
 
         else:
 
-            print("WELL OK, MUTUAL_UNDERSTANDING IS OFF...")
+            print("Well ok, mutual_understanding is OFF...")
 
             if production == 'simlang':
                 utterance = produce_simlang(sample(population[speaker_index]), topic)
@@ -1088,13 +1099,13 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 10  # the number of generations (Kirby et al., 2015 used 100)
+runs = 4  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 5  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 initial_dataset = create_initial_dataset(initial_language_type, b)  # the data that the first generation learns from
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.2  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.4  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -1168,7 +1179,7 @@ if __name__ == '__main__':
             plot_title = "Mutual Understanding Only"
         elif mutual_understanding == False and minimal_effort == True:
             plot_title = "Minimal Effort Only"
-        elif mutual_understanding == False and minimal_effort == True:
+        elif mutual_understanding == True and minimal_effort == True:
             plot_title = "Mutual Understanding and Minimal Effort"
     plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title)
 
