@@ -902,7 +902,7 @@ def population_communication(population, rounds):
             if production == 'simlang':
                 utterance = produce_simlang(sample(population[speaker_index]), topic)
             else:
-                utterance = produce(sample(population[speaker_index]), topic, gamma, error)  # whenever a speaker is
+                utterance = produce(sample(population[speaker_index]), topic, gamma, error, noise)  # whenever a speaker is
                 # called upon to produce a utterance, they first sample a language from their posterior probability
                 # distribution. So each agent keeps updating their language according to the data they receive from
                 # their communication partner.
@@ -1205,7 +1205,7 @@ noise_prob = 0.6  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
