@@ -14744,7 +14744,7 @@ div.output_wrapper {
 div.output_subarea.output_text.output_stream.output_stdout,
 div.output_subarea.output_text {
  font-family: monospace, monospace;
- font-size: 8.5pt !important;
+ font-size: 10pt !important;
  line-height: 150% !important;
  background-color: #232323;
  color: #cccccc;
@@ -14754,7 +14754,7 @@ div.output_subarea.output_text {
 }
 div.output_area pre {
  font-family: monospace, monospace;
- font-size: 8.5pt !important;
+ font-size: 10pt !important;
  line-height: 151% !important;
  color: #cccccc;
  border-top-right-radius: 0px;
@@ -14765,7 +14765,7 @@ div.output_area {
 }
 div.output_html {
  font-family: monospace, monospace;
- font-size: 8.5pt;
+ font-size: 10pt;
  color: #cccccc;
  background-color: #232323;
  background: #232323;
@@ -16585,7 +16585,7 @@ $$<p>where <em>n</em> stands for the probability of noise.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># First some parameters:</span>
@@ -16624,7 +16624,7 @@ $$<p>where <em>n</em> stands for the probability of noise.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
@@ -16701,7 +16701,7 @@ $$<p>where <em>n</em> stands for the probability of noise.</p>
 
 <span class="k">def</span> <span class="nf">classify_all_languages</span><span class="p">(</span><span class="n">language_list</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Classify all languages as either &#39;degenerate&#39; (0), &#39;holistic&#39; (1), &#39;other&#39; (2) or &#39;compositional&#39; (3) </span>
+<span class="sd">    Classify all languages as either &#39;degenerate&#39; (0), &#39;holistic&#39; (1), &#39;other&#39; (2) or &#39;compositional&#39; (3)</span>
 <span class="sd">    (Kirby et al., 2015)</span>
 
 <span class="sd">    :param language_list: list of all languages</span>
@@ -16724,7 +16724,7 @@ $$<p>where <em>n</em> stands for the probability of noise.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Let&#39;s try out our create_all_possible_languages() function:</span>
@@ -16762,7 +16762,7 @@ $$<p>where <em>n</em> stands for the probability of noise.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Let&#39;s test our classify_language() function using some example languages </span>
@@ -16862,38 +16862,10 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># A reproduction of the production function of Kirby et al. (2015):</span>
-
-
-<span class="c1"># first we need to write a quick function that removes every instance of a given element from a list (to use for</span>
-<span class="c1"># removing the &#39;correct&#39; forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given</span>
-<span class="c1"># topic:</span>
-<span class="k">def</span> <span class="nf">remove_all_instances</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="n">element_to_be_removed</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Takes a list, and removes all instances of a given element from it</span>
-
-<span class="sd">    :param my_list: a list</span>
-<span class="sd">    :param element_to_be_removed: the element to be removed; can be of any type</span>
-<span class="sd">    :return: the list with all instances of the target element removed</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># loop counter</span>
-    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_list</span><span class="p">)</span>  <span class="c1"># list length</span>
-    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_list</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">my_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">element_to_be_removed</span><span class="p">):</span>
-            <span class="n">my_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">my_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="c1"># as an element is removed</span>
-            <span class="c1"># so decrease the length by 1</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="c1"># run loop again to check element</span>
-            <span class="c1"># at same index, when item removed</span>
-            <span class="c1"># next item will shift to the left</span>
-            <span class="k">continue</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">my_list</span>
-
 
 <span class="c1"># Now let&#39;s define a function that calculates the probabilities of producing each of the possible forms_without_noisy_</span>
 <span class="c1"># variants, given a particular language and topic:</span>
@@ -16915,13 +16887,6 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
         <span class="k">if</span> <span class="n">meanings</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">==</span> <span class="n">topic</span><span class="p">:</span>
             <span class="n">topic_index</span> <span class="o">=</span> <span class="n">m</span>
     <span class="n">correct_form</span> <span class="o">=</span> <span class="n">language</span><span class="p">[</span><span class="n">topic_index</span><span class="p">]</span>
-    <span class="n">error_forms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">forms_without_noise</span><span class="p">)</span>  <span class="c1">#This may seem a bit weird, but a speaker should be able to produce *any*</span>
-                                            <span class="c1"># form as an error form right? Not limited to only the other forms that</span>
-                                            <span class="c1"># exist within their language? (Otherwise a speaker with a degenerate</span>
-                                            <span class="c1"># language could never make a production error).</span>
-    <span class="n">error_forms</span> <span class="o">=</span> <span class="n">remove_all_instances</span><span class="p">(</span><span class="n">error_forms</span><span class="p">,</span> <span class="n">correct_form</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_forms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># if the list of error_forms is empty because the language is degenerate</span>
-        <span class="n">error_forms</span> <span class="o">=</span> <span class="n">language</span>  <span class="c1"># simply choose an error_form from the whole language</span>
     <span class="n">ambiguity</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">language</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="n">correct_form</span><span class="p">:</span>
@@ -16959,10 +16924,58 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">production_likelihoods_with_noise</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">noise_prob</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">create_noisy_variants</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a form and generates all its possible noisy variants. NOTE however that in its current form, this function</span>
+<span class="sd">    only creates noisy variants in which only a single element of the original form is replaced with a blank! (So it</span>
+<span class="sd">    creates for instance &#39;a_&#39; and &#39;_b&#39;, but not &#39;__&#39;.)</span>
+
+<span class="sd">    :param form: a form (string)</span>
+<span class="sd">    :return: a list of possible noisy variants of that form</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">noisy_variant_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">form</span><span class="p">)):</span>
+        <span class="n">noisy_variant</span> <span class="o">=</span> <span class="n">form</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">form</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="c1"># Instead of string slicing, another way of doing this would be to convert the string into a list, replace the</span>
+        <span class="c1"># element at the ith index, and then convert it back into a string using the &#39;join&#39; method,</span>
+        <span class="c1"># see: https://www.quora.com/How-do-you-change-one-character-in-a-string-in-Python</span>
+        <span class="n">noisy_variant_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">noisy_variant</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">noisy_variant_list</span>
+
+
+
+<span class="c1"># we also need a function that removes every instance of a given element from a list (to use for</span>
+<span class="c1"># removing the &#39;correct&#39; forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given</span>
+<span class="c1"># topic:</span>
+<span class="k">def</span> <span class="nf">remove_all_instances</span><span class="p">(</span><span class="n">my_list</span><span class="p">,</span> <span class="n">element_to_be_removed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a list, and removes all instances of a given element from it</span>
+
+<span class="sd">    :param my_list: a list</span>
+<span class="sd">    :param element_to_be_removed: the element to be removed; can be of any type</span>
+<span class="sd">    :return: the list with all instances of the target element removed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># loop counter</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_list</span><span class="p">)</span>  <span class="c1"># list length</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_list</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">my_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">element_to_be_removed</span><span class="p">):</span>
+            <span class="n">my_list</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">my_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="c1"># as an element is removed</span>
+            <span class="c1"># so decrease the length by 1</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="c1"># run loop again to check element</span>
+            <span class="c1"># at same index, when item removed</span>
+            <span class="c1"># next item will shift to the left</span>
+            <span class="k">continue</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">my_list</span>
+
+
+
+<span class="k">def</span> <span class="nf">production_likelihoods_with_noise</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">noise_prob</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the production probabilities for each of the possible forms (including both forms without noise and all</span>
 <span class="sd">    possible noisy variants) given a language and topic, and the probability of environmental noise</span>
@@ -16999,7 +17012,7 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
     <span class="n">prop_to_prob_correct_form_complete</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.</span><span class="o">/</span><span class="n">ambiguity</span><span class="p">)</span><span class="o">**</span><span class="n">gamma</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">error</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">noise_prob</span><span class="p">)</span>
     <span class="n">prop_to_prob_error_form_complete</span> <span class="o">=</span> <span class="n">error</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">forms_without_noise</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">noise_prob</span><span class="p">)</span>
     <span class="n">prop_to_prob_correct_form_noisy</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.</span> <span class="o">/</span> <span class="n">ambiguity</span><span class="p">)</span> <span class="o">**</span> <span class="n">gamma</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">error</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">noise_prob</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">noisy_forms</span><span class="p">))</span>
-    <span class="n">prop_to_prob_error_form_noisy</span> <span class="o">=</span> <span class="n">error</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">forms_without_noise</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">noise_prob</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">noise_prob</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">noisy_forms</span><span class="p">))</span>
+    <span class="n">prop_to_prob_error_form_noisy</span> <span class="o">=</span> <span class="n">error</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">forms_without_noise</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">noise_prob</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">noise_prob</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">noisy_forms</span><span class="p">))</span>
     <span class="n">prop_to_prob_per_form_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_forms_including_noisy_variants</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_forms_including_noisy_variants</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">all_forms_including_noisy_variants</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">correct_form</span><span class="p">:</span>
@@ -17028,10 +17041,10 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">produce</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">produce</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">noise_switch</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Produces an actual utterance, given a language and a topic</span>
 
@@ -17041,10 +17054,11 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 <span class="sd">    speaker intends to communicate</span>
 <span class="sd">    :param gamma: parameter that determines the strength of the penalty on ambiguity</span>
 <span class="sd">    :param error: the probability of making an error in production</span>
+<span class="sd">    :param noise_switch: turns noise on when set to True, and off when set to False</span>
 <span class="sd">    :return: an utterance. That is, a single form chosen from either the global variable &quot;forms_without_noise&quot; (if</span>
 <span class="sd">    noise is False) or the global variable &quot;all_forms_including_noisy_variants&quot; (if noise is True).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">noise</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">noise_switch</span><span class="p">:</span>
         <span class="n">prop_to_prob_per_form_array</span> <span class="o">=</span> <span class="n">production_likelihoods_with_noise</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">topic</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">noise_prob</span><span class="p">)</span>
         <span class="n">prob_per_form_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_prob_per_form_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_prob_per_form_array</span><span class="p">))</span>
         <span class="n">utterance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">all_forms_including_noisy_variants</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">prob_per_form_array</span><span class="p">)</span>
@@ -17070,10 +17084,10 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">produce</span><span class="p">(</span><span class="n">compositional_lang</span><span class="p">,</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">produce</span><span class="p">(</span><span class="n">compositional_lang</span><span class="p">,</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">noise_switch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17086,7 +17100,7 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[8]:</div>
+    <div class="prompt output_prompt">Out[37]:</div>
 
 
 
@@ -17111,7 +17125,7 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
@@ -17129,6 +17143,8 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">language</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">language</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">utterance</span><span class="p">:</span>
             <span class="n">possible_interpretations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">possible_interpretations</span> <span class="o">=</span> <span class="n">meanings</span>
     <span class="n">interpretation</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">interpretation</span>
 </pre></div>
@@ -17148,7 +17164,7 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">receive_without_repair</span><span class="p">(</span><span class="n">compositional_lang</span><span class="p">,</span> <span class="s1">&#39;aa&#39;</span><span class="p">)</span>
@@ -17164,7 +17180,7 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[10]:</div>
+    <div class="prompt output_prompt">Out[39]:</div>
 
 
 
@@ -17190,6 +17206,303 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we can write the function that does the actual receiving of a signal and deciding whether or not to do repair. There are two variables that play a role in the process of deciding whether or not to initiate repair: the amount of ambiguity left after receiving the utterance, and the cost of the require repair initiator. The three possible responses a listener can give when receiving an utterance are:</p>
+<ol>
+<li>no repair (i.e. just interpret the utterance using the receive_without_repair() function above)</li>
+<li>restricted request (ask for clarification about part of the meaning)</li>
+<li>open request (ask for clarification about the whole meaning</li>
+</ol>
+<p>To start simple, let's say that these are the probabilities of initiating the three options, depending on the ambiguity <em>u</em> (I'm calling this <em>u</em> for uncertainty, because <em>a</em> for ambiguity already has a different meaning above, in Kirby et al.'s, 2015 production function), and the cost of the required repair initiator <em>c</em>:</p>
+$$
+P(r \mid I_{u}, c) \propto \Bigg\{
+\begin{array}{ll}
+\frac{1}{|I_{u}|}-c_{r} \; \; \textrm{if} \; r \; \textrm{is no repair}\\ 
+(1 - \frac{1}{|I_{u}|}) -c_{r} \; \; \textrm{if} \; r \; \textrm{is a repair initiator}
+\end{array}
+$$<p>where $r$ stands for response, $I_{u}$ for the set of possible interpretations of utterance <em>u</em> (i.e. the set of meanings that map to the set of complete forms that are compatible with the form that was received), and $c_{r}$ for the cost of response $r$.</p>
+<p>Which repair initiator is available depends on whether the listener has a partial grasp of the meaning or not. If so, the listener will always use a restricted request when they decide to go for repair, and if not, the listener will always use an open request.</p>
+<p>To start off with, let's defined the cost vector c as:</p>
+<ul>
+<li>c = 0.0 for no repair</li>
+<li>c = 0.2 for restricted request</li>
+<li>c = 0.4 for open request</li>
+</ul>
+<p>(So the cost ratio of restricted:open is 1:2)
+Let's work through some examples to see how this definition of repair initiation works out.</p>
+<p>Say the listener receives the signal 'a_'. Remember that the order of possible meanings that each language assumes is: ['02', '03', '12', '13'].</p>
+<p>If the listener uses the following compositional language: ['aa', 'ab', 'ba', 'bb'], the set of possible interpretations $I_{u}$ consists of ['02', '03']. Thus, $|I_{u}| = 2$. Furthermore, the signal 'a<em>' maps unambiguously to meaning '0</em>' in the listener's language, which means that the listener has partial grasp of the meaning. Therefore, the repair initiator that is available to the listener is the restricted request '0?'. Given our definition of the probabilities of initiating repair or not above (as well as the cost vector <em>c</em>), this means that initiating repair or not will have the following probabilities for this listener given this utterance:</p>
+$$
+P(repair \mid I_{u}, c) \propto (1-(1/2))-0.2\\
+P(no repair \mid I_{u}, c) \propto (1/2)-0.0\\
+$$<p>Which, when normalized, yields the following probabilities:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prop_to_prob_repair_compositional</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">2.</span><span class="p">))</span><span class="o">-</span><span class="mf">0.2</span>
+<span class="n">prop_to_prob_no_repair_compositional</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">-</span><span class="mf">0.0</span>
+
+<span class="n">prop_to_probs_compositional</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prop_to_prob_repair_compositional</span><span class="p">,</span> <span class="n">prop_to_prob_no_repair_compositional</span><span class="p">])</span>
+<span class="n">normalized_probs_compositional</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_probs_compositional</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_probs_compositional</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(repair | compositional language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_compositional</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(no repair | compositional language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_compositional</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>P(repair | compositional language) = 0.37499999999999994
+P(no repair | compositional language) = 0.625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now let's work through the same example, but with a listener using the following holistic language: ['aa', 'ba', 'ab', 'bb]. Remember that the order of meanings is: ['02', '03', '12', '13']. Given the same utterance, 'a<em>', the set of possible interpretations $I</em>{u}$ now consists of ['02', '12']. Thus, just like for the compositional language, $|I<em>{u}| = 2$. However, signal 'a</em>' does not map unambiguously to any partial meaning in this holistic language. Therefore, the repair initiator that is available to the listener is the open request '??'. Given our definition of the probabilities of initiating repair or not above (as well as the cost vector <em>c</em>), this means that initiating repair or not will have the following probabilities for this listener given this utterance:</p>
+$$
+P(repair \mid I_{u}, c) \propto (1-(1/2))-0.4\\
+P(no repair \mid I_{u}, c) \propto (1/2)-0.0\\
+$$<p>Which, when normalized, yields the following probabilities:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prop_to_prob_repair_holistic</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">2.</span><span class="p">))</span><span class="o">-</span><span class="mf">0.4</span>
+<span class="n">prop_to_prob_no_repair_holistic</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">-</span><span class="mf">0.0</span>
+
+<span class="n">prop_to_probs_holistic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prop_to_prob_repair_holistic</span><span class="p">,</span> <span class="n">prop_to_prob_no_repair_holistic</span><span class="p">])</span>
+<span class="n">normalized_probs_holistic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_probs_holistic</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_probs_holistic</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(repair | holistic language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_holistic</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(no repair | holistic language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_holistic</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>P(repair | holistic language) = 0.16666666666666663
+P(no repair | holistic language) = 0.8333333333333334
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>So given the holistic language, initiating repair is a bit less likely (see below exactly how much less likely), because the required repair initiator is more costly.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;P(repair | compositional language) / P(repair | holistic language) = &quot;</span><span class="p">)</span>
+<span class="n">normalized_probs_compositional</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">normalized_probs_holistic</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>P(repair | compositional language) / P(repair | holistic language) = 
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[42]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>2.25</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now let's consider an example language of the 'other' category: ['aa', 'aa', 'ab', 'bb]. Remember that the order of meanings is: ['02', '03', '12', '13']. Given the same utterance, 'a<em>', the set of possible interpretations $I</em>{u}$ thus consists of ['02', '03', '12']. So $|I<em>{u}| = 3$. Signal 'a</em>' does not map unambiguously to any partial meaning in this holistic language, which means that again the listener can only use an open request repair initiator ('??'). This means that initiating repair or not will have the following probabilities for this listener given this utterance:</p>
+$$
+P(repair \mid I_{u}, c) \propto (1-(1/3))-0.4\\
+P(no repair \mid I_{u}, c) \propto (1/3)-0.0\\
+$$<p>Which, when normalized, yields the following probabilities:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prop_to_prob_repair_other</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">))</span><span class="o">-</span><span class="mf">0.4</span>
+<span class="n">prop_to_prob_no_repair_other</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">-</span><span class="mf">0.0</span>
+
+<span class="n">prop_to_probs_other</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prop_to_prob_repair_other</span><span class="p">,</span> <span class="n">prop_to_prob_no_repair_other</span><span class="p">])</span>
+<span class="n">normalized_probs_other</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_probs_other</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_probs_other</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(repair | other language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_other</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(no repair | other language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_other</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>P(repair | other language) = 0.4444444444444445
+P(no repair | other language) = 0.5555555555555555
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Finally, let's consider an example degenerate language: ['aa', 'aa', 'aa', 'aa']. Remember that the order of meanings is: ['02', '03', '12', '13']. Given the same utterance, 'a<em>', the set of possible interpretations $I</em>{u}$ thus consists of ['02', '03', '12', '13']. So $|I<em>{u}| = 4$. Signal 'a</em>' does not map unambiguously to any partial meaning in this holistic language, which means that again the listener can only use an open request repair initiator ('??'). This means that initiating repair or not will have the following probabilities for this listener given this utterance:</p>
+$$
+P(repair \mid I_{u}, c) \propto (1-(1/4))-0.4\\
+P(no repair \mid I_{u}, c) \propto (1/4)-0.0\\
+$$<p>Which, when normalized, yields the following probabilities:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prop_to_prob_repair_degenerate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">4.</span><span class="p">))</span><span class="o">-</span><span class="mf">0.4</span>
+<span class="n">prop_to_prob_no_repair_degenerate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mf">4.</span><span class="p">)</span><span class="o">-</span><span class="mf">0.0</span>
+
+<span class="n">prop_to_probs_degenerate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prop_to_prob_repair_degenerate</span><span class="p">,</span> <span class="n">prop_to_prob_no_repair_degenerate</span><span class="p">])</span>
+<span class="n">normalized_probs_degenerate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_probs_degenerate</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_probs_degenerate</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(repair | degenerate language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_degenerate</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;P(no repair | degenerate language) = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">normalized_probs_degenerate</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>P(repair | degenerate language) = 0.5833333333333334
+P(no repair | degenerate language) = 0.4166666666666667
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thus, maximal uncertainty is the only situation in which initiating repair becomes more likely than just making a guess.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, let's capture what we've defined above in an actual function:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <p>First we need a function that takes a noisy form and works back to determine which possible complete forms it could have stemmed from:</p>
 
 </div>
@@ -17197,10 +17510,17 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">noisy_to_complete_forms</span><span class="p">(</span><span class="n">noisy_form</span><span class="p">,</span> <span class="n">forms_without_noise</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a noisy form and returns all possible complete forms that it&#39;s compatible with.</span>
+
+<span class="sd">    :param noisy_form: a noisy form (i.e. a string containing &#39;_&#39; as at least one of the characters)</span>
+<span class="sd">    :param forms_without_noise: The full set of possible complete forms</span>
+<span class="sd">    :return: A list of complete forms that the noisy form is compatible with</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">possible_complete_forms</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">amount_of_noise</span> <span class="o">=</span> <span class="n">noisy_form</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">complete_form</span> <span class="ow">in</span> <span class="n">forms_without_noise</span><span class="p">:</span>
@@ -17228,90 +17548,12 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">noisy_to_complete_forms</span><span class="p">(</span><span class="s1">&#39;a_&#39;</span><span class="p">,</span> <span class="n">forms_without_noise</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[12]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&#39;aa&#39;, &#39;ab&#39;]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">receive_with_repair</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">utterance</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;meanings are:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">meanings</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;language is:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
-    <span class="n">possible_interpretations</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="s1">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">utterance</span><span class="p">:</span>
-       <span class="n">possible_complete_forms</span> <span class="o">=</span> <span class="n">noisy_to_complete_forms</span><span class="p">(</span><span class="n">utterance</span><span class="p">,</span> <span class="n">forms_without_noise</span><span class="p">)</span> 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;possible_complete_forms are:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">possible_complete_forms</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">language</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">language</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">possible_complete_forms</span><span class="p">:</span>
-            <span class="n">possible_interpretations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;possible_interpretations&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span>
-    <span class="n">ambiguity</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">meanings</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ambiguity is:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">ambiguity</span><span class="p">)</span>
-    <span class="n">part_meaning_score</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)):</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)):</span>
-            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;possible_interpretations[j][l] is:&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">l</span><span class="p">])</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;possible_interpretations[k][l] is:&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">])</span>
-                <span class="k">if</span> <span class="n">possible_interpretations</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">==</span> <span class="n">possible_interpretations</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]:</span>
-                    <span class="n">part_meaning_score</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;part_meaning_score is:&quot;</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">part_meaning_score</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;part_meaning_score is:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">part_meaning_score</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">receive_with_repair</span><span class="p">(</span><span class="n">compositional_lang</span><span class="p">,</span> <span class="s1">&#39;a_&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">compatible_forms</span> <span class="o">=</span> <span class="n">noisy_to_complete_forms</span><span class="p">(</span><span class="s1">&#39;a_&#39;</span><span class="p">,</span> <span class="n">forms_without_noise</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;compatible_forms are:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">compatible_forms</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17328,76 +17570,347 @@ $$<p>where $f$ stands for form (in the sense of a complete signal, such as <em>a
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>meanings are:
-[&#39;02&#39;, &#39;03&#39;, &#39;12&#39;, &#39;13&#39;]
-language is:
-(&#39;aa&#39;, &#39;ab&#39;, &#39;ba&#39;, &#39;bb&#39;)
-possible_complete_forms are:
+<pre>compatible_forms are:
 [&#39;aa&#39;, &#39;ab&#39;]
-possible_interpretations
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we need a function that, given a set of complete forms that are compatible with the noisy form that was received, determines which possible interpretations of the noisy signal are available</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">find_possible_interpretations</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">forms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds all meanings that the forms given as input are mapped to in the language given as input</span>
+
+<span class="sd">    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),</span>
+<span class="sd">    where each form is mapped to the meaning at the corresponding index</span>
+<span class="sd">    :param forms: list of forms</span>
+<span class="sd">    :return: list of meanings (type: string) that the forms given as input are mapped to in the language given as input</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">possible_interpretations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">language</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">language</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">forms</span><span class="p">:</span>
+            <span class="n">possible_interpretations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">possible_interpretations</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's test our possible_interpretations() function:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">example_language</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">,</span> <span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">]</span>
+
+<span class="n">possible_interpretations</span> <span class="o">=</span> <span class="n">find_possible_interpretations</span><span class="p">(</span><span class="n">example_language</span><span class="p">,</span> <span class="n">compatible_forms</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;possible_interpretations are:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>possible_interpretations are:
 [&#39;02&#39;, &#39;03&#39;]
-ambiguity is:
-0.5
+</pre>
+</div>
+</div>
 
-possible_interpretations[j][l] is:
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we need a function that takes a language and a noisy form, and determines whether or not the noisy form maps unambiguously onto a partial meaning (i.e. whether the listener has at least a partial grasp of the meaning):</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">find_partial_meaning</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">noisy_form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks whether the noisy_form given as input maps unambiguously to a partial meaning in the language given as</span>
+<span class="sd">    input, and if so, returns that partial meaning.</span>
+
+<span class="sd">    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),</span>
+<span class="sd">    where each form is mapped to the meaning at the corresponding index</span>
+<span class="sd">    :param noisy_form: a noisy form (i.e. a string containing &#39;_&#39; as at least one of the characters)</span>
+<span class="sd">    :return: a list containing the partial meaning that the noisy_form maps unambiguously to, if there is one</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">part_meanings_as_ints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">meanings</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">part_meanings_as_ints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span>
+    <span class="n">max_part_meaning</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">part_meanings_as_ints</span><span class="p">)</span>
+    <span class="n">count_per_partial_meaning</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">max_part_meaning</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noisy_form</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">noisy_form</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">language</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">language</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">noisy_form</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">count_per_partial_meaning</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">meanings</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">])]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">n_features</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">meanings</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">meanings</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">meanings</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">n_features</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">count_per_partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_features</span><span class="p">:</span>
+        <span class="n">part_meaning_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">count_per_partial_meaning</span><span class="o">==</span><span class="n">n_features</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">part_meaning_index</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part_meaning_index</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">part_meaning_index</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's test our find_partial_meanings() function:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">example_lang</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">,</span> <span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">]</span>
+
+<span class="n">partial_meaning</span> <span class="o">=</span> <span class="n">find_partial_meaning</span><span class="p">(</span><span class="n">example_lang</span><span class="p">,</span> <span class="s1">&#39;b_&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;partial_meaning is:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+partial_meaning is:
+[]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have all these functions in place, we can finally build our full receive_with_repair() function:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">receive_with_repair</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">utterance</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely</span>
+<span class="sd">    these two response types are to happen depends on the settings of the paremeters &#39;mutual_understanding&#39; and</span>
+<span class="sd">    &#39;minimal_effort&#39; (and, if minimal_effort is set to True, the parameter &#39;cost_vector&#39;). These three parameters are</span>
+<span class="sd">    all assumed to be global variables.</span>
+
+<span class="sd">    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),</span>
+<span class="sd">    where each form is mapped to the meaning at the corresponding index</span>
+<span class="sd">    :param utterance: an utterance (string)</span>
+<span class="sd">    :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator. A repair initiator</span>
+<span class="sd">    can be of two types: if the listener has grasped part of the meaning, it will be a restricted request, which is a</span>
+<span class="sd">    string containing the partial meaning that the listener did grasp, followed by a question mark. If the listener did</span>
+<span class="sd">    not grasp any of the meaning, it will be an open request, which is simply &#39;??&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">mutual_understanding</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">minimal_effort</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Sorry, this function has only been implemented for at least one of either mutual_understanding or minimal_effort being True&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">utterance</span><span class="p">:</span>
+        <span class="n">compatible_forms</span> <span class="o">=</span> <span class="n">noisy_to_complete_forms</span><span class="p">(</span><span class="n">utterance</span><span class="p">,</span> <span class="n">forms_without_noise</span><span class="p">)</span>
+        <span class="n">possible_interpretations</span> <span class="o">=</span> <span class="n">find_possible_interpretations</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">compatible_forms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">possible_interpretations</span> <span class="o">=</span> <span class="n">meanings</span>
+        <span class="n">partial_meaning</span> <span class="o">=</span> <span class="n">find_partial_meaning</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">utterance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mutual_understanding</span> <span class="ow">and</span> <span class="n">minimal_effort</span><span class="p">:</span>
+            <span class="n">prop_to_prob_no_repair</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">))</span><span class="o">-</span><span class="n">cost_vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">prop_to_prob_repair</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)))</span><span class="o">-</span><span class="n">cost_vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">repair_initiator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;?&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">prop_to_prob_repair</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)))</span><span class="o">-</span><span class="n">cost_vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">repair_initiator</span> <span class="o">=</span> <span class="s1">&#39;??&#39;</span>
+        <span class="k">elif</span> <span class="n">mutual_understanding</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">minimal_effort</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">prop_to_prob_no_repair</span> <span class="o">=</span> <span class="mf">0.</span>
+                <span class="n">prop_to_prob_repair</span> <span class="o">=</span> <span class="mf">1.</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">repair_initiator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;?&#39;</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">repair_initiator</span> <span class="o">=</span> <span class="s1">&#39;??&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">prop_to_prob_no_repair</span> <span class="o">=</span> <span class="mf">1.</span>
+                <span class="n">prop_to_prob_repair</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">mutual_understanding</span> <span class="ow">and</span> <span class="n">minimal_effort</span><span class="p">:</span>
+            <span class="n">prop_to_prob_no_repair</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="n">prop_to_prob_repair</span> <span class="o">=</span> <span class="mf">0.</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">repair_initiator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;?&#39;</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">partial_meaning</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">repair_initiator</span> <span class="o">=</span> <span class="s1">&#39;??&#39;</span>
+        <span class="n">prop_to_prob_per_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">prop_to_prob_no_repair</span><span class="p">,</span> <span class="n">prop_to_prob_repair</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_to_prob_per_response</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">prop_to_prob_per_response</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">prop_to_prob_per_response</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">normalized_response_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">prop_to_prob_per_response</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">prop_to_prob_per_response</span><span class="p">))</span>
+        <span class="n">selected_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">p</span><span class="o">=</span><span class="n">normalized_response_probs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">selected_response</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">possible_interpretations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">selected_response</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">repair_initiator</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">receive_without_repair</span><span class="p">(</span><span class="n">language</span><span class="p">,</span> <span class="n">utterance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, let's test our receive_with_repair() function:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># First, we&#39;ll need to set some parameters:</span>
+
+<span class="n">minimal_effort</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mutual_understanding</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">cost_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]</span>  <span class="c1"># costs of no repair, restricted request, and open request, respectively</span>
+
+<span class="n">example_lang</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;ba&#39;</span><span class="p">,</span> <span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;i is:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">receive_with_repair</span><span class="p">(</span><span class="n">example_lang</span><span class="p">,</span> <span class="s1">&#39;a_&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;response is:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+i is:
 0
-possible_interpretations[k][l] is:
-0
-part_meaning_score is:
+response is:
+02
+
+i is:
 1
+response is:
+12
 
-possible_interpretations[j][l] is:
+i is:
 2
-possible_interpretations[k][l] is:
-2
-part_meaning_score is:
-2
+response is:
+??
 
-possible_interpretations[j][l] is:
-0
-possible_interpretations[k][l] is:
-0
-part_meaning_score is:
+i is:
 3
+response is:
+02
 
-possible_interpretations[j][l] is:
-2
-possible_interpretations[k][l] is:
-3
-part_meaning_score is:
-3
-
-possible_interpretations[j][l] is:
-0
-possible_interpretations[k][l] is:
-0
-part_meaning_score is:
+i is:
 4
-
-possible_interpretations[j][l] is:
-3
-possible_interpretations[k][l] is:
-2
-part_meaning_score is:
-4
-
-possible_interpretations[j][l] is:
-0
-possible_interpretations[k][l] is:
-0
-part_meaning_score is:
-5
-
-possible_interpretations[j][l] is:
-3
-possible_interpretations[k][l] is:
-3
-part_meaning_score is:
-6
-
-
-part_meaning_score is:
-6
+response is:
+02
 </pre>
 </div>
 </div>
