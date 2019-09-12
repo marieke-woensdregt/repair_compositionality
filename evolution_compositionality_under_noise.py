@@ -855,7 +855,8 @@ def population_communication(population, rounds):
     :param rounds: the number of rounds for which the population should communicate
     :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
     """
-    # random_parent_index = np.random.choice(np.arange(len(population)))
+    if n_parents == 'single':
+        random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
         # if len(population) == 2:
@@ -934,13 +935,21 @@ def population_communication(population, rounds):
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
                     population[hearer_index] = update_posterior(population[hearer_index], inferred_meaning, utterance)
 
-        # if speaker_index == random_parent_index:
-        if observed_meaning == 'intended':
-            data.append((topic, utterance))
-        elif observed_meaning == 'inferred':
-            if mutual_understanding:
-                inferred_meaning = listener_response
-            data.append((inferred_meaning, utterance))
+        if n_parents == 'single':
+            if speaker_index == random_parent_index:
+                if observed_meaning == 'intended':
+                    data.append((topic, utterance))
+                elif observed_meaning == 'inferred':
+                    if mutual_understanding:
+                        inferred_meaning = listener_response
+                    data.append((inferred_meaning, utterance))
+        else:
+            if observed_meaning == 'intended':
+                data.append((topic, utterance))
+            elif observed_meaning == 'inferred':
+                if mutual_understanding:
+                    inferred_meaning = listener_response
+                data.append((inferred_meaning, utterance))
     return data
 
 
@@ -1004,7 +1013,6 @@ def language_stats(population):
     population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
     (this ordering has to correspond to that defined in the classify_language() function!)
     """
-    # stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
     stats = np.zeros(4)  # degenerate, holistic, other, compositional
     for p in population:
         for i in range(len(p)):
@@ -1213,7 +1221,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 200  # the number of generations (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
@@ -1235,9 +1243,11 @@ else:
 minimal_effort = True
 cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
-observed_meaning = 'inferred'  # determines which meaning the learner observes when receiving a meaning-form pair; can
+observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
+n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
+# previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
 gen_start = int(generations/2)
 
