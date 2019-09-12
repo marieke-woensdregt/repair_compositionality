@@ -1097,35 +1097,93 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     plt.ylabel('Mean proportion')
     plt.legend()
     plt.grid()
-    plt.savefig(fig_file_title + ".pdf")
+    plt.savefig("Timecourse_plot_"+fig_file_title + ".pdf")
     plt.show()
 
 
 
 
-def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title):
+def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs, n_gens, gen_start, baselines):
     """
-    Takes a list of language stats over generations (results) and plots a timecourse graph
+    Takes a list of language stats over generations (results) and creates a bar plot showing the proportions of each
+    of the language classes, from generation 'gen_start' to generation 'gen_stop'
 
     :param results: A list of language stats over generations, containing n_runs sublists which each contain
     n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other,
     and index 3 = compositional)
     :param plot_title: The title of the condition that should be on the plot (string)
     :param fig_file_title: The file name that the plot should be saved under
+    :param gen_start: The generation from which the plot should start taking the mean (should be after the population
+    has reached convergence)
+    :param baselines: The baseline proportion for each language class, where 0 = degenerate, 1 = holistic, 2 = other,
+    3 = compositional
     :return: Nothing. Just saves the plot and then shows it.
     """
+
+    sns.set(style="whitegrid")
+
+    print('')
+    print('')
+    print('THIS IS THE plot_barplot() FUNCTION:')
+
+    proportion_column = np.array(lang_class_prop_over_gen_df['proportion'])
+
+    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, 4))
+
+    proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
+
+    proportion_column_from_start_gen = proportion_column_from_start_gen.flatten()
+
+    runs_column_from_start_gen = []
+    for i in range(n_runs):
+        for j in range(gen_start, n_gens):
+            for k in range(4):
+                runs_column_from_start_gen.append(i)
+    runs_column_from_start_gen = np.array(runs_column_from_start_gen)
+
+    generation_column_from_start_gen = []
+    for i in range(n_runs):
+        for j in range(gen_start, n_gens):
+            for k in range(4):
+                generation_column_from_start_gen.append(j)
+    generation_column_from_start_gen = np.array(generation_column_from_start_gen)
+
+    class_column_from_start_gen = []
+    for i in range(n_runs):
+        for j in range(gen_start, n_gens):
+            class_column_from_start_gen.append('degenerate')
+            class_column_from_start_gen.append('holistic')
+            class_column_from_start_gen.append('other')
+            class_column_from_start_gen.append('compositional')
+
+
+    new_data_dict = {'run': runs_column_from_start_gen,
+            'generation': generation_column_from_start_gen,
+            'proportion': proportion_column_from_start_gen,
+            'class': class_column_from_start_gen,
+            }
+
+    lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
+    print('')
+    print('')
+    print("lang_class_prop_over_gen_df_from_starting_gen is:")
+    print(lang_class_prop_over_gen_df_from_starting_gen)
+
     palette = sns.color_palette(["black", "red", "grey", "green"])
 
-    sns.barplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
-    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
+    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
+
+    plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='0.6', linestyle='--', linewidth=2)
+    plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
+    plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
+    plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
 
     plt.ylim(-0.05, 1.05)
     plt.title(plot_title)
-    plt.xlabel('Generation')
-    plt.ylabel('')
-    plt.legend()
+    plt.xlabel('Language class')
+    plt.ylabel('Mean proportion')
     plt.grid()
-    plt.savefig(fig_file_title + ".pdf")
+    plt.savefig("Barplot_"+fig_file_title + ".pdf")
     plt.show()
 
 
@@ -1141,7 +1199,7 @@ generations = 50  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.5  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -1163,6 +1221,10 @@ observed_meaning = 'intended'  # determines which meaning the learner observes w
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'interpreted',
 # where the learner has access to the hearer's interpretation.
 
+gen_start = int(generations/2)
+
+
+
 
 if __name__ == '__main__':
 
@@ -1174,14 +1236,6 @@ if __name__ == '__main__':
         priors = np.ones(len(all_possible_languages))
         priors = np.divide(priors, np.sum(priors))
         priors = np.log(priors)
-    print('')
-    print('')
-    # print("priors is:")
-    # print(priors)
-    print("len(priors) is:")
-    print(len(priors))
-    print("np.exp(scipy.special.logsumexp(priors)) is:")
-    print(np.exp(scipy.special.logsumexp(priors)))
 
     initial_dataset = create_initial_dataset(initial_language_type, b)  # the data that the first generation learns from
 
@@ -1191,16 +1245,9 @@ if __name__ == '__main__':
         print('run '+str(i))
         results.append(simulation(generations, rounds, b, popsize, initial_dataset)[0])
 
-
     lang_class_prop_over_gen_df = results_to_dataframe(results, runs, generations)
-    print('')
-    print('')
-    print("lang_class_prop_over_gen_df is:")
-    print(lang_class_prop_over_gen_df)
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
-    print("timestr is:")
-    print(timestr)
 
     pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
@@ -1208,7 +1255,8 @@ if __name__ == '__main__':
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "Plot_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
+    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
+
     if mutual_understanding == False and minimal_effort == False:
         if gamma == 0 and turnover == True:
             plot_title = "Learnability only"
@@ -1225,7 +1273,17 @@ if __name__ == '__main__':
             plot_title = "Minimal Effort Only"
         elif mutual_understanding == True and minimal_effort == True:
             plot_title = "Mutual Understanding and Minimal Effort"
+
     plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title)
+
+
+    baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
+    print('')
+    print('')
+    print("baseline_proportions are:")
+    print(baseline_proportions)
+
+    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, baseline_proportions)
 
 
     t1 = time.clock()
