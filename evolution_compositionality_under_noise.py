@@ -437,7 +437,7 @@ def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
     prop_to_prob_correct_form_complete = ((1./ambiguity)**gamma)*(1.-error)*(1 - noise_prob)
     prop_to_prob_error_form_complete = error / (len(forms_without_noise) - 1)*(1 - noise_prob)
     prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** gamma) * (1. - error) * (noise_prob / len(noisy_forms))
-    prop_to_prob_error_form_noisy = error / (len(forms_without_noise) - 1) * (1 - noise_prob) * (noise_prob / len(noisy_forms))
+    prop_to_prob_error_form_noisy = error/(len(forms_without_noise)-1) * (1-noise_prob)*(noise_prob/len(noisy_forms))
     prop_to_prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
     for i in range(len(all_forms_including_noisy_variants)):
         if all_forms_including_noisy_variants[i] == correct_form:
@@ -496,7 +496,7 @@ def produce(language, topic, gamma, error, noise_switch):
 def produce_simlang(language, meaning):
     """
     This function is copied directly from lab 21 of the SimLang course of 2019. I only renamed and reformatted some of
-    the variables below, in order to make it work with my code (under the "# Added by me" comment).
+    the variables below, in order to make it work with my code (indicated with comments).
 
     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
     where each form is mapped to the meaning at the corresponding index
@@ -519,7 +519,8 @@ def produce_simlang(language, meaning):
         if m == meaning:
             signal = s
     if communication:
-        speaker_meaning = receive_without_repair(language, signal) # changed this to receive_without_repair() instead of receive()
+        speaker_meaning = receive_without_repair(language, signal)  # I changed this to receive_without_repair() instead
+                                                                    # of receive()
         if speaker_meaning != meaning:
             signal = random.choice(signals)
     if random.random() < noise:
@@ -627,6 +628,8 @@ def find_partial_meaning(language, noisy_form):
 
 
 
+#TODO: This has turned into a bit of a monster function. Maybe shorten it by pulling out the code that calculates the
+# probabilities for the different response options and putting that in a seperate function?
 def receive_with_repair(language, utterance):
     """
     Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
@@ -697,11 +700,13 @@ def receive_with_repair(language, utterance):
 
 def update_posterior(log_posterior, topic, utterance):
     """
-    Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability distribution accordingly
+    Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
+    distribution accordingly
 
     :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
     :param topic: a topic (string from the global variable meanings)
-    :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is True)
+    :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is
+    True)
     :return: the updated (and normalized) log_posterior (1D numpy array)
     """
     # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy
@@ -738,7 +743,8 @@ def normalize_logprobs_simlang(logprobs):
     logtotal = scipy.special.logsumexp(logprobs) #calculates the summed log probabilities
     normedlogs = []
     for logp in logprobs:
-        normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the normal domain
+        normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the
+                                            # normal domain
     return normedlogs
 
 
@@ -798,10 +804,12 @@ def update_posterior_simlang(posterior, meaning, signal):
 
 def new_population(popsize):
     """
-    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which is assumed to be defined as a global variable called 'priors')
+    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which
+    is assumed to be defined as a global variable called 'priors')
 
     :param popsize: the number of agents desired in the new population
-    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding LOG prior probabilities)
+    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding LOG prior
+    probabilities)
     on the columns.
     """
     population = [priors for x in range(popsize)]
@@ -812,7 +820,8 @@ def new_population(popsize):
 
 def log_roulette_wheel(normedlogs):
     """
-    Samples an index from a list of LOG probabilities, where each index has a probability proportional to their probability of being chosen
+    Samples an index from a list of LOG probabilities, where each index has a probability proportional to their
+    probability of being chosen
 
     :param normedlogs: a list of normalized LOG probabilities
     :return: an index somewhere between 0 and len(normedlogs)
@@ -868,8 +877,8 @@ def population_communication(population, rounds):
                 utterance = produce_simlang(speaker_language, topic)
             else:
                 utterance = produce(speaker_language, topic, gamma, error, noise)  # whenever a speaker is called upon
-            # to produce a utterance, they first sample a language from their posterior probability distribution. So each agent
-            # keeps updating their language according to the data they receive from their communication partner.
+            # to produce a utterance, they first sample a language from their posterior probability distribution. So
+            # each agent keeps updating their language according to the data received from their communication partner.
             listener_response = receive_with_repair(hearer_language, utterance)
             counter = 0
             while '?' in listener_response:
@@ -878,13 +887,14 @@ def population_communication(population, rounds):
                 if production == 'simlang':
                     utterance = produce_simlang(speaker_language, topic)
                 else:
-                    utterance = produce(speaker_language, topic, gamma, error, noise_switch=False)  # For now, we assume that the
-                                    # speaker's response to a repair initiator always comes through without noise.
+                    utterance = produce(speaker_language, topic, gamma, error, noise_switch=False)  # For now, we assume
+                                # that the speaker's response to a repair initiator always comes through without noise.
                 listener_response = receive_with_repair(hearer_language, utterance)
                 counter += 1
             if production == 'simlang':
                 population[hearer_index] = update_posterior_simlang(population[hearer_index], topic,
-                                                                    utterance)  # (Thus, in this simplified version of the model, agents are still able to "track changes in their partners' linguistic behaviour over time
+                                                                    utterance)  # (Thus, in this simplified version of
+                # the model, agents are still able to "track changes in their partners' linguistic behaviour over time
             else:
                 population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
 
@@ -892,11 +902,14 @@ def population_communication(population, rounds):
             if production == 'simlang':
                 utterance = produce_simlang(sample(population[speaker_index]), topic)
             else:
-                utterance = produce(sample(population[speaker_index]), topic, gamma, error)  # whenever a speaker is called upon
-            # to produce a utterance, they first sample a language from their posterior probability distribution. So each agent
-            # keeps updating their language according to the data they receive from their communication partner.
+                utterance = produce(sample(population[speaker_index]), topic, gamma, error)  # whenever a speaker is
+                # called upon to produce a utterance, they first sample a language from their posterior probability
+                # distribution. So each agent keeps updating their language according to the data they receive from
+                # their communication partner.
             if production == 'simlang':
-                population[hearer_index] = update_posterior_simlang(population[hearer_index], topic, utterance)  # (Thus, in this simplified version of the model, agents are still able to "track changes in their partners' linguistic behaviour over time
+                population[hearer_index] = update_posterior_simlang(population[hearer_index], topic, utterance) #(Thus,
+                # in this simplified version of the model, agents are still able to "track changes in their partners'
+                # linguistic behaviour over time
             else:
                 population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
 
@@ -908,11 +921,13 @@ def population_communication(population, rounds):
 
 def dataset_from_language(language):
     """
-    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly once, combined with its corresponding form.
+    Takes a language and generates a balanced minimal dataset from it, in which each possible meaning occurs exactly
+    once, combined with its corresponding form.
 
     :param language: a language (list of forms_without_noisy_variants that has same length as the global variable
     meanings, where each form is mapped to the meaning at the corresponding index)
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form)
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
+    the form)
     """
     meaning_form_pairs = []
     for i in range(len(language)):
@@ -927,7 +942,8 @@ def create_initial_dataset(desired_class, b):
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
     :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
-    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by the form) from a randomly chosen language of the desired class
+    :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
+    the form) from a randomly chosen language of the desired class
     """
     if desired_class == 'degenerate':
         class_index = 0
@@ -956,8 +972,10 @@ def language_stats(population):
     """
     Tracks how well each of the language classes is represented in the populations' posterior probability distributions
 
-    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability distribution
-    :return: a list containing the overall average posterior probability assigned to each class of language in the population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
+    :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
+    distribution
+    :return: a list containing the overall average posterior probability assigned to each class of language in the
+    population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
     (this ordering has to correspond to that defined in the classify_language() function!)
     """
     # stats = [0., 0., 0., 0.]  # degenerate, holistic, other, compositional
@@ -977,7 +995,8 @@ def language_stats(population):
 
 def simulation(generations, rounds, bottleneck, popsize, data):
     """
-    Runs the full simulation and returns the total amount of posterior probability that is assigned to each language class over generations (results) as well as the data that each generation produced (data)
+    Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
+    class over generations (results) as well as the data that each generation produced (data)
 
     :param generations: the desired number of generations (int)
     :param rounds: the desired number of communication rounds *within* each generation
@@ -1060,7 +1079,9 @@ def plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     """
     Takes a list of language stats over generations (results) and plots a timecourse graph
 
-    :param results: A list of language stats over generations, containing n_runs sublists which each contain n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional)
+    :param results: A list of language stats over generations, containing n_runs sublists which each contain
+    n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other,
+    and index 3 = compositional)
     :param plot_title: The title of the condition that should be on the plot (string)
     :param fig_file_title: The file name that the plot should be saved under
     :return: Nothing. Just saves the plot and then shows it.
@@ -1082,9 +1103,11 @@ def plot_graph(lang_class_prop_over_gen_df, plot_title, fig_file_title):
 
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al. used a bottleneck of 20 in the body of the paper.
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+        # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply a pair of agents.
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+            # a pair of agents.
 runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
@@ -1099,9 +1122,13 @@ noise_prob = 0.1  # the probability of environmental noise masking part of an ut
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 mutual_understanding = True
 if mutual_understanding:
-    gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
+    gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+    # conditions
 else:
-    gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for "Learnability Only" condition, and gamma = 2 for both "Expressivity Only" and "Learnability and Expressivity" conditions
+    gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+    # conditions
 minimal_effort = True
 cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
@@ -1148,7 +1175,7 @@ if __name__ == '__main__':
     pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
-    # to unpickle the data after it's been saved, simply run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
+    # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
     fig_file_title = "Plot_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
