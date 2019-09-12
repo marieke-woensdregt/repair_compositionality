@@ -892,11 +892,19 @@ def population_communication(population, rounds):
                 listener_response = receive_with_repair(hearer_language, utterance)
                 counter += 1
             if production == 'simlang':
-                population[hearer_index] = update_posterior_simlang(population[hearer_index], topic,
+                if observed_meaning == 'intended':
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], topic,
                                                                     utterance)  # (Thus, in this simplified version of
                 # the model, agents are still able to "track changes in their partners' linguistic behaviour over time
+                elif observed_meaning == 'inferred':
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], listener_response,
+                                                                        utterance)  # (Thus, in this simplified version of
+                    # the model, agents are still able to "track changes in their partners' linguistic behaviour over time
             else:
-                population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
+                if observed_meaning == 'intended':
+                    population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
+                elif observed_meaning == 'inferred':
+                    population[hearer_index] = update_posterior(population[hearer_index], listener_response, utterance)
 
         else:
             if production == 'simlang':
@@ -907,14 +915,32 @@ def population_communication(population, rounds):
                 # distribution. So each agent keeps updating their language according to the data they receive from
                 # their communication partner.
             if production == 'simlang':
-                population[hearer_index] = update_posterior_simlang(population[hearer_index], topic, utterance) #(Thus,
-                # in this simplified version of the model, agents are still able to "track changes in their partners'
-                # linguistic behaviour over time
+                if observed_meaning == 'intended':
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], topic, utterance) #(Thus,
+                    # in this simplified version of the model, agents are still able to "track changes in their partners'
+                    # linguistic behaviour over time
+                elif observed_meaning == 'inferred':
+                    hearer_language = sample(population[hearer_index])
+                    inferred_meaning = receive_without_repair(hearer_language, utterance)
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], inferred_meaning,
+                                                                        utterance)  # (Thus,
+                    # in this simplified version of the model, agents are still able to "track changes in their partners'
+                    # linguistic behaviour over time
             else:
-                population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
+                if observed_meaning == 'intended':
+                    population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
+                elif observed_meaning == 'inferred':
+                    hearer_language = sample(population[hearer_index])
+                    inferred_meaning = receive_without_repair(hearer_language, utterance)
+                    population[hearer_index] = update_posterior(population[hearer_index], inferred_meaning, utterance)
 
         # if speaker_index == random_parent_index:
-        data.append((topic, utterance))
+        if observed_meaning == 'intended':
+            data.append((topic, utterance))
+        elif observed_meaning == 'inferred':
+            if mutual_understanding:
+                inferred_meaning = listener_response
+            data.append((inferred_meaning, utterance))
     return data
 
 
@@ -1195,7 +1221,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 50  # the number of generations (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
@@ -1205,7 +1231,7 @@ noise_prob = 0.6  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = False
+mutual_understanding = True
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -1217,8 +1243,8 @@ else:
 minimal_effort = True
 cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
-observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
-# be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'interpreted',
+observed_meaning = 'inferred'  # determines which meaning the learner observes when receiving a meaning-form pair; can
+# be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
 
 gen_start = int(generations/2)
@@ -1249,13 +1275,13 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_"+timestr
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
+    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning
 
     if mutual_understanding == False and minimal_effort == False:
         if gamma == 0 and turnover == True:
