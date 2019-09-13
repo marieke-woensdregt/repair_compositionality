@@ -1366,7 +1366,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 minimal_effort = True
-cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
+cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -1407,6 +1407,7 @@ if __name__ == '__main__':
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
+
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
