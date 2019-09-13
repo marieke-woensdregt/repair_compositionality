@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages
+from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages, dataframe_to_results
 
 
 
