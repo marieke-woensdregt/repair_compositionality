@@ -59,7 +59,7 @@ if batches > 1:
 
         lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
-        results = dataframe_to_results(lang_class_prop_over_gen_df)
+        results = dataframe_to_results(lang_class_prop_over_gen_df, runs, generations)
 
         for j in range(len(results)):
             all_results.append(results[j])
