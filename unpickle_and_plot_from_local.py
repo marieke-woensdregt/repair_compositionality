@@ -18,9 +18,9 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -40,22 +40,31 @@ else:
     gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
-minimal_effort = True
+minimal_effort = False
 cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
+interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+# used, but NOTE that it only works with a popsize of 2!
+n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
+# previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
 gen_start = int(generations/2)
 
-batches = 3
+n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
+# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+# languages, and 5 if the new code was used which does make this distinction.
+
+
+batches = 1
 
 
 if batches > 1:
     all_results = []
     for i in range(batches):
-        pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_"+str(i)
+        pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+str(i)
 
         lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
@@ -78,44 +87,38 @@ if batches > 1:
     print("lang_class_prop_over_gen_df is:")
     print(lang_class_prop_over_gen_df)
 
-    fig_file_title = "r_" + str(runs*batches) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
-        rounds) + "_pop_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
-        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + str(cost_vector) + "_turnover_" + str(
-        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
-        noise) + "_noise_prob_" + str(noise_prob) + "_" + production + "_observed_m_" + observed_meaning
+    fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
+
 
 
 
 else:
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
     lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
-    fig_file_title = "r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
-        rounds) + "_pop_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
-        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + str(cost_vector) + "_turnover_" + str(
-        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
-        noise) + "_noise_prob_" + str(noise_prob) + "_" + production + "_observed_m_" + observed_meaning
+    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
 
-if mutual_understanding == False and minimal_effort == False:
-    if gamma == 0 and turnover == True:
+if mutual_understanding is False and minimal_effort is False:
+    if gamma == 0 and turnover is True:
         plot_title = "Learnability only"
-    elif gamma > 0 and turnover == False:
+    elif gamma > 0 and turnover is False:
         plot_title = "Expressivity only"
-    elif gamma > 0 and turnover == True:
+    elif gamma > 0 and turnover is True:
         plot_title = "Learnability and expressivity"
     if noise:
         plot_title = plot_title + " Plus Noise"
 else:
-    if mutual_understanding == True and minimal_effort == False:
+    if mutual_understanding is True and minimal_effort is False:
         plot_title = "Mutual Understanding Only"
-    elif mutual_understanding == False and minimal_effort == True:
+    elif mutual_understanding is False and minimal_effort is True:
         plot_title = "Minimal Effort Only"
-    elif mutual_understanding == True and minimal_effort == True:
+    elif mutual_understanding is True and minimal_effort is True:
         plot_title = "Mutual Understanding and Minimal Effort"
 
-plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title)
+
+plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
 
 
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
@@ -136,6 +139,6 @@ print('')
 print("baseline_proportions are:")
 print(baseline_proportions)
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs*batches, generations, gen_start,
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, n_lang_classes,
              baseline_proportions)
 
