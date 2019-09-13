@@ -77,7 +77,7 @@ print("lang_class_prop_over_gen_df is:")
 print(lang_class_prop_over_gen_df)
 
 
-fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
+fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
 
 if mutual_understanding == False and minimal_effort == False:
     if gamma == 0 and turnover == True:
@@ -117,6 +117,6 @@ print('')
 print("baseline_proportions are:")
 print(baseline_proportions)
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start,
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs*batches, generations, gen_start,
              baseline_proportions)
 
