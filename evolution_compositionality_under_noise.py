@@ -234,17 +234,17 @@ def transform_all_languages_to_simlang_format(language_list):
     return all_langs_as_in_simlang
 
 
-# all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
-# print('')
-# print('')
-# # print("all_langs_as_in_simlang is:")
-# # print(all_langs_as_in_simlang)
-# print("len(all_langs_as_in_simlang) is:")
-# print(len(all_langs_as_in_simlang))
-# print("len(all_langs_as_in_simlang[0]) is:")
-# print(len(all_langs_as_in_simlang[0]))
-# print("len(all_langs_as_in_simlang[0][0]) is:")
-# print(len(all_langs_as_in_simlang[0][0]))
+all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
+print('')
+print('')
+# print("all_langs_as_in_simlang is:")
+# print(all_langs_as_in_simlang)
+print("len(all_langs_as_in_simlang) is:")
+print(len(all_langs_as_in_simlang))
+print("len(all_langs_as_in_simlang[0]) is:")
+print(len(all_langs_as_in_simlang[0]))
+print("len(all_langs_as_in_simlang[0][0]) is:")
+print(len(all_langs_as_in_simlang[0][0]))
 
 
 def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
@@ -1345,8 +1345,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 50  # the number of generations (Kirby et al., 2015 used 100)
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
