@@ -55,7 +55,7 @@ batches = 3
 if batches > 1:
     all_results = []
     for i in range(batches):
-        pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" +str(popsize)+ "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_"+str(i)
+        pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_"+str(i)
 
         lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
@@ -78,19 +78,25 @@ if batches > 1:
     print("lang_class_prop_over_gen_df is:")
     print(lang_class_prop_over_gen_df)
 
+    fig_file_title = "r_" + str(runs*batches) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
+        rounds) + "_pop_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
+        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + str(cost_vector) + "_turnover_" + str(
+        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
+        noise) + "_noise_prob_" + str(noise_prob) + "_" + production + "_observed_m_" + observed_meaning
+
 
 
 else:
-    pickle_file_title = "Pickle_r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
-        rounds) + "_pop_size_" + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
-        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + str(cost_vector) + "_turnover_" + str(
-        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
-        noise) + "_noise_prob_" + str(noise_prob) + "_" + production
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning
 
     lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
+    fig_file_title = "r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
+        rounds) + "_pop_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
+        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + str(cost_vector) + "_turnover_" + str(
+        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
+        noise) + "_noise_prob_" + str(noise_prob) + "_" + production + "_observed_m_" + observed_meaning
 
-fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production
 
 if mutual_understanding == False and minimal_effort == False:
     if gamma == 0 and turnover == True:
