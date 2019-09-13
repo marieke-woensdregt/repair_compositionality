@@ -1107,7 +1107,13 @@ def results_to_dataframe(results, runs, generations):
 
 
 
+def dataframe_to_results(dataframe, n_runs, n_gens):
 
+    proportion_column = np.array(dataframe['proportion'])
+
+    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, 4))
+
+    return proportion_column_as_results
 
 def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
     """
@@ -1157,9 +1163,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
 
     sns.set_style("whitegrid")
 
-    proportion_column = np.array(lang_class_prop_over_gen_df['proportion'])
-
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, 4))
+    proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
@@ -1218,14 +1222,14 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 100  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.5  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -1241,7 +1245,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 minimal_effort = True
-cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
+cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
