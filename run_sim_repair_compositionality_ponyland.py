@@ -54,16 +54,19 @@ def classify_language(lang, forms, meanings):
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :type forms: list
     :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = other, 3 = compositional (here I'm following the
-    numbering used in SimLang lab 21)
+    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
+    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :rtype: int
     """
     # TODO: See if I can modify this function so that it can deal with any number of forms_without_noisy_variants and
     #  meanings.
     class_degenerate = 0
     class_holistic = 1
-    class_other = 2
+    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
+    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
     class_compositional = 3
+    class_other = 4
+
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(forms) != 4:
         raise ValueError(
@@ -88,7 +91,17 @@ def classify_language(lang, forms, meanings):
 
     # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
     elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[3] in lang:
-        return class_holistic
+        # within holistic languages, we can distinguish between those in which at least one part form is mapped
+        # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
+        # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
+        # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
+        # restricted request for repair instead of an open request.
+        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
+            return class_hybrid
+        elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
+            return class_hybrid
+        else:
+            return class_holistic
 
     # In all other cases, a language belongs to the 'other' category:
     else:
@@ -96,8 +109,6 @@ def classify_language(lang, forms, meanings):
 
 
 
-
-# Let's try out our create_all_possible_languages() function:
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
 
 
@@ -110,8 +121,9 @@ def classify_all_languages(language_list):
     :param language_list: list of all languages
     :type language_list: list
     :returns: 1D numpy array containing integer corresponding to category of corresponding
-    language index: 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional
-    (here I'm following the numbering used in SimLang lab 21)
+    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
+    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
+    from SimLang lab 21)
     :rtype: 1D numpy array
     """
     class_per_lang = np.zeros(len(language_list))
@@ -120,18 +132,14 @@ def classify_all_languages(language_list):
     return class_per_lang
 
 
-# Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
-# get with the SimLang lab 21:
-
-types_simlang = np.array(types_simlang)
 
 
 class_per_lang = classify_all_languages(all_possible_languages)
 
+no_of_each_class = np.bincount(class_per_lang.astype(int))
 
-# Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
-# create_all_languages() function, or in my classify_lang() function?
-# To find out, let's compare my list of all languages to that from SimLang lab 21:
+
+
 
 # First, we need to change the way we represent the list of all languages to match
 # that of lab 21:
@@ -697,20 +705,26 @@ def population_communication(population, rounds):
     :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
     """
     if n_parents == 'single':
+        if len(population) != 2 or interaction != 'taking_turns':
+            raise ValueError(
+                "OOPS! n_parents = 'single' only works if popsize = 2 and interaction = 'taking_turns'.")
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-        # if len(population) == 2:
-        #     if i % 2 == 0:
-        #         speaker_index = 0
-        #         hearer_index = 1
-        #     else:
-        #         speaker_index = 1
-        #         hearer_index = 0
-        # else:
-        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-        speaker_index = pair_indices[0]
-        hearer_index = pair_indices[1]
+        if interaction == 'taking_turns':
+            if len(population) != 2:
+                raise ValueError(
+                "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
+            if i % 2 == 0:
+                speaker_index = 0
+                hearer_index = 1
+            else:
+                speaker_index = 1
+                hearer_index = 0
+        else:
+            pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+            speaker_index = pair_indices[0]
+            hearer_index = pair_indices[1]
         topic = random.choice(meanings)
         if mutual_understanding:
             speaker_language = sample(population[speaker_index])
@@ -777,6 +791,7 @@ def population_communication(population, rounds):
                     population[hearer_index] = update_posterior(population[hearer_index], inferred_meaning, utterance)
 
         if n_parents == 'single':
+
             if speaker_index == random_parent_index:
                 if observed_meaning == 'intended':
                     data.append((topic, utterance))
@@ -817,7 +832,9 @@ def create_initial_dataset(desired_class, b):
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
-    :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
+    :param desired_class: 'degenerate', 'holistic', 'hybrid', 'compositional', or 'other'; category indices as hardcoded
+    in classify_language function are: 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm
+    following the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
     the form) from a randomly chosen language of the desired class
     """
@@ -825,10 +842,12 @@ def create_initial_dataset(desired_class, b):
         class_index = 0
     elif desired_class == 'holistic':
         class_index = 1
-    elif desired_class == 'other':
+    elif desired_class == 'hybrid':
         class_index = 2
     elif desired_class == 'compositional':
         class_index = 3
+    elif desired_class == 'other':
+        class_index = 4
     language_class_indices = np.where(class_per_lang == class_index)[0]
     class_languages = []
     for index in language_class_indices:
@@ -851,10 +870,11 @@ def language_stats(population):
     :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
     distribution
     :return: a list containing the overall average posterior probability assigned to each class of language in the
-    population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
-    (this ordering has to correspond to that defined in the classify_language() function!)
+    population, where index 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other; these are the
+    category indices as hardcoded in the classify_language() function (where I follow the ordering used in the Kirby
+    et al., 2015 paper; NOT the ordering from SimLang lab 21)
     """
-    stats = np.zeros(4)  # degenerate, holistic, other, compositional
+    stats = np.zeros(5)  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
     for p in population:
         for i in range(len(p)):
             # if proportion_measure == 'posterior':
@@ -886,11 +906,16 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
-                # if bottleneck != len(data):
-                #     raise ValueError(
-                #         "UH-OH! data should have the same size as the bottleneck b")
-                # meaning, signal = data[k]
-                meaning, signal = random.choice(data)
+                if interaction == 'taking_turns':
+                    if len(population) != 2:
+                        raise ValueError(
+                            "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
+                    if bottleneck != len(data):
+                        raise ValueError(
+                            "UH-OH! data should have the same size as the bottleneck b")
+                    meaning, signal = data[k]
+                else:
+                    meaning, signal = random.choice(data)
                 if production == 'simlang':
                     population[j] = update_posterior_simlang(population[j], meaning, signal)
                 else:
@@ -908,14 +933,14 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -936,11 +961,16 @@ compressibility_bias = False  # determines whether agents have a prior that favo
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
-n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
+interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+# used, but NOTE that it only works with a popsize of 2!
+n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
 gen_start = int(generations/2)
 
+n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
+# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+# languages, and 5 if the new code was used which does make this distinction.
 
 
 
@@ -962,9 +992,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_"+timestr
-
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
 
     pickle.dump(results, open(pickle_file_title+".p", "wb"))
 
