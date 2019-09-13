@@ -56,16 +56,19 @@ def classify_language(lang, forms, meanings):
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :type forms: list
     :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = other, 3 = compositional (here I'm following the
-    numbering used in SimLang lab 21)
+    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
+    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :rtype: int
     """
     # TODO: See if I can modify this function so that it can deal with any number of forms_without_noisy_variants and
     #  meanings.
     class_degenerate = 0
     class_holistic = 1
-    class_other = 2
+    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
+    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
     class_compositional = 3
+    class_other = 4
+
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(forms) != 4:
         raise ValueError(
@@ -90,7 +93,17 @@ def classify_language(lang, forms, meanings):
 
     # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
     elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[3] in lang:
-        return class_holistic
+        # within holistic languages, we can distinguish between those in which at least one part form is mapped
+        # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
+        # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
+        # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
+        # restricted request for repair instead of an open request.
+        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
+            return class_hybrid
+        elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
+            return class_hybrid
+        else:
+            return class_holistic
 
     # In all other cases, a language belongs to the 'other' category:
     else:
@@ -106,39 +119,51 @@ print(len(all_possible_languages))
 
 
 
-# # Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
-# degenerate_lang = ('aa', 'aa', 'aa', 'aa')
-# print('')
-# print("degenerate_lang is:")
-# print(degenerate_lang)
-# class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
-# print("class_degenerate_lang is:")
-# print(class_degenerate_lang)
-#
-# holistic_lang = ('aa', 'ab', 'bb', 'ba')
-# print('')
-# print("holistic_lang is:")
-# print(holistic_lang)
-# class_holistic_lang = classify_language(holistic_lang, forms_without_noise, meanings)
-# print("class_holistic_lang is:")
-# print(class_holistic_lang)
-#
-# other_lang = ('aa', 'aa', 'aa', 'ab')
-# print('')
-# print("other_lang is:")
-# print(other_lang)
-# class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
-# print("class_other_lang is:")
-# print(class_other_lang)
-#
-# compositional_lang = ('aa', 'ab', 'ba', 'bb')
-# print('')
-# print("compositional_lang is:")
-# print(compositional_lang)
-# class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
-#                                              meanings)
-# print("class_compositional_lang is:")
-# print(class_compositional_lang)
+# Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
+degenerate_lang = ('aa', 'aa', 'aa', 'aa')
+print('')
+print("degenerate_lang is:")
+print(degenerate_lang)
+class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
+print("class_degenerate_lang is:")
+print(class_degenerate_lang)
+
+
+holistic_lang_fully_holistic = ('aa', 'ba', 'ab', 'bb')
+print('')
+print("holistic_lang_fully_holistic is:")
+print(holistic_lang_fully_holistic)
+class_holistic_lang_fully_holistic = classify_language(holistic_lang_fully_holistic, forms_without_noise, meanings)
+print("class_holistic_lang_fully_holistic is:")
+print(class_holistic_lang_fully_holistic)
+
+
+holistic_lang_hybrid = ('aa', 'ab', 'bb', 'ba')
+print('')
+print("holistic_lang_hybrid is:")
+print(holistic_lang_hybrid)
+class_holistic_lang_hybrid = classify_language(holistic_lang_hybrid, forms_without_noise, meanings)
+print("class_holistic_lang_hybrid is:")
+print(class_holistic_lang_hybrid)
+
+
+compositional_lang = ('aa', 'ab', 'ba', 'bb')
+print('')
+print("compositional_lang is:")
+print(compositional_lang)
+class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
+                                             meanings)
+print("class_compositional_lang is:")
+print(class_compositional_lang)
+
+
+other_lang = ('aa', 'aa', 'aa', 'ab')
+print('')
+print("other_lang is:")
+print(other_lang)
+class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
+print("class_other_lang is:")
+print(class_other_lang)
 
 
 def classify_all_languages(language_list):
@@ -149,8 +174,9 @@ def classify_all_languages(language_list):
     :param language_list: list of all languages
     :type language_list: list
     :returns: 1D numpy array containing integer corresponding to category of corresponding
-    language index: 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional
-    (here I'm following the numbering used in SimLang lab 21)
+    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
+    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
+    from SimLang lab 21)
     :rtype: 1D numpy array
     """
     class_per_lang = np.zeros(len(language_list))
@@ -165,7 +191,7 @@ def classify_all_languages(language_list):
 types_simlang = np.array(types_simlang)
 no_of_each_type = np.bincount(types_simlang)
 print('')
-print("no_of_each_type ACCORDING TO SIMLANG CODE is:")
+print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
 print(no_of_each_type)
 
 class_per_lang = classify_all_languages(all_possible_languages)
@@ -175,7 +201,8 @@ print('')
 # print(class_per_lang)
 no_of_each_class = np.bincount(class_per_lang.astype(int))
 print('')
-print("no_of_each_class ACCORDING TO MY CODE is:")
+print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+      "4 = other is:")
 print(no_of_each_class)
 
 
@@ -269,46 +296,65 @@ print(np.exp(scipy.special.logsumexp(new_log_prior)))
 # compositional languages. So let's first have a look at which languages it classifies as compositional:
 
 
-# compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
-# print('')
-# print('')
-# print("compositional_langs_indices_my_code MY CODE are:")
-# print(compositional_langs_indices_my_code)
-# print("len(compositional_langs_indices_my_code) MY CODE are:")
-# print(len(compositional_langs_indices_my_code))
-#
-#
-# for index in compositional_langs_indices_my_code:
-#     print('')
-#     print("index MY CODE is:")
-#     print(index)
-#     print("all_possible_languages[index] MY CODE is:")
-#     print(all_possible_languages[index])
-#
-#
-# # And now let's do the same for the languages from SimLang Lab 21:
-#
-# compositional_langs_indices_simlang = np.where(np.array(types)==3)[0]
-# print('')
-# print('')
-# print("compositional_langs_indices_simlang SIMLANG CODE are:")
-# print(compositional_langs_indices_simlang)
-# print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
-# print(len(compositional_langs_indices_simlang))
-#
-#
-# for index in compositional_langs_indices_simlang:
-#     print('')
-#     print("index SIMLANG CODE is:")
-#     print(index)
-#     print("languages[index] SIMLANG CODE is:")
-#     print(languages[index])
+compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
+print('')
+print('')
+print("compositional_langs_indices_my_code MY CODE are:")
+print(compositional_langs_indices_my_code)
+print("len(compositional_langs_indices_my_code) MY CODE are:")
+print(len(compositional_langs_indices_my_code))
+
+
+for index in compositional_langs_indices_my_code:
+    print('')
+    print("index MY CODE is:")
+    print(index)
+    print("all_possible_languages[index] MY CODE is:")
+    print(all_possible_languages[index])
+
+
+# And now let's do the same for the languages from SimLang Lab 21:
+
+compositional_langs_indices_simlang = np.where(np.array(types_simlang)==3)[0]
+print('')
+print('')
+print("compositional_langs_indices_simlang SIMLANG CODE are:")
+print(compositional_langs_indices_simlang)
+print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
+print(len(compositional_langs_indices_simlang))
+
+
+
+for index in compositional_langs_indices_simlang:
+    print('')
+    print("index SIMLANG CODE is:")
+    print(index)
+    print("languages_simlang[index] SIMLANG CODE is:")
+    print(languages_simlang[index])
 
 
 # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
 # code (or rather, in the code that generated the list of types that was copied into SimLang lab 21)
+# Let's check whether maybe the holistic languages that are miscategorised as compositional in the SimLang code happen
+# to be the ones we identified as "hybrids" (i.e. kind of in between holistic and compositional) above:
 
 
+
+hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
+print('')
+print('')
+print("hybrid_langs_indices_my_code MY CODE are:")
+print(hybrid_langs_indices_my_code)
+print("len(hybrid_langs_indices_my_code) MY CODE are:")
+print(len(hybrid_langs_indices_my_code))
+
+
+for index in hybrid_langs_indices_my_code:
+    print('')
+    print("index MY CODE is:")
+    print(index)
+    print("all_possible_languages[index] MY CODE is:")
+    print(all_possible_languages[index])
 
 
 
@@ -1236,7 +1282,7 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -1247,7 +1293,7 @@ noise_prob = 0.5  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = False
+mutual_understanding = True
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
