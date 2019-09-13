@@ -1261,7 +1261,7 @@ observed_meaning = 'intended'  # determines which meaning the learner observes w
 # where the learner has access to the hearer's interpretation.
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
-n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
+n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
 gen_start = int(generations/2)
