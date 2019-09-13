@@ -891,6 +891,12 @@ def sample(log_posterior):
     return all_possible_languages[log_roulette_wheel(log_posterior)]
 
 
+
+
+# TODO: population_communication() has become a bit of a monster function; see if I can take some parts out to be
+#  separate functions (e.g. for the different possible settings of the mutual_understanding and minimal_effort
+#  parameters. Also, there has to be a way to not have exactly the same lines of code for doing the communicative
+#  success pressure stuff in there twice (should probably be a separate function)!
 def population_communication(population, rounds):
     """
     Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
@@ -907,6 +913,7 @@ def population_communication(population, rounds):
                 "OOPS! n_parents = 'single' only works if popsize = 2 and interaction = 'taking_turns'.")
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
+    data_for_just_in_case = []
     for i in range(rounds):
         if interaction == 'taking_turns':
             if len(population) != 2:
@@ -991,18 +998,84 @@ def population_communication(population, rounds):
 
             if speaker_index == random_parent_index:
                 if observed_meaning == 'intended':
-                    data.append((topic, utterance))
+
+                    meaning_observed = topic
+
                 elif observed_meaning == 'inferred':
                     if mutual_understanding:
-                        inferred_meaning = listener_response
-                    data.append((inferred_meaning, utterance))
-        else:
+                        meaning_observed = listener_response
+                    else:
+                        meaning_observed = inferred_meaning
+
+                if communicative_success_pressure == True:
+                    inferred_meaning = listener_response
+                    success = False
+                    if inferred_meaning == topic:
+                        success = True
+                    random_float = np.random.uniform()
+                    if random_float < communicative_success_pressure_strength:  # if our random_float falls within
+                        # the range of our communicative_success_pressure_strength parameter, the <meaning, form>
+                        # pair is added to the dataset only if the interaction was successful
+                        if success:
+                            data.append((meaning_observed, utterance))
+                    else:  # if our random_float falls above the range of our
+                        # communicative_success_pressure_strength parameter, the <meaning, form>
+                        # pair is added to the dataset no matter whether the interaction was successful or not
+                        data.append((meaning_observed, utterance))
+                elif communicative_success_pressure == False:
+                    data.append((meaning_observed, utterance))
+
+                data_for_just_in_case.append((meaning_observed, utterance))  # this is being recorded just in case the
+                # dataset otherwise ends up being empty, as a result of the pressure for communicative success being
+                # too strong.
+
+
+        elif n_parents == 'multiple':
             if observed_meaning == 'intended':
-                data.append((topic, utterance))
+
+                meaning_observed = topic
+
             elif observed_meaning == 'inferred':
                 if mutual_understanding:
-                    inferred_meaning = listener_response
-                data.append((inferred_meaning, utterance))
+                    meaning_observed = listener_response
+                else:
+                    meaning_observed = inferred_meaning
+
+            if communicative_success_pressure == True:
+                inferred_meaning = listener_response
+                success = False
+                if inferred_meaning == topic:
+                    success = True
+                random_float = np.random.uniform()
+                if random_float < communicative_success_pressure_strength:  # if our random_float falls within
+                    # the range of our communicative_success_pressure_strength parameter, the <meaning, form>
+                    # pair is added to the dataset only if the interaction was successful
+                    if success:
+                        data.append((meaning_observed, utterance))
+                else:  # if our random_float falls above the range of our
+                    # communicative_success_pressure_strength parameter, the <meaning, form>
+                    # pair is added to the dataset no matter whether the interaction was successful or not
+                    data.append((meaning_observed, utterance))
+            elif communicative_success_pressure == False:
+                data.append((meaning_observed, utterance))
+
+            data_for_just_in_case.append((meaning_observed, utterance))  # this is being recorded just in case the
+                # dataset otherwise ends up being empty, as a result of the pressure for communicative success being
+                # too strong.
+
+    if len(data) == 0:  # In case the data set is empty (which might happen if the pressure for communicative success
+        # is too strong; especially if the "n_parents" parameter has been set to 'single'), we just use all the
+        # <meaning, form> pairs from all the interactions as the data set, no matter whether they were successful or
+        # not.
+        data = data_for_just_in_case
+
+
+    print('')
+    print('')
+    print("len(data) is:")
+    print(len(data))
+
+
     return data
 
 
@@ -1345,12 +1418,12 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 5  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -1371,10 +1444,15 @@ compressibility_bias = False  # determines whether agents have a prior that favo
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
-interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+interaction = 'random'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
-n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
+n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
+communicative_success_pressure = True  # determines whether there is a pressure for communicative success or not
+communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
+# successful interaction is to enter the data set that is passed on to the next generation, compared to a
+# <meaning, form> pair from a unsuccessful interaction.
+
 
 gen_start = int(generations/2)
 
