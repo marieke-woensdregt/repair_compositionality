@@ -856,6 +856,9 @@ def population_communication(population, rounds):
     :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
     """
     if n_parents == 'single':
+        if len(population) != 2 or interaction != 'taking_turns':
+            raise ValueError(
+                "OOPS! n_parents = 'single' only works if popsize = 2 and interaction = 'taking_turns'.")
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
