@@ -859,17 +859,20 @@ def population_communication(population, rounds):
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     for i in range(rounds):
-        # if len(population) == 2:
-        #     if i % 2 == 0:
-        #         speaker_index = 0
-        #         hearer_index = 1
-        #     else:
-        #         speaker_index = 1
-        #         hearer_index = 0
-        # else:
-        pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
-        speaker_index = pair_indices[0]
-        hearer_index = pair_indices[1]
+        if interaction == 'taking_turns':
+            if len(population) != 2:
+                raise ValueError(
+                "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
+            if i % 2 == 0:
+                speaker_index = 0
+                hearer_index = 1
+            else:
+                speaker_index = 1
+                hearer_index = 0
+        else:
+            pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
+            speaker_index = pair_indices[0]
+            hearer_index = pair_indices[1]
         topic = random.choice(meanings)
         if mutual_understanding:
             speaker_language = sample(population[speaker_index])
@@ -936,6 +939,7 @@ def population_communication(population, rounds):
                     population[hearer_index] = update_posterior(population[hearer_index], inferred_meaning, utterance)
 
         if n_parents == 'single':
+
             if speaker_index == random_parent_index:
                 if observed_meaning == 'intended':
                     data.append((topic, utterance))
@@ -1045,11 +1049,16 @@ def simulation(generations, rounds, bottleneck, popsize, data):
     for i in range(generations):
         for j in range(popsize):
             for k in range(bottleneck):
-                # if bottleneck != len(data):
-                #     raise ValueError(
-                #         "UH-OH! data should have the same size as the bottleneck b")
-                # meaning, signal = data[k]
-                meaning, signal = random.choice(data)
+                if interaction == 'taking_turns':
+                    if len(population) != 2:
+                        raise ValueError(
+                            "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
+                    if bottleneck != len(data):
+                        raise ValueError(
+                            "UH-OH! data should have the same size as the bottleneck b")
+                    meaning, signal = data[k]
+                else:
+                    meaning, signal = random.choice(data)
                 if production == 'simlang':
                     population[j] = update_posterior_simlang(population[j], meaning, signal)
                 else:
@@ -1222,9 +1231,9 @@ turnover = True  # determines whether new individuals enter the population or no
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
-popsize = 10  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -1235,7 +1244,7 @@ noise_prob = 0.5  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -1250,6 +1259,8 @@ compressibility_bias = False  # determines whether agents have a prior that favo
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
+interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+# used, but NOTE that it only works with a popsize of 2!
 n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
@@ -1289,21 +1300,21 @@ if __name__ == '__main__':
 
     fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning
 
-    if mutual_understanding == False and minimal_effort == False:
-        if gamma == 0 and turnover == True:
+    if mutual_understanding is False and minimal_effort is False:
+        if gamma == 0 and turnover is True:
             plot_title = "Learnability only"
-        elif gamma > 0 and turnover == False:
+        elif gamma > 0 and turnover is False:
             plot_title = "Expressivity only"
-        elif gamma > 0 and turnover == True:
+        elif gamma > 0 and turnover is True:
             plot_title = "Learnability and expressivity"
         if noise:
             plot_title = plot_title+" Plus Noise"
     else:
-        if mutual_understanding == True and minimal_effort == False:
+        if mutual_understanding is True and minimal_effort is False:
             plot_title = "Mutual Understanding Only"
-        elif mutual_understanding == False and minimal_effort == True:
+        elif mutual_understanding is False and minimal_effort is True:
             plot_title = "Minimal Effort Only"
-        elif mutual_understanding == True and minimal_effort == True:
+        elif mutual_understanding is True and minimal_effort is True:
             plot_title = "Mutual Understanding and Minimal Effort"
 
     plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title)
