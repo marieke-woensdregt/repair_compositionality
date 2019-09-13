@@ -118,52 +118,52 @@ print("number of possible languages is:")
 print(len(all_possible_languages))
 
 
-
-# Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
-degenerate_lang = ('aa', 'aa', 'aa', 'aa')
-print('')
-print("degenerate_lang is:")
-print(degenerate_lang)
-class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
-print("class_degenerate_lang is:")
-print(class_degenerate_lang)
-
-
-holistic_lang_fully_holistic = ('aa', 'ba', 'ab', 'bb')
-print('')
-print("holistic_lang_fully_holistic is:")
-print(holistic_lang_fully_holistic)
-class_holistic_lang_fully_holistic = classify_language(holistic_lang_fully_holistic, forms_without_noise, meanings)
-print("class_holistic_lang_fully_holistic is:")
-print(class_holistic_lang_fully_holistic)
-
-
-holistic_lang_hybrid = ('aa', 'ab', 'bb', 'ba')
-print('')
-print("holistic_lang_hybrid is:")
-print(holistic_lang_hybrid)
-class_holistic_lang_hybrid = classify_language(holistic_lang_hybrid, forms_without_noise, meanings)
-print("class_holistic_lang_hybrid is:")
-print(class_holistic_lang_hybrid)
-
-
-compositional_lang = ('aa', 'ab', 'ba', 'bb')
-print('')
-print("compositional_lang is:")
-print(compositional_lang)
-class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
-                                             meanings)
-print("class_compositional_lang is:")
-print(class_compositional_lang)
-
-
-other_lang = ('aa', 'aa', 'aa', 'ab')
-print('')
-print("other_lang is:")
-print(other_lang)
-class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
-print("class_other_lang is:")
-print(class_other_lang)
+#
+# # Let's test our classify_language() function using some example languages from the Kirby et al. (2015) paper:
+# degenerate_lang = ('aa', 'aa', 'aa', 'aa')
+# print('')
+# print("degenerate_lang is:")
+# print(degenerate_lang)
+# class_degenerate_lang = classify_language(degenerate_lang, forms_without_noise, meanings)
+# print("class_degenerate_lang is:")
+# print(class_degenerate_lang)
+#
+#
+# holistic_lang_fully_holistic = ('aa', 'ba', 'ab', 'bb')
+# print('')
+# print("holistic_lang_fully_holistic is:")
+# print(holistic_lang_fully_holistic)
+# class_holistic_lang_fully_holistic = classify_language(holistic_lang_fully_holistic, forms_without_noise, meanings)
+# print("class_holistic_lang_fully_holistic is:")
+# print(class_holistic_lang_fully_holistic)
+#
+#
+# holistic_lang_hybrid = ('aa', 'ab', 'bb', 'ba')
+# print('')
+# print("holistic_lang_hybrid is:")
+# print(holistic_lang_hybrid)
+# class_holistic_lang_hybrid = classify_language(holistic_lang_hybrid, forms_without_noise, meanings)
+# print("class_holistic_lang_hybrid is:")
+# print(class_holistic_lang_hybrid)
+#
+#
+# compositional_lang = ('aa', 'ab', 'ba', 'bb')
+# print('')
+# print("compositional_lang is:")
+# print(compositional_lang)
+# class_compositional_lang = classify_language(compositional_lang, forms_without_noise,
+#                                              meanings)
+# print("class_compositional_lang is:")
+# print(class_compositional_lang)
+#
+#
+# other_lang = ('aa', 'aa', 'aa', 'ab')
+# print('')
+# print("other_lang is:")
+# print(other_lang)
+# class_other_lang = classify_language(other_lang, forms_without_noise, meanings)
+# print("class_other_lang is:")
+# print(class_other_lang)
 
 
 def classify_all_languages(language_list):
@@ -188,11 +188,11 @@ def classify_all_languages(language_list):
 # Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
 # get with the SimLang lab 21:
 
-types_simlang = np.array(types_simlang)
-no_of_each_type = np.bincount(types_simlang)
-print('')
-print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
-print(no_of_each_type)
+# types_simlang = np.array(types_simlang)
+# no_of_each_type = np.bincount(types_simlang)
+# print('')
+# print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
+# print(no_of_each_type)
 
 class_per_lang = classify_all_languages(all_possible_languages)
 print('')
@@ -234,17 +234,17 @@ def transform_all_languages_to_simlang_format(language_list):
     return all_langs_as_in_simlang
 
 
-all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
-print('')
-print('')
-# print("all_langs_as_in_simlang is:")
-# print(all_langs_as_in_simlang)
-print("len(all_langs_as_in_simlang) is:")
-print(len(all_langs_as_in_simlang))
-print("len(all_langs_as_in_simlang[0]) is:")
-print(len(all_langs_as_in_simlang[0]))
-print("len(all_langs_as_in_simlang[0][0]) is:")
-print(len(all_langs_as_in_simlang[0][0]))
+# all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
+# print('')
+# print('')
+# # print("all_langs_as_in_simlang is:")
+# # print(all_langs_as_in_simlang)
+# print("len(all_langs_as_in_simlang) is:")
+# print(len(all_langs_as_in_simlang))
+# print("len(all_langs_as_in_simlang[0]) is:")
+# print(len(all_langs_as_in_simlang[0]))
+# print("len(all_langs_as_in_simlang[0][0]) is:")
+# print(len(all_langs_as_in_simlang[0][0]))
 
 
 def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
@@ -295,42 +295,42 @@ print(np.exp(scipy.special.logsumexp(new_log_prior)))
 # categorise the languages. Firstly, it looks like my classify_language() function underestimates the number of
 # compositional languages. So let's first have a look at which languages it classifies as compositional:
 
-
-compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
-print('')
-print('')
-print("compositional_langs_indices_my_code MY CODE are:")
-print(compositional_langs_indices_my_code)
-print("len(compositional_langs_indices_my_code) MY CODE are:")
-print(len(compositional_langs_indices_my_code))
-
-
-for index in compositional_langs_indices_my_code:
-    print('')
-    print("index MY CODE is:")
-    print(index)
-    print("all_possible_languages[index] MY CODE is:")
-    print(all_possible_languages[index])
-
-
-# And now let's do the same for the languages from SimLang Lab 21:
-
-compositional_langs_indices_simlang = np.where(np.array(types_simlang)==3)[0]
-print('')
-print('')
-print("compositional_langs_indices_simlang SIMLANG CODE are:")
-print(compositional_langs_indices_simlang)
-print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
-print(len(compositional_langs_indices_simlang))
-
-
-
-for index in compositional_langs_indices_simlang:
-    print('')
-    print("index SIMLANG CODE is:")
-    print(index)
-    print("languages_simlang[index] SIMLANG CODE is:")
-    print(languages_simlang[index])
+#
+# compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
+# print('')
+# print('')
+# print("compositional_langs_indices_my_code MY CODE are:")
+# print(compositional_langs_indices_my_code)
+# print("len(compositional_langs_indices_my_code) MY CODE are:")
+# print(len(compositional_langs_indices_my_code))
+#
+#
+# for index in compositional_langs_indices_my_code:
+#     print('')
+#     print("index MY CODE is:")
+#     print(index)
+#     print("all_possible_languages[index] MY CODE is:")
+#     print(all_possible_languages[index])
+#
+#
+# # And now let's do the same for the languages from SimLang Lab 21:
+#
+# compositional_langs_indices_simlang = np.where(np.array(types_simlang)==3)[0]
+# print('')
+# print('')
+# print("compositional_langs_indices_simlang SIMLANG CODE are:")
+# print(compositional_langs_indices_simlang)
+# print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
+# print(len(compositional_langs_indices_simlang))
+#
+#
+#
+# for index in compositional_langs_indices_simlang:
+#     print('')
+#     print("index SIMLANG CODE is:")
+#     print(index)
+#     print("languages_simlang[index] SIMLANG CODE is:")
+#     print(languages_simlang[index])
 
 
 # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
@@ -340,21 +340,21 @@ for index in compositional_langs_indices_simlang:
 
 
 
-hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
-print('')
-print('')
-print("hybrid_langs_indices_my_code MY CODE are:")
-print(hybrid_langs_indices_my_code)
-print("len(hybrid_langs_indices_my_code) MY CODE are:")
-print(len(hybrid_langs_indices_my_code))
-
-
-for index in hybrid_langs_indices_my_code:
-    print('')
-    print("index MY CODE is:")
-    print(index)
-    print("all_possible_languages[index] MY CODE is:")
-    print(all_possible_languages[index])
+# hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
+# print('')
+# print('')
+# print("hybrid_langs_indices_my_code MY CODE are:")
+# print(hybrid_langs_indices_my_code)
+# print("len(hybrid_langs_indices_my_code) MY CODE are:")
+# print(len(hybrid_langs_indices_my_code))
+#
+#
+# for index in hybrid_langs_indices_my_code:
+#     print('')
+#     print("index MY CODE is:")
+#     print(index)
+#     print("all_possible_languages[index] MY CODE is:")
+#     print(all_possible_languages[index])
 
 
 
@@ -1029,7 +1029,9 @@ def create_initial_dataset(desired_class, b):
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
-    :param desired_class: 'degenerate', 'holistic', 'other', or 'compositional'
+    :param desired_class: 'degenerate', 'holistic', 'hybrid', 'compositional', or 'other'; category indices as hardcoded
+    in classify_language function are: 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm
+    following the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
     the form) from a randomly chosen language of the desired class
     """
@@ -1037,10 +1039,12 @@ def create_initial_dataset(desired_class, b):
         class_index = 0
     elif desired_class == 'holistic':
         class_index = 1
-    elif desired_class == 'other':
+    elif desired_class == 'hybrid':
         class_index = 2
     elif desired_class == 'compositional':
         class_index = 3
+    elif desired_class == 'other':
+        class_index = 4
     language_class_indices = np.where(class_per_lang == class_index)[0]
     class_languages = []
     for index in language_class_indices:
@@ -1063,10 +1067,11 @@ def language_stats(population):
     :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
     distribution
     :return: a list containing the overall average posterior probability assigned to each class of language in the
-    population, where index 0 = degenerate, index 1 = holistic, index 2 = other, and index 3 = compositional
-    (this ordering has to correspond to that defined in the classify_language() function!)
+    population, where index 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other; these are the
+    category indices as hardcoded in the classify_language() function (where I follow the ordering used in the Kirby
+    et al., 2015 paper; NOT the ordering from SimLang lab 21)
     """
-    stats = np.zeros(4)  # degenerate, holistic, other, compositional
+    stats = np.zeros(5)  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
     for p in population:
         for i in range(len(p)):
             # if proportion_measure == 'posterior':
@@ -1120,12 +1125,17 @@ def simulation(generations, rounds, bottleneck, popsize, data):
 
 
 
-def results_to_dataframe(results, runs, generations):
+def results_to_dataframe(results, runs, generations, n_lang_classes):
     """
     Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
     and language class)
 
-    :param results: a list containing proportions for each of the 4 language classes, for each generation, for each run
+    :param results: a list containing proportions for each of the 5 language classes, for each generation, for each run
+    :param runs: the number of runs (int)
+    :param generations: the number of generations (int)
+    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+    languages, and 5 if the new code was used which does make this distinction.
     :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
     column_proportion = np.array(results)
@@ -1134,24 +1144,32 @@ def results_to_dataframe(results, runs, generations):
     column_runs = []
     for i in range(runs):
         for j in range(generations):
-            for k in range(4):
+            for k in range(n_lang_classes):
                 column_runs.append(i)
     column_runs = np.array(column_runs)
 
     column_generation = []
     for i in range(runs):
         for j in range(generations):
-            for k in range(4):
+            for k in range(n_lang_classes):
                 column_generation.append(j)
     column_generation = np.array(column_generation)
 
     column_type = []
     for i in range(runs):
         for j in range(generations):
-            column_type.append('degenerate')
-            column_type.append('holistic')
-            column_type.append('other')
-            column_type.append('compositional')
+            if n_lang_classes == 4:
+                column_type.append('degenerate')
+                column_type.append('holistic')
+                column_type.append('other')
+                column_type.append('compositional')
+            elif n_lang_classes == 5:
+                column_type.append('degenerate')
+                column_type.append('holistic')
+                column_type.append('hybrid')
+                column_type.append('compositional')
+                column_type.append('other')
+
 
     data = {'run': column_runs,
             'generation': column_generation,
@@ -1165,28 +1183,52 @@ def results_to_dataframe(results, runs, generations):
 
 
 
-def dataframe_to_results(dataframe, n_runs, n_gens):
+def dataframe_to_results(dataframe, n_runs, n_gens, n_lang_classes):
+    """
+    Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
+    populations' posterior probability distributions over generations.
+
+    :param dataframe: a pandas dataframe which contains at least a column named "proportions", which contains the
+    proportions of the different language classes over generations over runs.
+    :param n_runs: number of runs (int)
+    :param n_gens: number of generations (int)
+    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+    languages, and 5 if the new code was used which does make this distinction.
+    :return: a numpy array containing the proportions of the different language classes for each generation for each run
+    """
 
     proportion_column = np.array(dataframe['proportion'])
 
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, 4))
+    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_lang_classes))
 
     return proportion_column_as_results
 
-def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
+
+
+def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes):
     """
     Takes a list of language stats over generations (results) and plots a timecourse graph
 
     :param results: A list of language stats over generations, containing n_runs sublists which each contain
-    n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other,
-    and index 3 = compositional)
+    n_generations, which each contain 4 or 5 numbers (depending on whether the old code was used (from before 13
+    September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new
+    code was used which does make this distinction. In the new code, index 0 = degenerate, 1 = holistic, 2 = hybrid,
+    3 = compositional, 4 = other; these are the category indices as hardcoded in the classify_language() function
+    (where I follow the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :param plot_title: The title of the condition that should be on the plot (string)
     :param fig_file_title: The file name that the plot should be saved under
+    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+    languages, and 5 if the new code was used which does make this distinction.
     :return: Nothing. Just saves the plot and then shows it.
     """
     sns.set_style("whitegrid")
 
-    palette = sns.color_palette(["black", "red", "grey", "green"])
+    if n_lang_classes == 4:
+        palette = sns.color_palette(["black", "red", "grey", "green"])
+    elif n_lang_classes == 5:
+        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
     # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
@@ -1202,7 +1244,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title):
 
 
 
-def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs, n_gens, gen_start, baselines):
+def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs, n_gens, gen_start, n_lang_classes, baselines):
     """
     Takes a list of language stats over generations (results) and creates a bar plot showing the proportions of each
     of the language classes, from generation 'gen_start' to generation 'gen_stop'
@@ -1214,14 +1256,17 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     :param fig_file_title: The file name that the plot should be saved under
     :param gen_start: The generation from which the plot should start taking the mean (should be after the population
     has reached convergence)
-    :param baselines: The baseline proportion for each language class, where 0 = degenerate, 1 = holistic, 2 = other,
-    3 = compositional
+    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+    languages, and 5 if the new code was used which does make this distinction.
+    :param baselines: The baseline proportion for each language class, where the ordering depends on the code that was
+    used, as described above.
     :return: Nothing. Just saves the plot and then shows it.
     """
 
     sns.set_style("whitegrid")
 
-    proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens)
+    proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
@@ -1230,24 +1275,31 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     runs_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            for k in range(4):
+            for k in range(n_lang_classes):
                 runs_column_from_start_gen.append(i)
     runs_column_from_start_gen = np.array(runs_column_from_start_gen)
 
     generation_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            for k in range(4):
+            for k in range(n_lang_classes):
                 generation_column_from_start_gen.append(j)
     generation_column_from_start_gen = np.array(generation_column_from_start_gen)
 
     class_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            class_column_from_start_gen.append('degenerate')
-            class_column_from_start_gen.append('holistic')
-            class_column_from_start_gen.append('other')
-            class_column_from_start_gen.append('compositional')
+            if n_lang_classes == 4:
+                class_column_from_start_gen.append('degenerate')
+                class_column_from_start_gen.append('holistic')
+                class_column_from_start_gen.append('other')
+                class_column_from_start_gen.append('compositional')
+            elif n_lang_classes == 5:
+                class_column_from_start_gen.append('degenerate')
+                class_column_from_start_gen.append('holistic')
+                class_column_from_start_gen.append('hybrid')
+                class_column_from_start_gen.append('compositional')
+                class_column_from_start_gen.append('other')
 
 
     new_data_dict = {'run': runs_column_from_start_gen,
@@ -1258,14 +1310,25 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
 
-    palette = sns.color_palette(["black", "red", "grey", "green"])
+    if n_lang_classes == 4:
+        palette = sns.color_palette(["black", "red", "grey", "green"])
+    elif n_lang_classes == 5:
+        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
     sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
 
-    plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='0.6', linestyle='--', linewidth=2)
-    plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
-    plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
-    plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
+    if n_lang_classes == 4:
+        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
+    elif n_lang_classes == 5:
+        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.2, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[1], xmin=0.2, xmax=0.4, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[2], xmin=0.4, xmax=0.6, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[3], xmin=0.6, xmax=0.8, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[4], xmin=0.8, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
+
 
     plt.ylim(-0.05, 1.05)
     plt.title(plot_title)
@@ -1282,12 +1345,12 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 50  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.5  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -1303,7 +1366,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 minimal_effort = True
-cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
+cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -1315,7 +1378,9 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 
 gen_start = int(generations/2)
 
-
+n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
+# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+# languages, and 5 if the new code was used which does make this distinction.
 
 
 if __name__ == '__main__':
@@ -1337,17 +1402,17 @@ if __name__ == '__main__':
         print('run '+str(i))
         results.append(simulation(generations, rounds, b, popsize, initial_dataset)[0])
 
-    lang_class_prop_over_gen_df = results_to_dataframe(results, runs, generations)
+    lang_class_prop_over_gen_df = results_to_dataframe(results, runs, generations, n_lang_classes)
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_"+timestr
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning
+    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
     if mutual_understanding is False and minimal_effort is False:
         if gamma == 0 and turnover is True:
@@ -1366,7 +1431,7 @@ if __name__ == '__main__':
         elif mutual_understanding is True and minimal_effort is True:
             plot_title = "Mutual Understanding and Minimal Effort"
 
-    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title)
+    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
 
 
     baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
@@ -1375,7 +1440,7 @@ if __name__ == '__main__':
     print("baseline_proportions are:")
     print(baseline_proportions)
 
-    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, baseline_proportions)
+    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, n_lang_classes, baseline_proportions)
 
 
     t1 = time.clock()
