@@ -1373,10 +1373,10 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
                 class_column_from_start_gen.append('other')
                 class_column_from_start_gen.append('compositional')
             elif n_lang_classes == 5:
-                class_column_from_start_gen.append('degenerate')
+                class_column_from_start_gen.append('degen.')
                 class_column_from_start_gen.append('holistic')
                 class_column_from_start_gen.append('hybrid')
-                class_column_from_start_gen.append('compositional')
+                class_column_from_start_gen.append('comp.')
                 class_column_from_start_gen.append('other')
 
 
@@ -1410,7 +1410,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
 
     plt.ylim(-0.05, 1.05)
     plt.title(plot_title)
-    plt.xlabel('Language class')
+    # plt.xlabel('Language class')
     plt.ylabel('Mean proportion')
     plt.savefig("Barplot_"+fig_file_title + ".pdf")
     plt.show()
