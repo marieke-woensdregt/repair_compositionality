@@ -1300,7 +1300,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_l
     :return: Nothing. Just saves the plot and then shows it.
     """
     sns.set_style("whitegrid")
-    sns.set_context("poster")
+    sns.set_context("talk")
 
     if n_lang_classes == 4:
         palette = sns.color_palette(["black", "red", "grey", "green"])
@@ -1342,7 +1342,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     """
 
     sns.set_style("whitegrid")
-    sns.set_context("poster")
+    sns.set_context("talk")
 
     proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
 
