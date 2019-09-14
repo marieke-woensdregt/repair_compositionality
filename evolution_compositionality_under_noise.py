@@ -930,9 +930,9 @@ def population_communication(population, rounds):
             speaker_index = pair_indices[0]
             hearer_index = pair_indices[1]
         topic = random.choice(meanings)
-        if mutual_understanding:
-            speaker_language = sample(population[speaker_index])
-            hearer_language = sample(population[hearer_index])
+        speaker_language = sample(population[speaker_index])
+        hearer_language = sample(population[hearer_index])
+        if mutual_understanding is True:
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
@@ -966,11 +966,11 @@ def population_communication(population, rounds):
                 elif observed_meaning == 'inferred':
                     population[hearer_index] = update_posterior(population[hearer_index], listener_response, utterance)
 
-        else:
+        elif mutual_understanding is False:
             if production == 'simlang':
-                utterance = produce_simlang(sample(population[speaker_index]), topic)
+                utterance = produce_simlang(speaker_language, topic)
             else:
-                utterance = produce(sample(population[speaker_index]), topic, gamma, error, noise)  # whenever a speaker is
+                utterance = produce(speaker_language, topic, gamma, error, noise)  # whenever a speaker is
                 # called upon to produce a utterance, they first sample a language from their posterior probability
                 # distribution. So each agent keeps updating their language according to the data they receive from
                 # their communication partner.
@@ -980,7 +980,6 @@ def population_communication(population, rounds):
                     # in this simplified version of the model, agents are still able to "track changes in their partners'
                     # linguistic behaviour over time
                 elif observed_meaning == 'inferred':
-                    hearer_language = sample(population[hearer_index])
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
                     population[hearer_index] = update_posterior_simlang(population[hearer_index], inferred_meaning,
                                                                         utterance)  # (Thus,
@@ -990,7 +989,6 @@ def population_communication(population, rounds):
                 if observed_meaning == 'intended':
                     population[hearer_index] = update_posterior(population[hearer_index], topic, utterance)
                 elif observed_meaning == 'inferred':
-                    hearer_language = sample(population[hearer_index])
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
                     population[hearer_index] = update_posterior(population[hearer_index], inferred_meaning, utterance)
 
@@ -998,8 +996,8 @@ def population_communication(population, rounds):
 
             if speaker_index == random_parent_index:
                 if observed_meaning == 'intended':
-
                     meaning_observed = topic
+                    inferred_meaning = receive_without_repair(hearer_language, utterance)
 
                 elif observed_meaning == 'inferred':
                     if mutual_understanding:
@@ -1007,8 +1005,9 @@ def population_communication(population, rounds):
                     else:
                         meaning_observed = inferred_meaning
 
-                if communicative_success_pressure == True:
-                    inferred_meaning = listener_response
+                if communicative_success_pressure is True:
+                    if mutual_understanding:
+                        inferred_meaning = listener_response
                     success = False
                     if inferred_meaning == topic:
                         success = True
@@ -1022,7 +1021,7 @@ def population_communication(population, rounds):
                         # communicative_success_pressure_strength parameter, the <meaning, form>
                         # pair is added to the dataset no matter whether the interaction was successful or not
                         data.append((meaning_observed, utterance))
-                elif communicative_success_pressure == False:
+                elif communicative_success_pressure is False:
                     data.append((meaning_observed, utterance))
 
                 data_for_just_in_case.append((meaning_observed, utterance))  # this is being recorded just in case the
@@ -1032,8 +1031,8 @@ def population_communication(population, rounds):
 
         elif n_parents == 'multiple':
             if observed_meaning == 'intended':
-
                 meaning_observed = topic
+                inferred_meaning = receive_without_repair(hearer_language, utterance)
 
             elif observed_meaning == 'inferred':
                 if mutual_understanding:
@@ -1041,8 +1040,9 @@ def population_communication(population, rounds):
                 else:
                     meaning_observed = inferred_meaning
 
-            if communicative_success_pressure == True:
-                inferred_meaning = listener_response
+            if communicative_success_pressure is True:
+                if mutual_understanding:
+                    inferred_meaning = listener_response
                 success = False
                 if inferred_meaning == topic:
                     success = True
@@ -1056,7 +1056,7 @@ def population_communication(population, rounds):
                     # communicative_success_pressure_strength parameter, the <meaning, form>
                     # pair is added to the dataset no matter whether the interaction was successful or not
                     data.append((meaning_observed, utterance))
-            elif communicative_success_pressure == False:
+            elif communicative_success_pressure is False:
                 data.append((meaning_observed, utterance))
 
             data_for_just_in_case.append((meaning_observed, utterance))  # this is being recorded just in case the
@@ -1070,11 +1070,14 @@ def population_communication(population, rounds):
         data = data_for_just_in_case
 
 
-    print('')
-    print('')
-    print("len(data) is:")
-    print(len(data))
 
+
+    if len(data) < b:
+        print('')
+        print('')
+        print("UH-OH! len(data) < b!")
+        print("len(data) is:")
+        print(len(data))
 
     return data
 
@@ -1418,8 +1421,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 5  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 10  # the number of generations (Kirby et al., 2015 used 100)
+runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
@@ -1429,7 +1432,7 @@ noise_prob = 0.6  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -1484,14 +1487,14 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + str(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+str(communicative_success_pressure_strength)+"_"+timestr
 
     lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
 
-    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
+    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+str(communicative_success_pressure_strength)
 
     if mutual_understanding is False and minimal_effort is False:
         if gamma == 0 and turnover is True:
