@@ -1434,7 +1434,7 @@ noise_prob = 0.6  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -1443,7 +1443,7 @@ else:
     gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
-minimal_effort = False
+minimal_effort = True
 cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'inferred'  # determines which meaning the learner observes when receiving a meaning-form pair; can
