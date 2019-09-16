@@ -945,6 +945,30 @@ def str_to_bool(s):
 
 
 
+def convert_float_value_to_string(float_value):
+    """
+    :param array: A 1D numpy array
+    :return: The numpy array converted into a string where spaces are replaced by underscores and brackets and dots are removed.
+    """
+    # if float_value % 1. == 0:
+    #     float_value = int(float_value)
+    float_string = str(float_value)
+    float_string = float_string.replace(".", "")
+    return float_string
+
+
+def convert_array_to_string(array):
+    """
+    :param array: A 1D numpy array
+    :return: The numpy array converted into a string where spaces are replaced by underscores and brackets and dots are removed.
+    """
+    array_string = np.array2string(array, separator=',')
+    array_string = array_string.replace(" ", "")
+    array_string = array_string.replace(".", "")
+    return array_string
+
+
+
 turnover = True  # determines whether new individuals enter the population or not
 b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
@@ -1002,7 +1026,7 @@ print("type(str_to_bool(sys.argv[3])) is:")
 print(type(str_to_bool(sys.argv[3])))
 
 
-cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -1038,7 +1062,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+timestr
 
     pickle.dump(results, open(pickle_file_title+".p", "wb"))
 
