@@ -1,3 +1,3 @@
 #!/bin/bash
 #
-python3 run_sim_repair_compositionality_ponyland.py 0.3 True False
+python3 run_sim_repair_compositionality_ponyland.py 0.4 True False
