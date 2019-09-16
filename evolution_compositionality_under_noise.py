@@ -1300,7 +1300,9 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_l
     :return: Nothing. Just saves the plot and then shows it.
     """
     sns.set_style("whitegrid")
-    sns.set_context("poster")
+    sns.set_context("talk")
+
+    fig, ax = plt.subplots()
 
     if n_lang_classes == 4:
         palette = sns.color_palette(["black", "red", "grey", "green"])
@@ -1310,11 +1312,16 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_l
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
     # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
 
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.tick_params(axis='both', which='minor', labelsize=20)
     plt.ylim(-0.05, 1.05)
-    plt.title(plot_title)
-    plt.xlabel('Generation')
-    plt.ylabel('Mean proportion')
-    plt.legend()
+    plt.title(plot_title, fontsize=22)
+    plt.xlabel('Generation', fontsize=20)
+    plt.ylabel('Mean proportion', fontsize=20)
+    # plt.legend()
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles=handles[1:], labels=labels[1:])
+    plt.tight_layout()
     plt.savefig("Timecourse_plot_"+fig_file_title + ".pdf")
     plt.show()
 
@@ -1342,7 +1349,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     """
 
     sns.set_style("whitegrid")
-    sns.set_context("poster")
+    sns.set_context("talk")
 
     proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
 
@@ -1373,10 +1380,10 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
                 class_column_from_start_gen.append('other')
                 class_column_from_start_gen.append('compositional')
             elif n_lang_classes == 5:
-                class_column_from_start_gen.append('degenerate')
+                class_column_from_start_gen.append('degen.')
                 class_column_from_start_gen.append('holistic')
                 class_column_from_start_gen.append('hybrid')
-                class_column_from_start_gen.append('compositional')
+                class_column_from_start_gen.append('comp.')
                 class_column_from_start_gen.append('other')
 
 
@@ -1396,22 +1403,26 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
 
     if n_lang_classes == 4:
-        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
     elif n_lang_classes == 5:
-        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.2, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[1], xmin=0.2, xmax=0.4, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[2], xmin=0.4, xmax=0.6, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[3], xmin=0.6, xmax=0.8, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[4], xmin=0.8, xmax=1.0, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=baselines[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
 
-
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.tick_params(axis='both', which='minor', labelsize=20)
     plt.ylim(-0.05, 1.05)
-    plt.title(plot_title)
-    plt.xlabel('Language class')
-    plt.ylabel('Mean proportion')
+    plt.title(plot_title, fontsize=22)
+    # plt.xlabel('Language class')
+    plt.xlabel('', fontsize=20)
+    plt.ylabel('Mean proportion', fontsize=20)
+    plt.tight_layout()
+
     plt.savefig("Barplot_"+fig_file_title + ".pdf")
     plt.show()
 

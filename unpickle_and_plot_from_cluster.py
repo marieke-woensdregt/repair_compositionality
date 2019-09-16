@@ -13,17 +13,17 @@ all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all poss
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.3  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
 # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
 # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
@@ -39,7 +39,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 minimal_effort = True  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
-cost_vector = [0.0, 0.15, 0.45]  # costs of no repair, restricted request, and open request, respectively
+cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -49,7 +49,7 @@ interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'.
 n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
-gen_start = int(generations/2)
+gen_start = 70
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
@@ -100,7 +100,7 @@ print(lang_class_prop_over_gen_df)
 
 
 
-fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
+fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+str(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + str(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
 
 if mutual_understanding == False and minimal_effort == False:
@@ -118,7 +118,7 @@ else:
     elif mutual_understanding == False and minimal_effort == True:
         plot_title = "Minimal Effort Only"
     elif mutual_understanding == True and minimal_effort == True:
-        plot_title = "Mutual Understanding and Minimal Effort"
+        plot_title = "Mutual Understanding & Minimal Effort"
 
 plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
 
