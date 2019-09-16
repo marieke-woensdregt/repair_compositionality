@@ -13,12 +13,12 @@ all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all poss
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 12  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -49,14 +49,14 @@ interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'.
 n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
-gen_start = int(generations/2)
+gen_start = 70
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
 
 
-batches = 2
+batches = 1
 
 
 
@@ -118,7 +118,7 @@ else:
     elif mutual_understanding == False and minimal_effort == True:
         plot_title = "Minimal Effort Only"
     elif mutual_understanding == True and minimal_effort == True:
-        plot_title = "Mutual Understanding and Minimal Effort"
+        plot_title = "Mutual Understanding & Minimal Effort"
 
 plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
 
