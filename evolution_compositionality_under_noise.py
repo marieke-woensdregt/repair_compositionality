@@ -1482,13 +1482,10 @@ else:
     gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
-<<<<<<< HEAD
 minimal_effort = True
 cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
-=======
 minimal_effort = False
 cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
->>>>>>> e363ccc7956d0eef35243450c5d98b687ae00a64
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'inferred'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',

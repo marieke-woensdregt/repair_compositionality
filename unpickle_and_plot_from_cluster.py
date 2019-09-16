@@ -60,27 +60,14 @@ batches = 2
 
 
 
-if batches > 1:
-    all_results = []
-    for i in range(batches):
-        pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+str(i)
+all_results = []
+for i in range(batches):
+    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+str(i)
 
-        results = pickle.load(open(pickle_file_title+".p", "rb"))
+    results = pickle.load(open(pickle_file_title+".p", "rb"))
 
-        for j in range(len(results)):
-            all_results.append(results[j])
-
-
-elif batches == 1:
-    pickle_file_title = "Pickle_r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
-        rounds) + "_pop_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
-        gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(
-        turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(
-        noise) + "_noise_prob_" + str(
-        noise_prob) + "_" + production + "_observed_m_" + observed_meaning + "_n_lang_classes_" + str(
-        n_lang_classes)
-
-    all_results = pickle.load(open(pickle_file_title + ".p", "rb"))
+    for j in range(len(results)):
+        all_results.append(results[j])
 
 
 print('')
