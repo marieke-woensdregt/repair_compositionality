@@ -1451,7 +1451,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     plt.ylabel('Mean proportion', fontsize=20)
     plt.tight_layout()
 
-    plt.savefig("Barplot_"+fig_file_title + ".pdf")
+    plt.savefig("Barplot_"+fig_file_title + "_burn_in_"+str(gen_start)+".pdf")
     plt.show()
 
 
