@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages, dataframe_to_results, results_to_dataframe, convert_float_value_to_string, convert_array_to_string
+from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages, language_stats_to_dataframe, dataframe_to_language_stats, convert_float_value_to_string, convert_array_to_string
 
 
 
@@ -89,7 +89,7 @@ if batches > 1:
 
         lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_path+pickle_file_name+".pkl")
 
-        results = dataframe_to_results(lang_class_prop_over_gen_df, runs, generations)
+        results = dataframe_to_language_stats(lang_class_prop_over_gen_df, runs, generations)
 
         for j in range(len(results)):
             all_results.append(results[j])
@@ -102,7 +102,7 @@ if batches > 1:
     print("len(all_results[0][0]) are:")
     print(len(all_results[0][0]))
 
-    lang_class_prop_over_gen_df = results_to_dataframe(all_results, runs * batches, generations)
+    lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs * batches, generations)
     print('')
     print('')
     print("lang_class_prop_over_gen_df is:")
