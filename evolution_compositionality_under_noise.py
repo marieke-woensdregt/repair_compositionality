@@ -1310,7 +1310,7 @@ def convert_array_to_string(array):
 
 
 
-def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes):
+def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes):
     """
     Takes a list of language stats over generations (results) and plots a timecourse graph
 
@@ -1321,7 +1321,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_
     3 = compositional, 4 = other; these are the category indices as hardcoded in the classify_language() function
     (where I follow the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     :param plot_title: The title of the condition that should be on the plot (string)
-    :param fig_file_title: The file name that the plot should be saved under
+    :param fig_file_name: The file name that the plot should be saved under
     :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
     was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
     languages, and 5 if the new code was used which does make this distinction.
@@ -1350,13 +1350,13 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles[1:], labels=labels[1:])
     plt.tight_layout()
-    plt.savefig(fig_file_path+"Timecourse_plot_"+fig_file_title + ".pdf")
+    plt.savefig(fig_file_path+"Timecourse_plot_"+fig_file_name + ".pdf")
     plt.show()
 
 
 
 
-def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_runs, n_gens, gen_start, n_lang_classes, baselines):
+def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_runs, n_gens, gen_start, n_lang_classes, baselines):
     """
     Takes a list of language stats over generations (results) and creates a bar plot showing the proportions of each
     of the language classes, from generation 'gen_start' to generation 'gen_stop'
@@ -1365,7 +1365,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other,
     and index 3 = compositional)
     :param plot_title: The title of the condition that should be on the plot (string)
-    :param fig_file_title: The file name that the plot should be saved under
+    :param fig_file_name: The file name that the plot should be saved under
     :param gen_start: The generation from which the plot should start taking the mean (should be after the population
     has reached convergence)
     :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
@@ -1451,7 +1451,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     plt.ylabel('Mean proportion', fontsize=20)
     plt.tight_layout()
 
-    plt.savefig(fig_file_path+"Barplot_"+fig_file_title + "_burn_in_"+str(gen_start)+".pdf")
+    plt.savefig(fig_file_path+"Barplot_"+fig_file_name + "_burn_in_"+str(gen_start)+".pdf")
     plt.show()
 
 
@@ -1499,12 +1499,17 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 # successful interaction is to enter the data set that is passed on to the next generation, compared to a
 # <meaning, form> pair from a unsuccessful interaction.
 
-
-gen_start = int(generations/2)
+gen_start = 70  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
+
+pickle_file_path = "pickles/"
+
+fig_file_path = "plots/"
+
+
 
 
 if __name__ == '__main__':
@@ -1530,15 +1535,16 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
 
-    lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
 
-    # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
 
-    fig_file_path = "Plots/"
+    lang_class_prop_over_gen_df.to_pickle(pickle_file_path+pickle_file_name+".pkl")
 
-    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+    # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_name+".pkl")
+
+
+    fig_file_name = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
     if mutual_understanding is False and minimal_effort is False:
         if gamma == 0 and turnover is True:
@@ -1557,7 +1563,7 @@ if __name__ == '__main__':
         elif mutual_understanding is True and minimal_effort is True:
             plot_title = "Mutual Understanding and Minimal Effort"
 
-    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes)
+    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes)
 
 
     baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
@@ -1566,7 +1572,7 @@ if __name__ == '__main__':
     print("baseline_proportions are:")
     print(baseline_proportions)
 
-    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, runs, generations, gen_start, n_lang_classes, baseline_proportions)
+    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, gen_start, n_lang_classes, baseline_proportions)
 
 
     t1 = time.clock()
