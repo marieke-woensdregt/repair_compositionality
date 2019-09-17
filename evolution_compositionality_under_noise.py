@@ -1310,7 +1310,7 @@ def convert_array_to_string(array):
 
 
 
-def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes):
+def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes):
     """
     Takes a list of language stats over generations (results) and plots a timecourse graph
 
@@ -1350,13 +1350,13 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_l
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles[1:], labels=labels[1:])
     plt.tight_layout()
-    plt.savefig("Timecourse_plot_"+fig_file_title + ".pdf")
+    plt.savefig(fig_file_path+"Timecourse_plot_"+fig_file_title + ".pdf")
     plt.show()
 
 
 
 
-def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs, n_gens, gen_start, n_lang_classes, baselines):
+def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_runs, n_gens, gen_start, n_lang_classes, baselines):
     """
     Takes a list of language stats over generations (results) and creates a bar plot showing the proportions of each
     of the language classes, from generation 'gen_start' to generation 'gen_stop'
@@ -1451,7 +1451,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_runs
     plt.ylabel('Mean proportion', fontsize=20)
     plt.tight_layout()
 
-    plt.savefig("Barplot_"+fig_file_title + "_burn_in_"+str(gen_start)+".pdf")
+    plt.savefig(fig_file_path+"Barplot_"+fig_file_title + "_burn_in_"+str(gen_start)+".pdf")
     plt.show()
 
 
@@ -1534,6 +1534,7 @@ if __name__ == '__main__':
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
+    fig_file_path = "Plots/"
 
     fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
@@ -1554,7 +1555,7 @@ if __name__ == '__main__':
         elif mutual_understanding is True and minimal_effort is True:
             plot_title = "Mutual Understanding and Minimal Effort"
 
-    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
+    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes)
 
 
     baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
@@ -1563,7 +1564,7 @@ if __name__ == '__main__':
     print("baseline_proportions are:")
     print(baseline_proportions)
 
-    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, n_lang_classes, baseline_proportions)
+    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, runs, generations, gen_start, n_lang_classes, baseline_proportions)
 
 
     t1 = time.clock()
