@@ -102,7 +102,6 @@ if batches > 1:
     print("lang_class_prop_over_gen_df is:")
     print(lang_class_prop_over_gen_df)
 
-    fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 
 
@@ -112,8 +111,11 @@ else:
 
     lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
-    fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
+
+fig_file_path = "Plots/"
+
+fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 if mutual_understanding is False and minimal_effort is False:
     if gamma == 0 and turnover is True:
@@ -133,7 +135,7 @@ else:
         plot_title = "Mutual Understanding and Minimal Effort"
 
 
-plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
+plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes)
 
 
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
@@ -154,6 +156,5 @@ print('')
 print("baseline_proportions are:")
 print(baseline_proportions)
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs, generations, gen_start, n_lang_classes,
-             baseline_proportions)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, runs, generations, gen_start, n_lang_classes, baseline_proportions)
 
