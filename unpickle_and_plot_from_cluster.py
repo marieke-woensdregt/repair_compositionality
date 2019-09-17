@@ -49,7 +49,7 @@ interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'.
 n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
-gen_start = 70
+gen_start = 70  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
@@ -58,13 +58,18 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 
 batches = 1
 
+pickle_file_path = "pickles/"
+
+fig_file_path = "plots/"
+
+
 
 
 all_results = []
 for i in range(batches):
     pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_"+str(i)
 
-    results = pickle.load(open(pickle_file_title+".p", "rb"))
+    results = pickle.load(open(pickle_file_path+pickle_file_title+".p", "rb"))
 
     for j in range(len(results)):
         all_results.append(results[j])
@@ -86,7 +91,6 @@ print("lang_class_prop_over_gen_df is:")
 print(lang_class_prop_over_gen_df)
 
 
-fig_file_path = "plots/"
 
 fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
