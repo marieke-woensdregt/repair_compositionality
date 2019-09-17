@@ -18,7 +18,7 @@ b = 12  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 50  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -56,7 +56,7 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 
-batches = 2
+batches = 1
 
 
 
@@ -86,6 +86,7 @@ print("lang_class_prop_over_gen_df is:")
 print(lang_class_prop_over_gen_df)
 
 
+fig_file_path = "Plots/"
 
 fig_file_title = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_observed_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)
 
@@ -107,7 +108,7 @@ else:
     elif mutual_understanding == True and minimal_effort == True:
         plot_title = "Mutual Understanding & Minimal Effort"
 
-plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_title, n_lang_classes)
+plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, n_lang_classes)
 
 
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
@@ -128,5 +129,5 @@ print('')
 print("baseline_proportions are:")
 print(baseline_proportions)
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_title, runs*batches, generations, gen_start, n_lang_classes, baseline_proportions)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_title, runs*batches, generations, gen_start, n_lang_classes, baseline_proportions)
 
