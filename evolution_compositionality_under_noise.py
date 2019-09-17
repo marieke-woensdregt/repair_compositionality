@@ -1,13 +1,14 @@
 import itertools
 import numpy as np
 import random
+from copy import deepcopy
+from math import log
 import scipy.special
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
-from copy import deepcopy
-from math import log
+import pickle
 
 
 # FROM SIMLANG LAB 21:
@@ -1164,17 +1165,19 @@ def language_stats(population):
 def simulation(generations, rounds, bottleneck, popsize, data):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
-    class over generations (results) as well as the data that each generation produced (data)
+    class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
 
     :param generations: the desired number of generations (int)
     :param rounds: the desired number of communication rounds *within* each generation
     :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
     :param popsize: the desired size of the population (int)
     :param data: the initial data that generation 0 learns from
-    :return:
+    :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains data over
+    generations over runs), and the final population
     """
 
-    results = []
+    language_stats_over_gens = []
+    data_over_gens = []
     population = new_population(popsize)
     for i in range(generations):
         for j in range(popsize):
@@ -1194,14 +1197,15 @@ def simulation(generations, rounds, bottleneck, popsize, data):
                 else:
                     population[j] = update_posterior(population[j], meaning, signal)
         data = population_communication(population, rounds)
-        results.append(language_stats(population))
+        language_stats_over_gens.append(language_stats(population))
+        data_over_gens.append(data)
         if turnover:
             population = new_population(popsize)
-    return results, data
+    return language_stats_over_gens, data_over_gens, population
 
 
 
-def results_to_dataframe(results, runs, generations, n_lang_classes):
+def language_stats_to_dataframe(results, runs, generations, n_lang_classes):
     """
     Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
     and language class)
@@ -1250,8 +1254,7 @@ def results_to_dataframe(results, runs, generations, n_lang_classes):
     data = {'run': column_runs,
             'generation': column_generation,
             'proportion': column_proportion,
-            'class': column_type,
-            }
+            'class': column_type}
 
     lang_class_prop_over_gen_df = pd.DataFrame(data)
 
@@ -1259,7 +1262,7 @@ def results_to_dataframe(results, runs, generations, n_lang_classes):
 
 
 
-def dataframe_to_results(dataframe, n_runs, n_gens, n_lang_classes):
+def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_lang_classes):
     """
     Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
     populations' posterior probability distributions over generations.
@@ -1379,7 +1382,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    proportion_column_as_results = dataframe_to_results(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
+    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
@@ -1418,17 +1421,18 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     new_data_dict = {'run': runs_column_from_start_gen,
             'generation': generation_column_from_start_gen,
             'proportion': proportion_column_from_start_gen,
-            'class': class_column_from_start_gen,
-            }
+            'class': class_column_from_start_gen}
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
 
-    if n_lang_classes == 4:
-        palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_lang_classes == 5:
-        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
+    # if n_lang_classes == 4:
+    #     palette = sns.color_palette(["black", "red", "grey", "green"])
+    # elif n_lang_classes == 5:
+    #     palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
-    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
+    # sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
+    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen)
+
 
     if n_lang_classes == 4:
         plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
@@ -1463,7 +1467,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 10  # the number of generations (Kirby et al., 2015 used 100)
+generations = 15  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 noise = True  # parameter that determines whether environmental noise is on or off
@@ -1473,7 +1477,7 @@ noise_prob = 0.6  # the probability of environmental noise masking part of an ut
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
-mutual_understanding = False
+mutual_understanding = True
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -1483,18 +1487,16 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 minimal_effort = True
-cost_vector = [0.0, 0.2, 0.4]  # costs of no repair, restricted request, and open request, respectively
-minimal_effort = False
-cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
-observed_meaning = 'inferred'  # determines which meaning the learner observes when receiving a meaning-form pair; can
+observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
-interaction = 'random'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
-n_parents = 'multiple'  # determines whether each generation of learners receives data from a single agent from the
+n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
-communicative_success_pressure = True  # determines whether there is a pressure for communicative success or not
+communicative_success_pressure = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
 # successful interaction is to enter the data set that is passed on to the next generation, compared to a
 # <meaning, form> pair from a unsuccessful interaction.
@@ -1525,13 +1527,63 @@ if __name__ == '__main__':
 
     initial_dataset = create_initial_dataset(initial_language_type, b)  # the data that the first generation learns from
 
-    results = []
+    language_stats_over_gens_per_run = []
+    data_over_gens_per_run = []
+    final_pop_per_run = []
     for i in range(runs):
         print('')
         print('run '+str(i))
-        results.append(simulation(generations, rounds, b, popsize, initial_dataset)[0])
+        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, initial_dataset)
+        language_stats_over_gens_per_run.append(language_stats_over_gens)
+        data_over_gens_per_run.append(data_over_gens)
+        final_pop_per_run.append(final_pop)
 
-    lang_class_prop_over_gen_df = results_to_dataframe(results, runs, generations, n_lang_classes)
+    print('')
+    print('')
+    print('')
+    print('')
+    print("language_stats_over_gens_per_run is:")
+    print(language_stats_over_gens_per_run)
+    print("len(language_stats_over_gens_per_run) is:")
+    print(len(language_stats_over_gens_per_run))
+    print("len(language_stats_over_gens_per_run[0]) is:")
+    print(len(language_stats_over_gens_per_run[0]))
+    print("len(language_stats_over_gens_per_run[0][0]) is:")
+    print(len(language_stats_over_gens_per_run[0][0]))
+
+
+
+    print('')
+    print('')
+    print('')
+    print('')
+    print("final_pop_per_run is:")
+    print(final_pop_per_run)
+    print("len(final_pop_per_run) is:")
+    print(len(final_pop_per_run))
+    print("len(final_pop_per_run[0]) is:")
+    print(len(final_pop_per_run[0]))
+
+
+
+    print('')
+    print('')
+    print('')
+    print('')
+    print("data_over_gens_per_run is:")
+    print(data_over_gens_per_run)
+    print("len(data_over_gens_per_run) is:")
+    print(len(data_over_gens_per_run))
+    print("len(data_over_gens_per_run[0]) is:")
+    print(len(data_over_gens_per_run[0]))
+    print("len(data_over_gens_per_run[0][0]) is:")
+    print(len(data_over_gens_per_run[0][0]))
+    print("len(data_over_gens_per_run[0][0][0]) is:")
+    print(len(data_over_gens_per_run[0][0][0]))
+
+
+
+    lang_class_prop_over_gen_df = language_stats_to_dataframe(language_stats_over_gens_per_run, runs, generations, n_lang_classes)
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
@@ -1539,7 +1591,13 @@ if __name__ == '__main__':
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
 
-    lang_class_prop_over_gen_df.to_pickle(pickle_file_path+pickle_file_name+".pkl")
+    lang_class_prop_over_gen_df.to_pickle(pickle_file_path+pickle_file_name+"_language_stats"+".pkl")
+
+
+    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+
+    pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
+
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_name+".pkl")
 
