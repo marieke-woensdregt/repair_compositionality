@@ -1497,12 +1497,17 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 # successful interaction is to enter the data set that is passed on to the next generation, compared to a
 # <meaning, form> pair from a unsuccessful interaction.
 
-
-gen_start = int(generations/2)
+gen_start = 70  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
+
+pickle_file_path = "pickles/"
+
+fig_file_path = "plots/"
+
+
 
 
 if __name__ == '__main__':
@@ -1528,13 +1533,14 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
+
+
     pickle_file_title = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
 
-    lang_class_prop_over_gen_df.to_pickle(pickle_file_title+".pkl")
+    lang_class_prop_over_gen_df.to_pickle(pickle_file_path+pickle_file_title+".pkl")
 
     # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_title+".pkl")
 
-    fig_file_path = "plots/"
 
     fig_file_title = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
