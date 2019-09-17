@@ -1573,6 +1573,7 @@ if __name__ == '__main__':
     plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, gen_start, n_lang_classes, baseline_proportions)
 
 
+
     t1 = time.clock()
 
     print('')
