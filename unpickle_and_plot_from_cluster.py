@@ -1,5 +1,5 @@
 import pickle
-from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages, results_to_dataframe, convert_float_value_to_string, convert_array_to_string
+from evolution_compositionality_under_noise import plot_timecourse, plot_barplot, classify_all_languages, create_all_possible_languages, language_stats_to_dataframe, convert_float_value_to_string, convert_array_to_string
 import numpy as np
 
 
@@ -84,7 +84,7 @@ print("len(all_results[0][0]) are:")
 print(len(all_results[0][0]))
 
 
-lang_class_prop_over_gen_df = results_to_dataframe(all_results, runs*batches, generations, n_lang_classes)
+lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs*batches, generations, n_lang_classes)
 print('')
 print('')
 print("lang_class_prop_over_gen_df is:")
