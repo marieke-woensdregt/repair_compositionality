@@ -1425,14 +1425,12 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
 
-    # if n_lang_classes == 4:
-    #     palette = sns.color_palette(["black", "red", "grey", "green"])
-    # elif n_lang_classes == 5:
-    #     palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
+    if n_lang_classes == 4:
+        color_palette = sns.color_palette(["black", "red", "grey", "green"])
+    elif n_lang_classes == 5:
+        color_palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
-    # sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
-    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen)
-
+    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
 
     if n_lang_classes == 4:
         plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
