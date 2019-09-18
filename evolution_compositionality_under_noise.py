@@ -1,17 +1,17 @@
-import itertools
 import numpy as np
+import itertools
 import random
 from copy import deepcopy
 from math import log
 import scipy.special
+import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
-import pickle
 
 
-
+###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
 if __name__ == '__main__':
 
@@ -19,7 +19,6 @@ if __name__ == '__main__':
     languages_simlang = [[('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')]]
     types_simlang = [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0]
     priors_simlang = [-0.9178860550328204, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -2.304180416152711, -11.272664072079987, -10.749415928290118, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -10.749415928290118, -11.272664072079987, -2.304180416152711, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -0.9178860550328204]
-
 
     # MY OWN CODE:
     meanings = ['02', '03', '12', '13']  # all possible meanings
@@ -70,7 +69,7 @@ if __name__ == '__main__':
     # successful interaction is to enter the data set that is passed on to the next generation, compared to a
     # <meaning, form> pair from a unsuccessful interaction.
 
-    gen_start = round(generations/2)  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
+    burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
     n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
     # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
@@ -81,42 +80,33 @@ if __name__ == '__main__':
     fig_file_path = "plots/"
 
 
+###################################################################################################################
+# FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
 
-
-
-#  FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
-
-def create_all_possible_languages(meanings, forms):
+def create_all_possible_languages(meaning_list, forms):
     """Creates all possible languages
 
-    :param meanings: list of strings corresponding to all possible meanings
-    :type meanings: list
+    :param meaning_list: list of strings corresponding to all possible meanings
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
-    :type forms: list
     :returns: list of tuples which represent languages, where each tuple consists of forms_without_noisy_variants and
     has length len(meanings)
-    :rtype: list
     """
-    all_possible_languages = list(
-        itertools.product(forms, repeat=len(meanings)))
+    all_possible_languages = list(itertools.product(forms, repeat=len(meaning_list)))
     return all_possible_languages
 
 
-
-def classify_language(lang, forms, meanings):
+def classify_language(lang, forms, meaning_list):
     """
     Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
     or 'compositional' (3) (Kirby et al., 2015)
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
-    :type lang: tuple
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
-    :type forms: list
+    :param meaning_list: list of strings corresponding to all possible meanings
     :returns: integer corresponding to category that language belongs to:
     0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
     ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
-    :rtype: int
     """
     # TODO: See if I can modify this function so that it can deal with any number of forms_without_noisy_variants and
     #  meanings.
@@ -135,7 +125,7 @@ def classify_language(lang, forms, meanings):
     if len(forms[0]) != 2:
         raise ValueError(
             "This function only works when each form consists of 2 elements")
-    if len(lang) != len(meanings):
+    if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
 
     # lang is degenerate if it uses the same form for every meaning:
@@ -168,19 +158,16 @@ def classify_language(lang, forms, meanings):
         return class_other
 
 
-
 def classify_all_languages(language_list):
     """
     Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
     (Kirby et al., 2015)
 
     :param language_list: list of all languages
-    :type language_list: list
     :returns: 1D numpy array containing integer corresponding to category of corresponding
     language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
     3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
     from SimLang lab 21)
-    :rtype: 1D numpy array
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
@@ -188,10 +175,8 @@ def classify_all_languages(language_list):
     return class_per_lang
 
 
-
-
-#  NOW SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF LANGUAGES AND
-#  TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
+# NOW SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF LANGUAGES AND
+# TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
 
 def transform_all_languages_to_simlang_format(language_list):
     """
@@ -203,16 +188,13 @@ def transform_all_languages_to_simlang_format(language_list):
     a language
 
     :param language_list: list of all languages
-    :type language_list: list
     :returns: list of the input languages in the format of SimLang lab 21
-    :rtype: list
     """
     all_langs_as_in_simlang = []
     for l in range(len(language_list)):
         lang_as_in_simlang = [(meanings[x], language_list[l][x]) for x in range(len(meanings))]
         all_langs_as_in_simlang.append(lang_as_in_simlang)
     return all_langs_as_in_simlang
-
 
 
 def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
@@ -238,16 +220,10 @@ def check_all_lang_lists_against_each_other(language_list_a, language_list_b):
     return checks_per_lang, new_log_prior
 
 
-
-
-
-
+# NOW SOME FUNCTIONS THAT HANDLE PRODUCTION, NOISY PRODUCTION, AND RECEPTION WITH AND WITHOUT REPAIR:
 
 # A reproduction of the production function of Kirby et al. (2015):
-
-# Now let's define a function that calculates the probabilities of producing each of the possible forms_without_noisy_
-# variants, given a particular language and topic:
-def production_likelihoods_kirby_et_al(language, topic, gamma, error):
+def production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error_prob):
     """
     Calculates the production probabilities for each of the possible forms_without_noisy_variants given a language and
     topic, as defined by Kirby et al. (2015)
@@ -256,8 +232,8 @@ def production_likelihoods_kirby_et_al(language, topic, gamma, error):
     where each form is mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
-    :param gamma: parameter that determines the strength of the penalty on ambiguity
-    :param error: the probability of making an error in production
+    :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
+    :param error_prob: the probability of making an error in production
     :return: 1D numpy array containing a production probability for each possible form (where the index of the
     probability corresponds to the index of the form in the global variable "forms_without_noisy_variants")
     """
@@ -269,8 +245,8 @@ def production_likelihoods_kirby_et_al(language, topic, gamma, error):
     for f in language:
         if f == correct_form:
             ambiguity += 1
-    prop_to_prob_correct_form = ((1./ambiguity)**gamma)*(1.-error)
-    prop_to_prob_error_form = error / (len(forms_without_noise) - 1)
+    prop_to_prob_correct_form = ((1./ambiguity) ** ambiguity_penalty) * (1. - error_prob)
+    prop_to_prob_error_form = error_prob / (len(forms_without_noise) - 1)
     prop_to_prob_per_form_array = np.zeros(len(forms_without_noise))
     for i in range(len(forms_without_noise)):
         if forms_without_noise[i] == correct_form:
@@ -278,8 +254,6 @@ def production_likelihoods_kirby_et_al(language, topic, gamma, error):
         else:
             prop_to_prob_per_form_array[i] = prop_to_prob_error_form
     return prop_to_prob_per_form_array
-
-
 
 
 def create_noisy_variants(form):
@@ -314,8 +288,8 @@ def remove_all_instances(my_list, element_to_be_removed):
     """
     i = 0  # loop counter
     length = len(my_list)  # list length
-    while (i < len(my_list)):
-        if (my_list[i] == element_to_be_removed):
+    while i < len(my_list):
+        if my_list[i] == element_to_be_removed:
             my_list.remove(my_list[i])
             # as an element is removed
             # so decrease the length by 1
@@ -328,7 +302,7 @@ def remove_all_instances(my_list, element_to_be_removed):
     return my_list
 
 
-def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob):
+def production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_prob, prob_of_noise):
     """
     Calculates the production probabilities for each of the possible forms (including both forms without noise and all
     possible noisy variants) given a language and topic, and the probability of environmental noise
@@ -337,9 +311,9 @@ def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
     mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
-    :param gamma: parameter that determines the strength of the penalty on ambiguity
-    :param error: the probability of making an error in production
-    :param noise_prob: the probability of environmental noise masking part of the utterance
+    :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
+    :param error_prob: the probability of making an error in production
+    :param prob_of_noise: the probability of environmental noise masking part of the utterance
     :return: 1D numpy array containing a production probability for each possible form (where the index of the
     probability corresponds to the index of the form in the global variable "all_forms_including_noisy_variants")
     """
@@ -362,10 +336,10 @@ def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
     for f in language:
         if f == correct_form:
             ambiguity += 1
-    prop_to_prob_correct_form_complete = ((1./ambiguity)**gamma)*(1.-error)*(1 - noise_prob)
-    prop_to_prob_error_form_complete = error / (len(forms_without_noise) - 1)*(1 - noise_prob)
-    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** gamma) * (1. - error) * (noise_prob / len(noisy_forms))
-    prop_to_prob_error_form_noisy = error/(len(forms_without_noise)-1) * (1-noise_prob)*(noise_prob/len(noisy_forms))
+    prop_to_prob_correct_form_complete = ((1./ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (1 - prob_of_noise)
+    prop_to_prob_error_form_complete = error_prob / (len(forms_without_noise) - 1) * (1 - prob_of_noise)
+    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_forms))
+    prop_to_prob_error_form_noisy = error_prob / (len(forms_without_noise) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_forms))
     prop_to_prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
     for i in range(len(all_forms_including_noisy_variants)):
         if all_forms_including_noisy_variants[i] == correct_form:
@@ -379,22 +353,8 @@ def production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
     return prop_to_prob_per_form_array
 
 
-
-# print('')
-# print('')
-# print('THIS IS THE PRODUCTION_PROBS_WITH_NOISE() AT WORK:')
-# production_probs_array_with_noise = production_probs_with_noise(other_lang, "02", gamma, error, noise_prob)
-# print("production_probs_array_with_noise are:")
-# print(production_probs_array_with_noise)
-# print("np.sum(production_probs_array_with_noise) are:")
-# print(np.sum(production_probs_array_with_noise))
-# print("len(production_probs_array_with_noise) are:")
-# print(len(production_probs_array_with_noise))
-#
-
-
-# And finally, let's write a function that actually produces an utterance, given a language and a topic
-def produce(language, topic, gamma, error, noise_switch):
+# And finally, let's write a function that actually produces an utterance, given a language and a topic:
+def produce(language, topic, ambiguity_penalty, error_prob, noise_switch):
     """
     Produces an actual utterance, given a language and a topic
 
@@ -402,23 +362,21 @@ def produce(language, topic, gamma, error, noise_switch):
     where each form is mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
-    :param gamma: parameter that determines the strength of the penalty on ambiguity
-    :param error: the probability of making an error in production
+    :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
+    :param error_prob: the probability of making an error in production
     :param noise_switch: turns noise on when set to True, and off when set to False
     :return: an utterance. That is, a single form chosen from either the global variable "forms_without_noise" (if
     noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
         """
     if noise_switch:
-        prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, gamma, error, noise_prob)
+        prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_prob, noise_prob)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
     else:
-        prop_to_prob_per_form_array = production_likelihoods_kirby_et_al(language, topic, gamma, error)
+        prop_to_prob_per_form_array = production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error_prob)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(forms_without_noise, p=prob_per_form_array)
     return utterance
-
-
 
 
 def produce_simlang(language, meaning):
@@ -458,8 +416,6 @@ def produce_simlang(language, meaning):
     return signal
 
 
-
-
 def receive_without_repair(language, utterance):
     """
     Takes a language and an utterance, and returns an interpretation of that utterance, following the language
@@ -479,20 +435,18 @@ def receive_without_repair(language, utterance):
     return interpretation
 
 
-
-
-
-def noisy_to_complete_forms(noisy_form, forms_without_noise):
+def noisy_to_complete_forms(noisy_form, complete_forms):
     """
     Takes a noisy form and returns all possible complete forms that it's compatible with.
 
     :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
-    :param forms_without_noise: The full set of possible complete forms
+    :param complete_forms: The full set of possible complete forms (corresponds to global parameter
+    'forms_without_noise')
     :return: A list of complete forms that the noisy form is compatible with
     """
     possible_complete_forms = []
     amount_of_noise = noisy_form.count('_')
-    for complete_form in forms_without_noise:
+    for complete_form in complete_forms:
         similarity_score = 0
         for i in range(len(noisy_form)):
             if noisy_form[i] == complete_form[i]:
@@ -500,7 +454,6 @@ def noisy_to_complete_forms(noisy_form, forms_without_noise):
         if similarity_score == len(complete_form)-amount_of_noise:
             possible_complete_forms.append(complete_form)
     return possible_complete_forms
-
 
 
 def find_possible_interpretations(language, forms):
@@ -517,7 +470,6 @@ def find_possible_interpretations(language, forms):
         if language[i] in forms:
             possible_interpretations.append(meanings[i])
     return possible_interpretations
-
 
 
 def find_partial_meaning(language, noisy_form):
@@ -555,9 +507,8 @@ def find_partial_meaning(language, noisy_form):
         return []
 
 
-
 #TODO: This has turned into a bit of a monster function. Maybe shorten it by pulling out the code that calculates the
-# probabilities for the different response options and putting that in a seperate function?
+# probabilities for the different response options and putting that in a separate function?
 def receive_with_repair(language, utterance):
     """
     Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
@@ -624,7 +575,7 @@ def receive_with_repair(language, utterance):
     return response
 
 
-
+# AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
 def update_posterior(log_posterior, topic, utterance):
     """
@@ -646,7 +597,7 @@ def update_posterior(log_posterior, topic, utterance):
     # <topic, utterance> pair that was given as input:
     new_log_posterior = []
     for j in range(len(log_posterior)):
-        hypothesis = all_possible_languages[j]
+        hypothesis = hypothesis_space[j]
         if noise:
             likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, gamma, error, noise_prob)
         else:
@@ -657,8 +608,6 @@ def update_posterior(log_posterior, topic, utterance):
     new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.special.logsumexp(new_log_posterior))
 
     return new_log_posterior_normalized
-
-
 
 
 def normalize_logprobs_simlang(logprobs):
@@ -674,7 +623,6 @@ def normalize_logprobs_simlang(logprobs):
         normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the
                                             # normal domain
     return normedlogs
-
 
 
 def update_posterior_simlang(posterior, meaning, signal):
@@ -704,47 +652,7 @@ def update_posterior_simlang(posterior, meaning, signal):
     return normalize_logprobs_simlang(new_posterior)
 
 
-# print('')
-# print('')
-# example_prior = np.array([1./len(all_possible_languages) for x in range(len(all_possible_languages))])
-# example_log_prior = np.log(example_prior)
-# print("np.exp(example_log_prior) is:")
-# print(np.exp(example_log_prior))
-# print("np.exp(scipy.special.logsumexp(example_log_prior)) is:")
-# print(np.exp(scipy.special.logsumexp(example_log_prior)))
-#
-# print('')
-# print('')
-# print("NOW, LET'S TEST THE UPDATE_POSTERIOR() FUNCTION:")
-# topic = '02'
-# utterance = 'a_'
-# new_log_posterior_normalized = update_posterior(example_log_prior, topic, utterance)
-# print('')
-# print('')
-# print("np.exp(new_log_posterior_normalized) is:")
-# print(np.exp(new_log_posterior_normalized))
-# print("new_log_posterior_normalized.shape is:")
-# print(new_log_posterior_normalized.shape)
-# print("np.exp(scipy.special.logsumexp(new_log_posterior_normalized)) is:")
-# print(np.exp(scipy.special.logsumexp(new_log_posterior_normalized)))
-
-
-
-def new_population(popsize):
-    """
-    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which
-    is assumed to be defined as a global variable called 'priors')
-
-    :param popsize: the number of agents desired in the new population
-    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding LOG prior
-    probabilities)
-    on the columns.
-    """
-    population = [priors for x in range(popsize)]
-    population = np.array(population)
-    return population
-
-
+# AND NOW FOR THE FUNCTIONS THAT HANDLE SAMPLING A HYPOTHESIS FROM A POSTERIOR PROBABILITY DISTRIBUTION:
 
 def log_roulette_wheel(normedlogs):
     """
@@ -770,23 +678,40 @@ def sample(log_posterior):
     :return: a language (list of forms_without_noisy_variants that has same length as the global variable meanings,
     where each form is mapped to the meaning at the corresponding index)
     """
-    return all_possible_languages[log_roulette_wheel(log_posterior)]
+    return hypothesis_space[log_roulette_wheel(log_posterior)]
 
 
+# NOW THE FUNCTION THAT CREATE A NEW POPULATION, AND MAKES A POPULATION COMMUNICATE (FOR THE INTRA-GENERATIONAL
+# INTERACTION ROUNDS):
+
+def new_population(pop_size):
+    """
+    Creates a new population of agents, where each agent simply consists of the prior probability distribution (which
+    is assumed to be defined as a global variable called 'priors')
+
+    :param pop_size: the number of agents desired in the new population; corresponds to global variable 'popsize'
+    :return: 2D numpy array, with agents on the rows, and hypotheses (or rather their corresponding LOG prior
+    probabilities)
+    on the columns.
+    """
+    population = [priors for x in range(pop_size)]
+    population = np.array(population)
+    return population
 
 
 # TODO: population_communication() has become a bit of a monster function; see if I can take some parts out to be
 #  separate functions (e.g. for the different possible settings of the mutual_understanding and minimal_effort
 #  parameters. Also, there has to be a way to not have exactly the same lines of code for doing the communicative
 #  success pressure stuff in there twice (should probably be a separate function)!
-def population_communication(population, rounds):
+def population_communication(population, n_rounds):
     """
     Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
     is updated every time the agent gets assigned the role of hearer)
 
     :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
     distribution
-    :param rounds: the number of rounds for which the population should communicate
+    :param n_rounds: the number of rounds for which the population should communicate; corresponds to global variable
+    'rounds'
     :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
     """
     if n_parents == 'single':
@@ -796,7 +721,7 @@ def population_communication(population, rounds):
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     data_for_just_in_case = []
-    for i in range(rounds):
+    for i in range(n_rounds):
         if interaction == 'taking_turns':
             if len(population) != 2:
                 raise ValueError(
@@ -952,7 +877,6 @@ def population_communication(population, rounds):
         data = data_for_just_in_case
 
 
-
     # I ADDED THE BIT BELOW TO CHECK HOW OFTEN SELECTING FOR COMMUNICATIVE SUCCESS LEADS TO DATA SETS THAT ARE SMALLER
     # THAN THE BOTTLENECK:
     if communicative_success_pressure:
@@ -966,6 +890,8 @@ def population_communication(population, rounds):
     return data
 
 
+# AND NOW FOR THE FUNCTIONS THAT HANDLE CREATING A DATASET FROM A SPECIFIC LANGUAGE TYPE (IN ORDER TO GENERATE THE DATA
+# THAT GENERATION 0 WILL LEARN FROM):
 
 def dataset_from_language(language):
     """
@@ -985,13 +911,14 @@ def dataset_from_language(language):
     return meaning_form_pairs
 
 
-def create_initial_dataset(desired_class, b):
+def create_initial_dataset(desired_class, bottleneck):
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
     :param desired_class: 'degenerate', 'holistic', 'hybrid', 'compositional', or 'other'; category indices as hardcoded
     in classify_language function are: 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm
     following the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    :param bottleneck: the transmission bottleneck (int); corresponds to global variable 'b'
     :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
     the form) from a randomly chosen language of the desired class
     """
@@ -1008,17 +935,19 @@ def create_initial_dataset(desired_class, b):
     language_class_indices = np.where(class_per_lang == class_index)[0]
     class_languages = []
     for index in language_class_indices:
-        class_languages.append(all_possible_languages[index])
+        class_languages.append(hypothesis_space[index])
     random_language = random.choice(class_languages)
     meaning_form_pairs = dataset_from_language(random_language)
-    if b % len(meaning_form_pairs) != 0:
+    if bottleneck % len(meaning_form_pairs) != 0:
         raise ValueError("OOPS! b needs to be a multiple of the number of meanings in order for this function to create a balanced dataset.")
     dataset = []
-    for i in range(int(b/len(meaning_form_pairs))):
+    for i in range(int(bottleneck / len(meaning_form_pairs))):
         dataset = dataset+meaning_form_pairs
     return dataset
 
 
+# AND NOW A FUNCTION THAT RECORDS THE PROPORTION OF POSTERIOR PROBABILITY THAT IS ASSIGNED TO EACH LANGUAGE CLASS IN A
+# GIVEN GENERATION:
 
 def language_stats(population):
     """
@@ -1031,10 +960,11 @@ def language_stats(population):
     category indices as hardcoded in the classify_language() function (where I follow the ordering used in the Kirby
     et al., 2015 paper; NOT the ordering from SimLang lab 21)
     """
-    stats = np.zeros(5)  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+    stats = np.zeros(5)
     for p in population:
         for i in range(len(p)):
-            # if proportion_measure == 'posterior':
+            # if proportion_measure == 'posterior':  # Note that this will only work when the population has a size
+            ## that is a reasonable multitude of the number of language classes
                 # stats[int(class_per_lang[i])] += np.exp(p[i]) / len(population)
             stats[int(class_per_lang[i])] += np.exp(p[i])
             # elif proportion_measure == 'sampled':
@@ -1044,26 +974,27 @@ def language_stats(population):
     return stats
 
 
+# AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(generations, rounds, bottleneck, popsize, data):
+def simulation(n_gens, n_rounds, bottleneck, pop_size, data):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
 
-    :param generations: the desired number of generations (int)
-    :param rounds: the desired number of communication rounds *within* each generation
+    :param n_gens: the desired number of generations (int); corresponds to global variable 'generations'
+    :param n_rounds: the desired number of communication rounds *within* each generation; corresponds to global variable
+    'rounds'
     :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
-    :param popsize: the desired size of the population (int)
+    :param pop_size: the desired size of the population (int); corresponds to global variable 'popsize'
     :param data: the initial data that generation 0 learns from
     :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains data over
     generations over runs), and the final population
     """
-
     language_stats_over_gens = []
     data_over_gens = []
-    population = new_population(popsize)
-    for i in range(generations):
-        for j in range(popsize):
+    population = new_population(pop_size)
+    for i in range(n_gens):
+        for j in range(pop_size):
             for k in range(bottleneck):
                 if interaction == 'taking_turns':
                     if len(population) != 2:
@@ -1079,60 +1010,61 @@ def simulation(generations, rounds, bottleneck, popsize, data):
                     population[j] = update_posterior_simlang(population[j], meaning, signal)
                 else:
                     population[j] = update_posterior(population[j], meaning, signal)
-        data = population_communication(population, rounds)
+        data = population_communication(population, n_rounds)
         language_stats_over_gens.append(language_stats(population))
         data_over_gens.append(data)
         if turnover:
-            population = new_population(popsize)
+            population = new_population(pop_size)
     return language_stats_over_gens, data_over_gens, population
 
 
+# AND NOW SOME FUNCTIONS THAT CONVERT A DATA LIST INTO A PANDAS DATA FRAME FOR PLOTTING:
 
-def language_stats_to_dataframe(results, runs, generations, n_lang_classes):
+def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
     """
     Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
     and language class)
 
     :param results: a list containing proportions for each of the 5 language classes, for each generation, for each run
-    :param runs: the number of runs (int)
-    :param generations: the number of generations (int)
-    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
+    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
+    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
+    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
+    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
+    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
+    this distinction
     :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
     column_proportion = np.array(results)
     column_proportion = column_proportion.flatten()
 
     column_runs = []
-    for i in range(runs):
-        for j in range(generations):
-            for k in range(n_lang_classes):
+    for i in range(n_runs):
+        for j in range(n_gens):
+            for k in range(n_language_classes):
                 column_runs.append(i)
     column_runs = np.array(column_runs)
 
     column_generation = []
-    for i in range(runs):
-        for j in range(generations):
-            for k in range(n_lang_classes):
+    for i in range(n_runs):
+        for j in range(n_gens):
+            for k in range(n_language_classes):
                 column_generation.append(j)
     column_generation = np.array(column_generation)
 
     column_type = []
-    for i in range(runs):
-        for j in range(generations):
-            if n_lang_classes == 4:
+    for i in range(n_runs):
+        for j in range(n_gens):
+            if n_language_classes == 4:
                 column_type.append('degenerate')
                 column_type.append('holistic')
                 column_type.append('other')
                 column_type.append('compositional')
-            elif n_lang_classes == 5:
+            elif n_language_classes == 5:
                 column_type.append('degenerate')
                 column_type.append('holistic')
                 column_type.append('hybrid')
                 column_type.append('compositional')
                 column_type.append('other')
-
 
     data = {'run': column_runs,
             'generation': column_generation,
@@ -1144,8 +1076,7 @@ def language_stats_to_dataframe(results, runs, generations, n_lang_classes):
     return lang_class_prop_over_gen_df
 
 
-
-def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_lang_classes):
+def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_language_classes):
     """
     Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
     populations' posterior probability distributions over generations.
@@ -1154,38 +1085,36 @@ def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_lang_classes):
     proportions of the different language classes over generations over runs.
     :param n_runs: number of runs (int)
     :param n_gens: number of generations (int)
-    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
+    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
+    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
+    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
+    this distinction
     :return: a numpy array containing the proportions of the different language classes for each generation for each run
     """
-
     proportion_column = np.array(dataframe['proportion'])
-
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_lang_classes))
-
+    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_language_classes))
     return proportion_column_as_results
 
 
+# AND NOW SOME FUNCTIONS THAT CONVERT VARIABLES TO FORMATS THAT ARE MORE SUITABLE FOR USING IN A FILENAME:
 
 def convert_float_value_to_string(float_value):
     """
-    :param array: A 1D numpy array
-    :return: The numpy array converted into a string where spaces are replaced by underscores and brackets and dots are removed.
+    :param float_value: float
+    :return: The float converted into a string where dots are removed.
     """
-    # if float_value % 1. == 0:
-    #     float_value = int(float_value)
+    if float_value % 1. == 0:
+        float_value = int(float_value)
     float_string = str(float_value)
     float_string = float_string.replace(".", "")
     return float_string
 
 
-
-
 def convert_array_to_string(array):
     """
     :param array: A 1D numpy array
-    :return: The numpy array converted into a string where spaces are replaced by underscores and brackets and dots are removed.
+    :return: The numpy array converted into a string where spaces are replaced by underscores and brackets and dots are
+    removed.
     """
     array_string = np.array2string(array, separator=',')
     array_string = array_string.replace(" ", "")
@@ -1193,22 +1122,18 @@ def convert_array_to_string(array):
     return array_string
 
 
+# AND NOW FOR THE PLOTTING FUNCTIONS:
 
-
-
-def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes):
+def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_language_classes):
     """
-    Takes a list of language stats over generations (results) and plots a timecourse graph
+    Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
 
-    :param results: A list of language stats over generations, containing n_runs sublists which each contain
-    n_generations, which each contain 4 or 5 numbers (depending on whether the old code was used (from before 13
-    September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new
-    code was used which does make this distinction. In the new code, index 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = other; these are the category indices as hardcoded in the classify_language() function
-    (where I follow the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
-    :param plot_title: The title of the condition that should be on the plot (string)
-    :param fig_file_name: The file name that the plot should be saved under
-    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
+    and 'class'
+    :param title: The title of the condition that should be on the plot (string)
+    :param file_path: path to folder in which the figure file should be saved
+    :param file_name: The file name that the plot should be saved under
+    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
     was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
     languages, and 5 if the new code was used which does make this distinction.
     :return: Nothing. Just saves the plot and then shows it.
@@ -1218,9 +1143,9 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_
 
     fig, ax = plt.subplots()
 
-    if n_lang_classes == 4:
+    if n_language_classes == 4:
         palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_lang_classes == 5:
+    elif n_language_classes == 5:
         palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
@@ -1229,35 +1154,33 @@ def plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_
     plt.tick_params(axis='both', which='major', labelsize=20)
     plt.tick_params(axis='both', which='minor', labelsize=20)
     plt.ylim(-0.05, 1.05)
-    plt.title(plot_title, fontsize=22)
+    plt.title(title, fontsize=22)
     plt.xlabel('Generation', fontsize=20)
     plt.ylabel('Mean proportion', fontsize=20)
-    # plt.legend()
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles[1:], labels=labels[1:])
     plt.tight_layout()
-    plt.savefig(fig_file_path+"Timecourse_plot_"+fig_file_name + ".pdf")
+    plt.savefig(file_path + "Timecourse_plot_" + file_name + ".pdf")
     plt.show()
 
 
-
-
-def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_runs, n_gens, gen_start, n_lang_classes, baselines):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines):
     """
-    Takes a list of language stats over generations (results) and creates a bar plot showing the proportions of each
-    of the language classes, from generation 'gen_start' to generation 'gen_stop'
+    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a barplot
+    (excluding the burn-in period)
 
-    :param results: A list of language stats over generations, containing n_runs sublists which each contain
-    n_generations, which each contain 4 numbers (where index 0 = degenerate, index 1 = holistic, index 2 = other,
-    and index 3 = compositional)
-    :param plot_title: The title of the condition that should be on the plot (string)
-    :param fig_file_name: The file name that the plot should be saved under
-    :param gen_start: The generation from which the plot should start taking the mean (should be after the population
-    has reached convergence)
-    :param n_lang_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
+    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
+    and 'class'
+    :param title: The title of the condition that should be on the plot (string)
+    :param file_path: path to folder in which the figure file should be saved
+    :param file_name: The file name that the plot should be saved under
+    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
+    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
+    :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
+    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
     was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
     languages, and 5 if the new code was used which does make this distinction.
-    :param baselines: The baseline proportion for each language class, where the ordering depends on the code that was
+    :param lang_class_baselines: The baseline proportion for each language class, where the ordering depends on the code that was
     used, as described above.
     :return: Nothing. Just saves the plot and then shows it.
     """
@@ -1265,7 +1188,7 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_lang_classes)
+    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_language_classes)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
@@ -1274,26 +1197,26 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
     runs_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            for k in range(n_lang_classes):
+            for k in range(n_language_classes):
                 runs_column_from_start_gen.append(i)
     runs_column_from_start_gen = np.array(runs_column_from_start_gen)
 
     generation_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            for k in range(n_lang_classes):
+            for k in range(n_language_classes):
                 generation_column_from_start_gen.append(j)
     generation_column_from_start_gen = np.array(generation_column_from_start_gen)
 
     class_column_from_start_gen = []
     for i in range(n_runs):
         for j in range(gen_start, n_gens):
-            if n_lang_classes == 4:
+            if n_language_classes == 4:
                 class_column_from_start_gen.append('degenerate')
                 class_column_from_start_gen.append('holistic')
                 class_column_from_start_gen.append('other')
                 class_column_from_start_gen.append('compositional')
-            elif n_lang_classes == 5:
+            elif n_language_classes == 5:
                 class_column_from_start_gen.append('degen.')
                 class_column_from_start_gen.append('holistic')
                 class_column_from_start_gen.append('hybrid')
@@ -1308,50 +1231,47 @@ def plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_fil
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
 
-    if n_lang_classes == 4:
+    if n_language_classes == 4:
         color_palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_lang_classes == 5:
+    elif n_language_classes == 5:
         color_palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
     sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
 
-    if n_lang_classes == 4:
-        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
-    elif n_lang_classes == 5:
-        plt.axhline(y=baselines[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=baselines[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
+    if n_language_classes == 4:
+        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
+    elif n_language_classes == 5:
+        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
 
     plt.tick_params(axis='both', which='major', labelsize=20)
     plt.tick_params(axis='both', which='minor', labelsize=20)
     plt.ylim(-0.05, 1.05)
-    plt.title(plot_title, fontsize=22)
+    plt.title(title, fontsize=22)
     # plt.xlabel('Language class')
     plt.xlabel('', fontsize=20)
     plt.ylabel('Mean proportion', fontsize=20)
     plt.tight_layout()
 
-    plt.savefig(fig_file_path+"Barplot_"+fig_file_name + "_burn_in_"+str(gen_start)+".pdf")
+    plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + ".pdf")
     plt.show()
 
 
-
-
-
+###################################################################################################################
 if __name__ == '__main__':
 
-
+    ###################################################################################################################
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
 
-    all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
+    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
-    print(len(all_possible_languages))
-
+    print(len(hypothesis_space))
 
     # Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
     # get with the SimLang lab 21:
@@ -1362,7 +1282,7 @@ if __name__ == '__main__':
     # print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
     # print(no_of_each_type)
 
-    class_per_lang = classify_all_languages(all_possible_languages)
+    class_per_lang = classify_all_languages(hypothesis_space)
     print('')
     print('')
     # print("class_per_lang is:")
@@ -1373,7 +1293,6 @@ if __name__ == '__main__':
           "4 = other is:")
     print(no_of_each_class)
 
-
     # Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
     # create_all_languages() function, or in my classify_lang() function?
     # To find out, let's compare my list of all languages to that from SimLang lab 21:
@@ -1381,7 +1300,7 @@ if __name__ == '__main__':
     # First, we need to change the way we represent the list of all languages to match
     # that of lab 21:
 
-    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(all_possible_languages)
+    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space)
     print('')
     print('')
     # print("all_langs_as_in_simlang is:")
@@ -1401,7 +1320,6 @@ if __name__ == '__main__':
     print("np.sum(checks_per_language) is:")
     print(np.sum(checks_per_language))
 
-
     print('')
     print('')
     # print("new_log_prior is:")
@@ -1417,7 +1335,6 @@ if __name__ == '__main__':
     # corresponding languages in the code from SimLang lab 21, so instead there must be something wrong with the way I
     # categorise the languages. Firstly, it looks like my classify_language() function underestimates the number of
     # compositional languages. So let's first have a look at which languages it classifies as compositional:
-
     #
     # compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
     # print('')
@@ -1427,14 +1344,12 @@ if __name__ == '__main__':
     # print("len(compositional_langs_indices_my_code) MY CODE are:")
     # print(len(compositional_langs_indices_my_code))
     #
-    #
     # for index in compositional_langs_indices_my_code:
     #     print('')
     #     print("index MY CODE is:")
     #     print(index)
     #     print("all_possible_languages[index] MY CODE is:")
     #     print(all_possible_languages[index])
-    #
     #
     # # And now let's do the same for the languages from SimLang Lab 21:
     #
@@ -1446,8 +1361,6 @@ if __name__ == '__main__':
     # print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
     # print(len(compositional_langs_indices_simlang))
     #
-    #
-    #
     # for index in compositional_langs_indices_simlang:
     #     print('')
     #     print("index SIMLANG CODE is:")
@@ -1455,13 +1368,10 @@ if __name__ == '__main__':
     #     print("languages_simlang[index] SIMLANG CODE is:")
     #     print(languages_simlang[index])
 
-
     # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
     # code (or rather, in the code that generated the list of types that was copied into SimLang lab 21)
     # Let's check whether maybe the holistic languages that are miscategorised as compositional in the SimLang code happen
     # to be the ones we identified as "hybrids" (i.e. kind of in between holistic and compositional) above:
-
-
 
     # hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
     # print('')
@@ -1471,7 +1381,6 @@ if __name__ == '__main__':
     # print("len(hybrid_langs_indices_my_code) MY CODE are:")
     # print(len(hybrid_langs_indices_my_code))
     #
-    #
     # for index in hybrid_langs_indices_my_code:
     #     print('')
     #     print("index MY CODE is:")
@@ -1480,24 +1389,20 @@ if __name__ == '__main__':
     #     print(all_possible_languages[index])
 
 
-
-
-
-
-
+    ###################################################################################################################
     # NOW LET'S RUN THE ACTUAL SIMULATION:
 
     t0 = time.clock()
 
-    all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
+    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
-    print(len(all_possible_languages))
+    print(len(hypothesis_space))
 
 
     if compressibility_bias:
         priors = new_log_prior
     else:
-        priors = np.ones(len(all_possible_languages))
+        priors = np.ones(len(hypothesis_space))
         priors = np.divide(priors, np.sum(priors))
         priors = np.log(priors)
 
@@ -1514,31 +1419,16 @@ if __name__ == '__main__':
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run.append(final_pop)
 
-
-
-
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-
-
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
-
-
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_language_stats" + ".p", "wb"))
-
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
-
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
 
-
-    lang_class_prop_over_gen_df = language_stats_to_dataframe(language_stats_over_gens_per_run, runs, generations, n_lang_classes)
-
-    lang_class_prop_over_gen_df.to_pickle(pickle_file_path+pickle_file_name+"_language_stats_pandas_df"+".pkl")
-
-
-
-    # to unpickle this data file, run: lang_class_prop_over_gen_df = pd.read_pickle(pickle_file_name+".pkl")
-
+    lang_class_prop_over_gen_dataframe = language_stats_to_dataframe(language_stats_over_gens_per_run, runs, generations, n_lang_classes)
+    lang_class_prop_over_gen_dataframe.to_pickle(pickle_file_path + pickle_file_name + "_language_stats_pandas_df" + ".pkl")
+    # to unpickle this data file, run: lang_class_prop_over_gen_dataframe = pd.read_pickle(pickle_file_name+".pkl")
 
     fig_file_name = "r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
@@ -1559,18 +1449,15 @@ if __name__ == '__main__':
         elif mutual_understanding is True and minimal_effort is True:
             plot_title = "Mutual Understanding and Minimal Effort"
 
-    plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes)
+    plot_timecourse(lang_class_prop_over_gen_dataframe, plot_title, fig_file_path, fig_file_name, n_lang_classes)
 
-
-    baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
+    baseline_proportions = np.divide(no_of_each_class, len(hypothesis_space))
     print('')
     print('')
     print("baseline_proportions are:")
     print(baseline_proportions)
 
-    plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, gen_start, n_lang_classes, baseline_proportions)
-
-
+    plot_barplot(lang_class_prop_over_gen_dataframe, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions)
 
     t1 = time.clock()
 
