@@ -84,11 +84,8 @@ print("len(all_results[0][0]) are:")
 print(len(all_results[0][0]))
 
 
-<<<<<<< HEAD
 lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs * batches, generations, n_lang_classes)
-=======
 lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs*batches, generations, n_lang_classes)
->>>>>>> c0732350304a50a58aa58bbcb72dda2d59da2082
 print('')
 print('')
 print("lang_class_prop_over_gen_df is:")
