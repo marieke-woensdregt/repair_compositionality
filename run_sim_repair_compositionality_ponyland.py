@@ -1,6 +1,5 @@
 import sys
 from evolution_compositionality_under_noise import *
-import scipy.misc
 
 
 def str_to_bool(s):
@@ -16,106 +15,6 @@ def str_to_bool(s):
         return False
     else:
         raise ValueError("string does not seem to correspond to a boolean")
-
-
-# I'm defining the update_posterior() and simulation() functions separately in this module because ponyland seems to
-# have an older version of scipy installed in which scipy.special didn't include the logsumexp() function yet.
-
-def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms):
-    """
-    Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
-    distribution accordingly
-
-    :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
-    :param hypotheses: list of all possible languages
-    :param topic: a topic (string from the global variable meanings)
-    :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is
-    True)
-    :param ambiguity_penalty: parameter that determines extent to which speaker tries to avoid ambiguity; corresponds
-    to global variable 'gamma'
-    :param noise_switch: determines whether noise is on or off (set to either True or False); corresponds to global
-    variable 'noise'
-    :param prob_of_noise: the probability of noise (only relevant when noise_switch == True); corresponds to global
-    variable 'noise_prob'
-    :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
-    'all_forms_including_noisy_variants'
-    :return: the updated (and normalized) log_posterior (1D numpy array)
-    """
-    # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy
-    # variants):
-    for i in range(len(all_possible_forms)):
-        if all_possible_forms[i] == utterance:
-            utterance_index = i
-    # Now, let's go through each hypothesis (i.e. language), and update its posterior probability given the
-    # <topic, utterance> pair that was given as input:
-    new_log_posterior = []
-    for j in range(len(log_posterior)):
-        hypothesis = hypotheses[j]
-        if noise_switch:
-            likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, ambiguity_penalty, error, prob_of_noise)
-        else:
-            likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, ambiguity_penalty, error)
-        log_likelihood_per_form_array = np.log(likelihood_per_form_array)
-        new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
-
-    new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.special.logsumexp(new_log_posterior))
-
-    return new_log_posterior_normalized
-
-
-def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms):
-    """
-    Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
-    class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
-
-    :param n_gens: the desired number of generations (int); corresponds to global variable 'generations'
-    :param n_rounds: the desired number of communication rounds *within* each generation; corresponds to global variable
-    'rounds'
-    :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
-    :param pop_size: the desired size of the population (int); corresponds to global variable 'popsize'
-    :param hypotheses: list of all possible languages; corresponds to global variable 'hypothesis_space'
-    :param log_priors: the LOG prior probability distribution that each agent should be initialised with
-    :param data: the initial data that generation 0 learns from
-    :param interaction_order: the order in which agents take turns in interaction (can be set to either 'taking_turns'
-    or 'random')
-    :param production_implementation: can be set to either 'my_code' or 'simlang'
-    :param ambiguity_penalty: parameter that determines the extent to which the speaker tries to avoid ambiguity;
-    corresponds to global variable 'gamma'
-    :param noise_switch: determines whether noise is on or off (set to either True or False); corresponds to global
-    variable 'noise'
-    :param prob_of_noise: probability of noise (only relevant when noise_switch == True); corresponds to global variable
-    'noise_prob'
-    :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
-    'all_forms_including_noisy_variants'
-    :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains
-    data over generations over runs), and the final population
-    """
-    language_stats_over_gens = []
-    data_over_gens = []
-    population = new_population(pop_size, log_priors)
-    for i in range(n_gens):
-        for j in range(pop_size):
-            for k in range(bottleneck):
-                if interaction_order == 'taking_turns':
-                    if len(population) != 2:
-                        raise ValueError(
-                            "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
-                    if bottleneck != len(data):
-                        raise ValueError(
-                            "UH-OH! data should have the same size as the bottleneck b")
-                    meaning, signal = data[k]
-                else:
-                    meaning, signal = random.choice(data)
-                if production_implementation == 'simlang':
-                    population[j] = update_posterior_simlang(population[j], meaning, signal)
-                else:
-                    population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
-        data = population_communication(population, n_rounds)
-        language_stats_over_gens.append(language_stats(population))
-        data_over_gens.append(data)
-        if turnover:
-            population = new_population(pop_size, priors)
-    return language_stats_over_gens, data_over_gens, population
 
 
 ###################################################################################################################
