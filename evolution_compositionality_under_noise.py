@@ -183,7 +183,7 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
 # NOW SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF LANGUAGES AND
 # TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
 
-def transform_all_languages_to_simlang_format(language_list):
+def transform_all_languages_to_simlang_format(language_list, meaning_list):
     """
     Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
     for each language, assuming the meaning for each form is specified by the
@@ -193,11 +193,12 @@ def transform_all_languages_to_simlang_format(language_list):
     a language
 
     :param language_list: list of all languages
+    :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: list of the input languages in the format of SimLang lab 21
     """
     all_langs_as_in_simlang = []
     for l in range(len(language_list)):
-        lang_as_in_simlang = [(meanings[x], language_list[l][x]) for x in range(len(meanings))]
+        lang_as_in_simlang = [(meaning_list[x], language_list[l][x]) for x in range(len(meaning_list))]
         all_langs_as_in_simlang.append(lang_as_in_simlang)
     return all_langs_as_in_simlang
 
@@ -1305,7 +1306,7 @@ if __name__ == '__main__':
     # First, we need to change the way we represent the list of all languages to match
     # that of lab 21:
 
-    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space)
+    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
     print('')
     print('')
     # print("all_langs_as_in_simlang is:")
