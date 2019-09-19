@@ -160,12 +160,15 @@ def classify_language(lang, forms, meaning_list):
         return class_other
 
 
-def classify_all_languages(language_list):
+def classify_all_languages(language_list, complete_forms, meaning_list):
     """
     Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
     (Kirby et al., 2015)
 
     :param language_list: list of all languages
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
     language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
     3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
@@ -173,7 +176,7 @@ def classify_all_languages(language_list):
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        class_per_lang[l] = classify_language(language_list[l], forms_without_noise, meanings)
+        class_per_lang[l] = classify_language(language_list[l], complete_forms, meaning_list)
     return class_per_lang
 
 
@@ -1284,7 +1287,7 @@ if __name__ == '__main__':
     # print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
     # print(no_of_each_type)
 
-    class_per_lang = classify_all_languages(hypothesis_space)
+    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
     print('')
     print('')
     # print("class_per_lang is:")
