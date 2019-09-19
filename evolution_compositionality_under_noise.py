@@ -40,10 +40,6 @@ if __name__ == '__main__':
 
     noise = True  # parameter that determines whether environmental noise is on or off
     noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
-    # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
-    # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
-    # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
-    # language and we count the resulting proportions.
     production = 'my_code'  # can be set to 'simlang' or 'my_code'
     mutual_understanding = True
     if mutual_understanding:
@@ -68,6 +64,11 @@ if __name__ == '__main__':
     communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
     # successful interaction is to enter the data set that is passed on to the next generation, compared to a
     # <meaning, form> pair from a unsuccessful interaction.
+
+    # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
+    # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
+    # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
+    # language and we count the resulting proportions.
 
     burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
@@ -1392,7 +1393,7 @@ if __name__ == '__main__':
     ###################################################################################################################
     # NOW LET'S RUN THE ACTUAL SIMULATION:
 
-    t0 = time.clock()
+    t0 = time.process_time()
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
@@ -1459,7 +1460,7 @@ if __name__ == '__main__':
 
     plot_barplot(lang_class_prop_over_gen_dataframe, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions)
 
-    t1 = time.clock()
+    t1 = time.process_time()
 
     print('')
     print('')
