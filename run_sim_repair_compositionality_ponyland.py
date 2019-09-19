@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
 
-    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space)
+    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
 
     checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages_simlang)
 
