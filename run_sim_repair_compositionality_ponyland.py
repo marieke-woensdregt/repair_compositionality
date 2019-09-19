@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
 
-    class_per_lang = classify_all_languages(hypothesis_space)
+    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
 
     all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space)
 
