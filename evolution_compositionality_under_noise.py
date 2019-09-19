@@ -5,11 +5,12 @@ from copy import deepcopy
 from math import log
 import scipy.special
 import pickle
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import time
 
+if __name__ == '__main__':
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
 
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
