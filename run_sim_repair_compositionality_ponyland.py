@@ -50,8 +50,6 @@ if __name__ == '__main__':
     print('')
     print("noise_prob is:")
     print(noise_prob)
-    print("type(noise_prob) is:")
-    print(type(noise_prob))
 
     production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
@@ -59,8 +57,6 @@ if __name__ == '__main__':
     print('')
     print("mutual_understanding is:")
     print(mutual_understanding)
-    print("type(mutual_understanding) is:")
-    print(type(mutual_understanding))
 
     if mutual_understanding:
         gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
@@ -75,8 +71,6 @@ if __name__ == '__main__':
     print('')
     print("minimal_effort is:")
     print(minimal_effort)
-    print("type(minimal_effort) is:")
-    print(type(minimal_effort))
 
     cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
     compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
@@ -87,7 +81,7 @@ if __name__ == '__main__':
     # used, but NOTE that it only works with a popsize of 2!
     n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
     # previous generation, or from multiple (can be set to either 'single' or 'multiple').
-    communicative_success_pressure = False  # determines whether there is a pressure for communicative success or not
+    communicative_success = False  # determines whether there is a pressure for communicative success or not
     communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
     # successful interaction is to enter the data set that is passed on to the next generation, compared to a
     # <meaning, form> pair from a unsuccessful interaction.
@@ -134,14 +128,14 @@ if __name__ == '__main__':
     for i in range(runs):
         print('')
         print('run '+str(i))
-        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants)
+        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
         language_stats_over_gens_per_run.append(language_stats_over_gens)
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run.append(final_pop)
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+ "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob)+"_observed_m_"+observed_meaning+"_n_l_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success_pressure)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_"+timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_language_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
