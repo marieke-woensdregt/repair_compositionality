@@ -7,10 +7,6 @@ import scipy.misc
 import pickle
 import time
 
-if __name__ == '__main__':
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import seaborn as sns
 
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
@@ -997,12 +993,14 @@ def create_initial_dataset(desired_class, bottleneck, language_list, class_per_l
 # AND NOW A FUNCTION THAT RECORDS THE PROPORTION OF POSTERIOR PROBABILITY THAT IS ASSIGNED TO EACH LANGUAGE CLASS IN A
 # GIVEN GENERATION:
 
-def language_stats(population):
+def language_stats(population, class_per_language):
     """
     Tracks how well each of the language classes is represented in the populations' posterior probability distributions
 
     :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
     distribution
+    :param class_per_language: list specifying the class for each corresponding language in the global variable
+    \'hypothesis_space'
     :return: a list containing the overall average posterior probability assigned to each class of language in the
     population, where index 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other; these are the
     category indices as hardcoded in the classify_language() function (where I follow the ordering used in the Kirby
@@ -1013,18 +1011,18 @@ def language_stats(population):
         for i in range(len(p)):
             # if proportion_measure == 'posterior':  # Note that this will only work when the population has a size
             ## that is a reasonable multitude of the number of language classes
-                # stats[int(class_per_lang[i])] += np.exp(p[i]) / len(population)
-            stats[int(class_per_lang[i])] += np.exp(p[i])
+                # stats[int(class_per_language[i])] += np.exp(p[i]) / len(population)
+            stats[int(class_per_language[i])] += np.exp(p[i])
             # elif proportion_measure == 'sampled':
             #     sampled_lang_index = log_roulette_wheel(p)
-            #     stats[int(class_per_lang[sampled_lang_index])] += 1
+            #     stats[int(class_per_language[sampled_lang_index])] += 1
     stats = np.divide(stats, len(population))
     return stats
 
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
+def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
@@ -1035,6 +1033,7 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, log_priors, d
     :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
     :param pop_size: the desired size of the population (int); corresponds to global variable 'popsize'
     :param hypotheses: list of all possible languages; corresponds to global variable 'hypothesis_space'
+    :param class_per_language: list specifiying the class for each corresponding language in the variable 'hypotheses'
     :param log_priors: the LOG prior probability distribution that each agent should be initialised with
     :param data: the initial data that generation 0 learns from
     :param interaction_order: the order in which agents take turns in interaction (can be set to either 'taking_turns'
@@ -1078,89 +1077,11 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, log_priors, d
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
         data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
-        language_stats_over_gens.append(language_stats(population))
+        language_stats_over_gens.append(language_stats(population, class_per_language))
         data_over_gens.append(data)
         if turnover:
-            population = new_population(pop_size, priors)
+            population = new_population(pop_size, log_priors)
     return language_stats_over_gens, data_over_gens, population
-
-
-# AND NOW SOME FUNCTIONS THAT CONVERT A DATA LIST INTO A PANDAS DATA FRAME FOR PLOTTING:
-
-def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
-    """
-    Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
-    and language class)
-
-    :param results: a list containing proportions for each of the 5 language classes, for each generation, for each run
-    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
-    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
-    :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
-    """
-    column_proportion = np.array(results)
-    column_proportion = column_proportion.flatten()
-
-    column_runs = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            for k in range(n_language_classes):
-                column_runs.append(i)
-    column_runs = np.array(column_runs)
-
-    column_generation = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            for k in range(n_language_classes):
-                column_generation.append(j)
-    column_generation = np.array(column_generation)
-
-    column_type = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            if n_language_classes == 4:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('other')
-                column_type.append('compositional')
-            elif n_language_classes == 5:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('hybrid')
-                column_type.append('compositional')
-                column_type.append('other')
-
-    data = {'run': column_runs,
-            'generation': column_generation,
-            'proportion': column_proportion,
-            'class': column_type}
-
-    lang_class_prop_over_gen_df = pd.DataFrame(data)
-
-    return lang_class_prop_over_gen_df
-
-
-def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_language_classes):
-    """
-    Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
-    populations' posterior probability distributions over generations.
-
-    :param dataframe: a pandas dataframe which contains at least a column named "proportions", which contains the
-    proportions of the different language classes over generations over runs.
-    :param n_runs: number of runs (int)
-    :param n_gens: number of generations (int)
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
-    :return: a numpy array containing the proportions of the different language classes for each generation for each run
-    """
-    proportion_column = np.array(dataframe['proportion'])
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_language_classes))
-    return proportion_column_as_results
 
 
 # AND NOW SOME FUNCTIONS THAT CONVERT VARIABLES TO FORMATS THAT ARE MORE SUITABLE FOR USING IN A FILENAME:
@@ -1187,147 +1108,6 @@ def convert_array_to_string(array):
     array_string = array_string.replace(" ", "")
     array_string = array_string.replace(".", "")
     return array_string
-
-
-# AND NOW FOR THE PLOTTING FUNCTIONS:
-
-def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_language_classes):
-    """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
-
-    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
-    and 'class'
-    :param title: The title of the condition that should be on the plot (string)
-    :param file_path: path to folder in which the figure file should be saved
-    :param file_name: The file name that the plot should be saved under
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
-    :return: Nothing. Just saves the plot and then shows it.
-    """
-    sns.set_style("whitegrid")
-    sns.set_context("talk")
-
-    fig, ax = plt.subplots()
-
-    if n_language_classes == 4:
-        palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
-        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
-
-    sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
-    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
-
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
-    plt.ylim(-0.05, 1.05)
-    plt.title(title, fontsize=22)
-    plt.xlabel('Generation', fontsize=20)
-    plt.ylabel('Mean proportion', fontsize=20)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles=handles[1:], labels=labels[1:])
-    plt.tight_layout()
-    plt.savefig(file_path + "Timecourse_plot_" + file_name + ".pdf")
-    plt.show()
-
-
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines):
-    """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a barplot
-    (excluding the burn-in period)
-
-    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
-    and 'class'
-    :param title: The title of the condition that should be on the plot (string)
-    :param file_path: path to folder in which the figure file should be saved
-    :param file_name: The file name that the plot should be saved under
-    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
-    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
-    :param lang_class_baselines: The baseline proportion for each language class, where the ordering depends on the code that was
-    used, as described above.
-    :return: Nothing. Just saves the plot and then shows it.
-    """
-
-    sns.set_style("whitegrid")
-    sns.set_context("talk")
-
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_language_classes)
-
-    proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
-
-    proportion_column_from_start_gen = proportion_column_from_start_gen.flatten()
-
-    runs_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                runs_column_from_start_gen.append(i)
-    runs_column_from_start_gen = np.array(runs_column_from_start_gen)
-
-    generation_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                generation_column_from_start_gen.append(j)
-    generation_column_from_start_gen = np.array(generation_column_from_start_gen)
-
-    class_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            if n_language_classes == 4:
-                class_column_from_start_gen.append('degenerate')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('other')
-                class_column_from_start_gen.append('compositional')
-            elif n_language_classes == 5:
-                class_column_from_start_gen.append('degen.')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('hybrid')
-                class_column_from_start_gen.append('comp.')
-                class_column_from_start_gen.append('other')
-
-
-    new_data_dict = {'run': runs_column_from_start_gen,
-            'generation': generation_column_from_start_gen,
-            'proportion': proportion_column_from_start_gen,
-            'class': class_column_from_start_gen}
-
-    lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
-
-    if n_language_classes == 4:
-        color_palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
-        color_palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
-
-    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
-
-    if n_language_classes == 4:
-        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
-    elif n_language_classes == 5:
-        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
-
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
-    plt.ylim(-0.05, 1.05)
-    plt.title(title, fontsize=22)
-    # plt.xlabel('Language class')
-    plt.xlabel('', fontsize=20)
-    plt.ylabel('Mean proportion', fontsize=20)
-    plt.tight_layout()
-
-    plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + ".pdf")
-    plt.show()
 
 
 ###################################################################################################################
@@ -1481,50 +1261,17 @@ if __name__ == '__main__':
     for i in range(runs):
         print('')
         print('run '+str(i))
-        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
         language_stats_over_gens_per_run.append(language_stats_over_gens)
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run.append(final_pop)
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
-    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_language_stats" + ".p", "wb"))
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
-
-    lang_class_prop_over_gen_dataframe = language_stats_to_dataframe(language_stats_over_gens_per_run, runs, generations, n_lang_classes)
-    lang_class_prop_over_gen_dataframe.to_pickle(pickle_file_path + pickle_file_name + "_language_stats_pandas_df" + ".pkl")
-    # to unpickle this data file, run: lang_class_prop_over_gen_dataframe = pd.read_pickle(pickle_file_name+".pkl")
-
-    fig_file_name = "r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_popsize_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) +  "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
-
-    if mutual_understanding is False and minimal_effort is False:
-        if gamma == 0 and turnover is True:
-            plot_title = "Learnability only"
-        elif gamma > 0 and turnover is False:
-            plot_title = "Expressivity only"
-        elif gamma > 0 and turnover is True:
-            plot_title = "Learnability and expressivity"
-        if noise:
-            plot_title = plot_title+" Plus Noise"
-    else:
-        if mutual_understanding is True and minimal_effort is False:
-            plot_title = "Mutual Understanding Only"
-        elif mutual_understanding is False and minimal_effort is True:
-            plot_title = "Minimal Effort Only"
-        elif mutual_understanding is True and minimal_effort is True:
-            plot_title = "Minimal Effort & Mutual Understanding"
-
-    plot_timecourse(lang_class_prop_over_gen_dataframe, plot_title, fig_file_path, fig_file_name, n_lang_classes)
-
-    baseline_proportions = np.divide(no_of_each_class, len(hypothesis_space))
-    print('')
-    print('')
-    print("baseline_proportions are:")
-    print(baseline_proportions)
-
-    plot_barplot(lang_class_prop_over_gen_dataframe, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions)
 
     t1 = time.process_time()
 
