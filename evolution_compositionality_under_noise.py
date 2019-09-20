@@ -694,15 +694,16 @@ def log_roulette_wheel(normedlogs):
         accumulator = scipy.misc.logsumexp([accumulator, normedlogs[i + 1]])
 
 
-def sample(log_posterior):
+def sample(hypotheses, log_posterior):
     """
     Samples a language based on the posterior
 
+    :param hypotheses: list of all possible languages; corresponds to global variable 'hypothesis_space'
     :param log_posterior: a list of LOG posterior probabilities
     :return: a language (list of forms_without_noisy_variants that has same length as the global variable meanings,
     where each form is mapped to the meaning at the corresponding index)
     """
-    return hypothesis_space[log_roulette_wheel(log_posterior)]
+    return hypotheses[log_roulette_wheel(log_posterior)]
 
 
 # NOW THE FUNCTION THAT CREATE A NEW POPULATION, AND MAKES A POPULATION COMMUNICATE (FOR THE INTRA-GENERATIONAL
@@ -762,8 +763,8 @@ def population_communication(population, n_rounds):
             speaker_index = pair_indices[0]
             hearer_index = pair_indices[1]
         topic = random.choice(meanings)
-        speaker_language = sample(population[speaker_index])
-        hearer_language = sample(population[hearer_index])
+        speaker_language = sample(hypothesis_space, population[speaker_index])
+        hearer_language = sample(hypothesis_space, population[hearer_index])
         if mutual_understanding is True:
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
