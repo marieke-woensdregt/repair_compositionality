@@ -50,9 +50,9 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.3  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
