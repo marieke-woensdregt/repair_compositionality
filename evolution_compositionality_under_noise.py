@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import itertools
 import random
@@ -6,6 +7,24 @@ from math import log
 import scipy.misc
 import pickle
 import time
+
+
+###################################################################################################################
+# THIS FUNCTION HAS TO BE DEFINED BEFORE EVERYTHING ELSE BECAUSE IT'S NEEDED TO GET SOME OF THE PARAMETER SETTINGS FROM
+# SYS.ARG
+def str_to_bool(s):
+    """
+    Takes a string which is either 'True' or '1' or 'False' or '0' and turns it into the corresponding boolean.
+
+    :param s: a string (only accepts 'True', 'true', '1', 'False', 'false' and '0'
+    :return: a boolean
+    """
+    if s == 'True' or s == 'true' or s == 1:
+        return True
+    elif s == 'False' or s == 'false' or s == 0:
+        return False
+    else:
+        raise ValueError("string does not seem to correspond to a boolean")
 
 
 ###################################################################################################################
@@ -62,9 +81,16 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 if __name__ == '__main__':
 
     noise = True  # parameter that determines whether environmental noise is on or off
-    noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
 
-    mutual_understanding = True
+    noise_prob = float(sys.argv[1])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
+    print('')
+    print("noise_prob is:")
+    print(noise_prob)
+
+    mutual_understanding = str_to_bool(sys.argv[2])  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("mutual_understanding is:")
+    print(mutual_understanding)
     if mutual_understanding:
         gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
         # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -74,7 +100,10 @@ if __name__ == '__main__':
         # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
         # conditions
 
-    minimal_effort = True
+    minimal_effort = str_to_bool(sys.argv[3])  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("minimal_effort is:")
+    print(minimal_effort)
 
     communicative_success = False  # determines whether there is a pressure for communicative success or not
     communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -1117,8 +1146,8 @@ if __name__ == '__main__':
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-    print("number of possible languages is:")
-    print(len(hypothesis_space))
+    # print("number of possible languages is:")
+    # print(len(hypothesis_space))
 
     # Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
     # get with the SimLang lab 21:
@@ -1130,15 +1159,15 @@ if __name__ == '__main__':
     # print(no_of_each_type)
 
     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-    print('')
-    print('')
+    # print('')
+    # print('')
     # print("class_per_lang is:")
     # print(class_per_lang)
     no_of_each_class = np.bincount(class_per_lang.astype(int))
-    print('')
-    print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
-          "4 = other is:")
-    print(no_of_each_class)
+    # print('')
+    # print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+    #       "4 = other is:")
+    # print(no_of_each_class)
 
     # Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
     # create_all_languages() function, or in my classify_lang() function?
@@ -1148,35 +1177,35 @@ if __name__ == '__main__':
     # that of lab 21:
 
     all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
-    print('')
-    print('')
-    # print("all_langs_as_in_simlang is:")
-    # print(all_langs_as_in_simlang)
-    print("len(all_langs_as_in_simlang) is:")
-    print(len(all_langs_as_in_simlang))
-    print("len(all_langs_as_in_simlang[0]) is:")
-    print(len(all_langs_as_in_simlang[0]))
-    print("len(all_langs_as_in_simlang[0][0]) is:")
-    print(len(all_langs_as_in_simlang[0][0]))
+    # print('')
+    # print('')
+    # # print("all_langs_as_in_simlang is:")
+    # # print(all_langs_as_in_simlang)
+    # print("len(all_langs_as_in_simlang) is:")
+    # print(len(all_langs_as_in_simlang))
+    # print("len(all_langs_as_in_simlang[0]) is:")
+    # print(len(all_langs_as_in_simlang[0]))
+    # print("len(all_langs_as_in_simlang[0][0]) is:")
+    # print(len(all_langs_as_in_simlang[0][0]))
 
     checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages_simlang, priors_simlang)
-    print('')
-    print('')
-    # print("checks_per_language is:")
-    # print(checks_per_language)
-    print("np.sum(checks_per_language) is:")
-    print(np.sum(checks_per_language))
-
-    print('')
-    print('')
-    # print("new_log_prior is:")
-    # print(new_log_prior)
-    # print("np.exp(new_log_prior) is:")
-    # print(np.exp(new_log_prior))
-    print("new_log_prior.shape is:")
-    print(new_log_prior.shape)
-    print("np.exp(scipy.misc.logsumexp(new_log_prior)) is:")
-    print(np.exp(scipy.misc.logsumexp(new_log_prior)))
+    # print('')
+    # print('')
+    # # print("checks_per_language is:")
+    # # print(checks_per_language)
+    # print("np.sum(checks_per_language) is:")
+    # print(np.sum(checks_per_language))
+    #
+    # print('')
+    # print('')
+    # # print("new_log_prior is:")
+    # # print(new_log_prior)
+    # # print("np.exp(new_log_prior) is:")
+    # # print(np.exp(new_log_prior))
+    # print("new_log_prior.shape is:")
+    # print(new_log_prior.shape)
+    # print("np.exp(scipy.misc.logsumexp(new_log_prior)) is:")
+    # print(np.exp(scipy.misc.logsumexp(new_log_prior)))
 
     # Ok, this shows that for each language in the list of all_possible_languages generated by my own code, there is a
     # corresponding languages in the code from SimLang lab 21, so instead there must be something wrong with the way I
@@ -1242,9 +1271,6 @@ if __name__ == '__main__':
     t0 = time.process_time()
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-    print("number of possible languages is:")
-    print(len(hypothesis_space))
-
 
     if compressibility_bias:
         priors = new_log_prior
@@ -1278,4 +1304,4 @@ if __name__ == '__main__':
     print('')
     print('')
     print("number of minutes it took to run simulation:")
-    print((t1-t0)/60.)
+    print(round((t1-t0)/60., ndigits=2))
