@@ -111,7 +111,7 @@ else:
     elif mutual_understanding == False and minimal_effort == True:
         plot_title = "Minimal Effort Only"
     elif mutual_understanding == True and minimal_effort == True:
-        plot_title = "Mutual Understanding & Minimal Effort"
+        plot_title = "Minimal Effort & Mutual Understanding"
 
 plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes)
 
