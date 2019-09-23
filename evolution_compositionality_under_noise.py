@@ -39,13 +39,10 @@ all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all poss
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
-        # used a bottleneck of 20 in the body of the paper.
-rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 150  # the number of generations (Kirby et al., 2015 used 100)
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 15  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -85,12 +82,19 @@ pickle_file_path = "pickles/"
 # ARGUMENTS GIVEN TO THE PYTHON SCRIPT WHEN RUN FROM THE TERMINAL OR FROM A .SH SCRIPT:
 if __name__ == '__main__':
 
-    noise_prob = float(sys.argv[1])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
+    b = int(sys.argv[1])  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+    # used a bottleneck of 20 in the body of the paper.
+    rounds = 2 * b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
+    print('')
+    print("b is:")
+    print(b)
+
+    noise_prob = float(sys.argv[2])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
     print('')
     print("noise_prob is:")
     print(noise_prob)
 
-    mutual_understanding = str_to_bool(sys.argv[2])  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    mutual_understanding = str_to_bool(sys.argv[3])  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
     print('')
     print("mutual_understanding is:")
     print(mutual_understanding)
@@ -103,7 +107,7 @@ if __name__ == '__main__':
         # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
         # conditions
 
-    minimal_effort = str_to_bool(sys.argv[3])  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    minimal_effort = str_to_bool(sys.argv[4])  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
     print('')
     print("minimal_effort is:")
     print(minimal_effort)
