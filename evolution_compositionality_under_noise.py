@@ -65,31 +65,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-
 noise = True  # parameter that determines whether environmental noise is on or off
-
-noise_prob = float(sys.argv[1])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
-print('')
-print("noise_prob is:")
-print(noise_prob)
-
-mutual_understanding = str_to_bool(sys.argv[2])  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
-print('')
-print("mutual_understanding is:")
-print(mutual_understanding)
-if mutual_understanding:
-    gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
-else:
-    gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
-
-minimal_effort = str_to_bool(sys.argv[3])  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
-print('')
-print("minimal_effort is:")
-print(minimal_effort)
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -103,6 +79,34 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 pickle_file_path = "pickles/"
+
+
+# THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
+# ARGUMENTS GIVEN TO THE PYTHON SCRIPT WHEN RUN FROM THE TERMINAL OR FROM A .SH SCRIPT:
+if __name__ == '__main__':
+
+    noise_prob = float(sys.argv[1])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
+    print('')
+    print("noise_prob is:")
+    print(noise_prob)
+
+    mutual_understanding = str_to_bool(sys.argv[2])  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("mutual_understanding is:")
+    print(mutual_understanding)
+    if mutual_understanding:
+        gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+        # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+        # conditions
+    else:
+        gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+        # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+        # conditions
+
+    minimal_effort = str_to_bool(sys.argv[3])  # Setting the 'minimal_effort' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("minimal_effort is:")
+    print(minimal_effort)
 
 
 # COPIED FROM SIMLANG LAB 21:
