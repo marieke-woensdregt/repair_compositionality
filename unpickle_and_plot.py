@@ -22,8 +22,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 15  # the number of generations (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 150  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -43,16 +43,16 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
+burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.3  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = False
+mutual_understanding = True
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
