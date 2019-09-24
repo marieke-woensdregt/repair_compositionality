@@ -50,7 +50,7 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.8  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
