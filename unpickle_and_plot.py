@@ -17,7 +17,7 @@ all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all poss
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 12  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
@@ -50,7 +50,7 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.8  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -201,7 +201,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
     plt.show()
 
 
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a barplot
     (excluding the burn-in period)
@@ -217,8 +217,10 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
     was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
     languages, and 5 if the new code was used which does make this distinction.
-    :param lang_class_baselines: The baseline proportion for each language class, where the ordering depends on the code that was
+    :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the code that was
     used, as described above.
+    :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
+    (i.e. 'holistic', 'hybrid', and 'compositional')
     :return: Nothing. Just saves the plot and then shows it.
     """
 
@@ -276,16 +278,22 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
 
     if n_language_classes == 4:
-        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
     elif n_language_classes == 5:
-        plt.axhline(y=lang_class_baselines[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_all[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
+
+        if title == 'Mutual Understanding Only' or title == 'Minimal Effort & Mutual Understanding':
+            plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.2, xmax=0.4, color='0.6', linestyle='--', linewidth=2)
+            plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.4, xmax=0.6, color='0.6', linestyle='--', linewidth=2)
+            plt.axhline(y=lang_class_baselines_fully_expressive[2], xmin=0.6, xmax=0.8, color='0.6', linestyle='--', linewidth=2)
+
 
     plt.tick_params(axis='both', which='major', labelsize=20)
     plt.tick_params(axis='both', which='minor', labelsize=20)
@@ -368,11 +376,22 @@ no_of_each_class = np.bincount(class_per_lang.astype(int))
 print('')
 print("no_of_each_class is:")
 print(no_of_each_class)
+print("np.sum(no_of_each_class) is:")
+print(np.sum(no_of_each_class))
 
-baseline_proportions = np.divide(no_of_each_class, len(all_possible_languages))
+
+baseline_proportions_all = np.divide(no_of_each_class, len(all_possible_languages))  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
 print('')
 print('')
-print("baseline_proportions are:")
-print(baseline_proportions)
+print("baseline_proportions_all are:")
+print(baseline_proportions_all)
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions)
+
+baseline_proportions_fully_expressive = np.divide(no_of_each_class[1:4], np.sum(no_of_each_class[1:4]))  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+print('')
+print('')
+print("baseline_proportions_fully_expressive are:")
+print(baseline_proportions_fully_expressive)
+
+
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions_all, baseline_proportions_fully_expressive)
