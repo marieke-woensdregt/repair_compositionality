@@ -41,8 +41,8 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 150  # the number of generations (Kirby et al., 2015 used 100)
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 15  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -1089,7 +1089,7 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_lan
     :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains
     data over generations over runs), and the final population
     """
-    language_stats_over_gens = []
+    language_stats_over_gens = np.zeros((n_gens, n_lang_classes))
     data_over_gens = []
     population = new_population(pop_size, log_priors)
     for i in range(n_gens):
@@ -1110,7 +1110,7 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_lan
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
         data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
-        language_stats_over_gens.append(language_stats(population, class_per_language))
+        language_stats_over_gens[i] = language_stats(population, class_per_language)
         data_over_gens.append(data)
         if turnover:
             population = new_population(pop_size, log_priors)
@@ -1285,16 +1285,17 @@ if __name__ == '__main__':
 
     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
 
-    language_stats_over_gens_per_run = []
+    language_stats_over_gens_per_run = np.zeros((runs, generations, n_lang_classes))
     data_over_gens_per_run = []
     final_pop_per_run = []
-    for i in range(runs):
+    for r in range(runs):
         print('')
-        print('run '+str(i))
+        print('run ' + str(r))
         language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
-        language_stats_over_gens_per_run.append(language_stats_over_gens)
+        language_stats_over_gens_per_run[r] = language_stats_over_gens
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run.append(final_pop)
+
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
