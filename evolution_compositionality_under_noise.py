@@ -1090,7 +1090,8 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_lan
     data over generations over runs), and the final population
     """
     language_stats_over_gens = np.zeros((n_gens, n_lang_classes))
-    data_over_gens = []
+    data_over_gens = []  # can't prespecify the size and shape of this list because size of data list depends on
+                        #  parameter settings such as n_parents and communicative_success_pressure.
     population = new_population(pop_size, log_priors)
     for i in range(n_gens):
         for j in range(pop_size):
@@ -1287,14 +1288,12 @@ if __name__ == '__main__':
 
     language_stats_over_gens_per_run = np.zeros((runs, generations, n_lang_classes))
     data_over_gens_per_run = []
-    final_pop_per_run = []
+    final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
     for r in range(runs):
-        print('')
-        print('run ' + str(r))
         language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
         language_stats_over_gens_per_run[r] = language_stats_over_gens
         data_over_gens_per_run.append(data_over_gens)
-        final_pop_per_run.append(final_pop)
+        final_pop_per_run[r] = final_pop
 
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
