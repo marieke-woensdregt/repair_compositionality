@@ -1055,11 +1055,12 @@ def language_stats(population, class_per_language):
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
+def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
 
+    :param population: the population at generation 0
     :param n_gens: the desired number of generations (int); corresponds to global variable 'generations'
     :param n_rounds: the desired number of communication rounds *within* each generation; corresponds to global variable
     'rounds'
@@ -1089,10 +1090,8 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_lan
     :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains
     data over generations over runs), and the final population
     """
-    language_stats_over_gens = np.zeros((n_gens, n_lang_classes))
-    data_over_gens = []  # can't prespecify the size and shape of this list because size of data list depends on
-                        #  parameter settings such as n_parents and communicative_success_pressure.
-    population = new_population(pop_size, log_priors)
+    language_stats_over_gens = []
+    data_over_gens = []
     for i in range(n_gens):
         for j in range(pop_size):
             for k in range(bottleneck):
@@ -1111,11 +1110,23 @@ def simulation(n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_lan
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
         data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
-        language_stats_over_gens[i] = language_stats(population, class_per_language)
+        language_stats_over_gens.append(language_stats(population, class_per_language))
         data_over_gens.append(data)
+        if i == n_gens-1:
+            print('')
+            print('')
+            print("i is:")
+            print(i)
+            print("n_gens is:")
+            print(n_gens)
+            print("i == n_gens!")
+            final_pop = population
+            print('')
+            print("np.exp(np.array(final_pop)) is:")
+            print(np.exp(np.array(final_pop)))
         if turnover:
             population = new_population(pop_size, log_priors)
-    return language_stats_over_gens, data_over_gens, population
+    return language_stats_over_gens, data_over_gens, final_pop
 
 
 # AND NOW SOME FUNCTIONS THAT CONVERT VARIABLES TO FORMATS THAT ARE MORE SUITABLE FOR USING IN A FILENAME:
@@ -1286,14 +1297,21 @@ if __name__ == '__main__':
 
     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
 
-    language_stats_over_gens_per_run = np.zeros((runs, generations, n_lang_classes))
+    language_stats_over_gens_per_run = []
     data_over_gens_per_run = []
-    final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
+    final_pop_per_run = []
     for r in range(runs):
-        language_stats_over_gens, data_over_gens, final_pop = simulation(generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
-        language_stats_over_gens_per_run[r] = language_stats_over_gens
+        population = new_population(popsize, priors)
+        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+
+        print('')
+        print('')
+        print("np.exp(np.array(final_pop)) is:")
+        print(np.exp(np.array(final_pop)))
+
+        language_stats_over_gens_per_run.append(language_stats_over_gens)
         data_over_gens_per_run.append(data_over_gens)
-        final_pop_per_run[r] = final_pop
+        final_pop_per_run.append(final_pop)
 
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
