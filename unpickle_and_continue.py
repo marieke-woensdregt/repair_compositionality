@@ -1,9 +1,7 @@
 import numpy as np
 import pickle
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from evolution_compositionality_under_noise import classify_all_languages, create_all_possible_languages, convert_float_value_to_string, convert_array_to_string
+import time
+from evolution_compositionality_under_noise import convert_array_to_string, convert_float_value_to_string, create_all_possible_languages, create_initial_dataset, classify_all_languages, transform_all_languages_to_simlang_format, check_all_lang_lists_against_each_other, simulation
 
 
 ###################################################################################################################
@@ -17,7 +15,7 @@ all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all poss
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 24  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
         # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
@@ -50,7 +48,7 @@ n_lang_classes = 5  # the number of language classes that are distinguished (int
 # languages, and 5 if the new code was used which does make this distinction.
 
 noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -77,235 +75,14 @@ fig_file_path = "plots/"
 batches = 1
 
 
-###################################################################################################################
-# ALL FUNCTION DEFINITIONS GO HERE:
-
-# FIRST WE NEED A FUNCTION THAT CONVERTS A DATA LIST INTO A PANDAS DATA FRAME FOR PLOTTING:
-def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
-    """
-    Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
-    and language class)
-
-    :param results: a list containing proportions for each of the 5 language classes, for each generation, for each run
-    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
-    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
-    :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
-    """
-    column_proportion = np.array(results)
-    column_proportion = column_proportion.flatten()
-
-    column_runs = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            for k in range(n_language_classes):
-                column_runs.append(i)
-    column_runs = np.array(column_runs)
-
-    column_generation = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            for k in range(n_language_classes):
-                column_generation.append(j)
-    column_generation = np.array(column_generation)
-
-    column_type = []
-    for i in range(n_runs):
-        for j in range(n_gens):
-            if n_language_classes == 4:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('other')
-                column_type.append('compositional')
-            elif n_language_classes == 5:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('hybrid')
-                column_type.append('compositional')
-                column_type.append('other')
-
-    data = {'run': column_runs,
-            'generation': column_generation,
-            'proportion': column_proportion,
-            'class': column_type}
-
-    lang_class_prop_over_gen_df = pd.DataFrame(data)
-
-    return lang_class_prop_over_gen_df
+extra_gens = 10
 
 
-# And this function turns a pandas dataframe back into a list of lists of lists of language stats, just in case
-# that's needed:
-def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_language_classes):
-    """
-    Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
-    populations' posterior probability distributions over generations.
+# COPIED FROM SIMLANG LAB 21:
+languages_simlang = [[('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')]]
+types_simlang = [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0]
+priors_simlang = [-0.9178860550328204, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -2.304180416152711, -11.272664072079987, -10.749415928290118, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -10.749415928290118, -11.272664072079987, -2.304180416152711, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -0.9178860550328204]
 
-    :param dataframe: a pandas dataframe which contains at least a column named "proportions", which contains the
-    proportions of the different language classes over generations over runs.
-    :param n_runs: number of runs (int)
-    :param n_gens: number of generations (int)
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
-    :return: a numpy array containing the proportions of the different language classes for each generation for each run
-    """
-    proportion_column = np.array(dataframe['proportion'])
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_language_classes))
-    return proportion_column_as_results
-
-
-# AND NOW FOR THE PLOTTING FUNCTIONS:
-
-def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_language_classes):
-    """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
-
-    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
-    and 'class'
-    :param title: The title of the condition that should be on the plot (string)
-    :param file_path: path to folder in which the figure file should be saved
-    :param file_name: The file name that the plot should be saved under
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
-    :return: Nothing. Just saves the plot and then shows it.
-    """
-    sns.set_style("whitegrid")
-    sns.set_context("talk")
-
-    fig, ax = plt.subplots()
-
-    if n_language_classes == 4:
-        palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
-        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
-
-    sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
-    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
-
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
-    plt.ylim(-0.05, 1.05)
-    plt.title(title, fontsize=22)
-    plt.xlabel('Generation', fontsize=20)
-    plt.ylabel('Mean proportion', fontsize=20)
-    handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles=handles[1:], labels=labels[1:])
-    plt.tight_layout()
-    plt.savefig(file_path + "Timecourse_plot_" + file_name + ".pdf")
-    plt.show()
-
-
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
-    """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a barplot
-    (excluding the burn-in period)
-
-    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
-    and 'class'
-    :param title: The title of the condition that should be on the plot (string)
-    :param file_path: path to folder in which the figure file should be saved
-    :param file_name: The file name that the plot should be saved under
-    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
-    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
-    :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the code that was
-    used, as described above.
-    :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
-    (i.e. 'holistic', 'hybrid', and 'compositional')
-    :return: Nothing. Just saves the plot and then shows it.
-    """
-
-    sns.set_style("whitegrid")
-    sns.set_context("talk")
-
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_language_classes)
-
-    proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
-
-    proportion_column_from_start_gen = proportion_column_from_start_gen.flatten()
-
-    runs_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                runs_column_from_start_gen.append(i)
-    runs_column_from_start_gen = np.array(runs_column_from_start_gen)
-
-    generation_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                generation_column_from_start_gen.append(j)
-    generation_column_from_start_gen = np.array(generation_column_from_start_gen)
-
-    class_column_from_start_gen = []
-    for i in range(n_runs):
-        for j in range(gen_start, n_gens):
-            if n_language_classes == 4:
-                class_column_from_start_gen.append('degenerate')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('other')
-                class_column_from_start_gen.append('compositional')
-            elif n_language_classes == 5:
-                class_column_from_start_gen.append('degen.')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('hybrid')
-                class_column_from_start_gen.append('comp.')
-                class_column_from_start_gen.append('other')
-
-
-    new_data_dict = {'run': runs_column_from_start_gen,
-            'generation': generation_column_from_start_gen,
-            'proportion': proportion_column_from_start_gen,
-            'class': class_column_from_start_gen}
-
-    lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
-
-    if n_language_classes == 4:
-        color_palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
-        color_palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
-
-    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
-
-    if n_language_classes == 4:
-        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
-    elif n_language_classes == 5:
-        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
-
-        if title == 'Mutual Understanding Only' or title == 'Minimal Effort & Mutual Understanding':
-            plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.2, xmax=0.4, color='0.6', linestyle='--', linewidth=2)
-            plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.4, xmax=0.6, color='0.6', linestyle='--', linewidth=2)
-            plt.axhline(y=lang_class_baselines_fully_expressive[2], xmin=0.6, xmax=0.8, color='0.6', linestyle='--', linewidth=2)
-
-
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
-    plt.ylim(-0.05, 1.05)
-    plt.title(title, fontsize=22)
-    # plt.xlabel('Language class')
-    plt.xlabel('', fontsize=20)
-    plt.ylabel('Mean proportion', fontsize=20)
-    plt.tight_layout()
-
-    plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + ".pdf")
-    plt.show()
 
 
 ###################################################################################################################
@@ -319,9 +96,147 @@ for i in range(batches):
     data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data"+".p", "rb"))
     final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
 
-    for r in range(len(final_pop_per_run)):
+
+    print('')
+    print('')
+    print("language_stats_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
+    print(language_stats_over_gens_per_run[-1])
+    print("len(language_stats_over_gens_per_run) BEFORE RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run))
+    print("len(language_stats_over_gens_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run[0]))
+    print("len(language_stats_over_gens_per_run[0][0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run[0][0]))
+
+
+    print('')
+    print('')
+    print("data_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
+    print(data_over_gens_per_run[-1])
+    print("len(data_over_gens_per_run) BEFORE RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run))
+    print("len(data_over_gens_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run[0]))
+    print("len(data_over_gens_per_run[0][0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run[0][0]))
+
+
+    print('')
+    print('')
+    print("np.exp(np.array(final_pop_per_run)) BEFORE RUNNING EXTRA GENS is:")
+    print(np.exp(np.array(final_pop_per_run)))
+    print("len(final_pop_per_run) BEFORE RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run))
+    print("len(final_pop_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run[0]))
+    print("len(final_pop_per_run[0][0]) BEFORE RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run[0][0]))
+
+    ###################################################################################################################
+    # NOW LET'S RUN THE ACTUAL SIMULATION:
+
+    t0 = time.process_time()
+
+    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
+
+    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
+
+    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
+
+    checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages_simlang, priors_simlang)
+
+    if compressibility_bias:
+        priors = new_log_prior
+    else:
+        priors = np.ones(len(hypothesis_space))
+        priors = np.divide(priors, np.sum(priors))
+        priors = np.log(priors)
+
+    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
+
+
+    final_pop_per_run_new = []
+    for r in range(runs):
+
+        print('')
+        print('')
+        print('This is run:')
+        print(r)
+
         final_pop = final_pop_per_run[r]
-        print("final_pop is:")
+        print('')
+        print("final_pop NOW INITIAL is:")
         print(final_pop)
-        print("final_pop.shape is:")
+        print("final_pop.shape NOW INITIAL is:")
         print(final_pop.shape)
+
+        initial_dataset = data_over_gens_per_run[r][-1]
+        print('')
+        print("initial_dataset (PREVIOUSLY FINAL) is:")
+        print(initial_dataset)
+        print("len(initial_dataset) (PREVIOUSLY FINAL) is:")
+        print(len(initial_dataset))
+
+        language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        language_stats_over_gens_per_run.append(language_stats_over_gens)
+        data_over_gens_per_run.append(data_over_gens)
+        final_pop_per_run_new.append(final_pop)
+
+
+    print('')
+    print('')
+    print("language_stats_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
+    print(language_stats_over_gens_per_run[-1])
+    print("len(language_stats_over_gens_per_run) AFTER RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run))
+    print("len(language_stats_over_gens_per_run[0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run[0]))
+    print("len(language_stats_over_gens_per_run[0][0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(language_stats_over_gens_per_run[0][0]))
+
+
+    print('')
+    print('')
+    print("data_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
+    print(data_over_gens_per_run[-1])
+    print("len(data_over_gens_per_run) AFTER RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run))
+    print("len(data_over_gens_per_run[0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run[0]))
+    print("len(data_over_gens_per_run[0][0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(data_over_gens_per_run[0][0]))
+
+
+    print('')
+    print('')
+    print("final_pop_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
+    print(final_pop_per_run_new[-1])
+    print("len(final_pop_per_run_new) AFTER RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run_new))
+    print("len(final_pop_per_run_new[0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run_new[0]))
+    print("len(final_pop_per_run_new[0][0]) AFTER RUNNING EXTRA GENS is:")
+    print(len(final_pop_per_run_new[0][0]))
+
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations+extra_gens) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
+    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+    pickle.dump(final_pop_per_run_new, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
+
+    t1 = time.process_time()
+
+    print('')
+    print("number of minutes it took to run simulation:")
+    print(round((t1-t0)/60., ndigits=2))
+
+    print('')
+    print('results were saved in folder:')
+    print(pickle_file_path)
+
+    print('')
+    print('using filename:')
+    print(pickle_file_name)
+
