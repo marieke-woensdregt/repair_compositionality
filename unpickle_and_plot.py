@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from evolution_compositionality_under_noise import classify_all_languages, create_all_possible_languages, convert_float_value_to_string, convert_array_to_string
+from evolution_compositionality_under_noise import create_all_possible_languages, classify_all_languages, convert_float_value_to_string, convert_array_to_string
 
 
 ###################################################################################################################
