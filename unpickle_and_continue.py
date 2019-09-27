@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 import time
-from evolution_compositionality_under_noise import convert_array_to_string, convert_float_value_to_string, create_all_possible_languages, create_initial_dataset, classify_all_languages, transform_all_languages_to_simlang_format, check_all_lang_lists_against_each_other, simulation
+from evolution_compositionality_under_noise import convert_array_to_string, convert_float_value_to_string, create_all_possible_languages, classify_all_languages, transform_all_languages_to_simlang_format, check_all_lang_lists_against_each_other, simulation
 
 
 ###################################################################################################################
@@ -151,9 +151,6 @@ for i in range(batches):
         priors = np.ones(len(hypothesis_space))
         priors = np.divide(priors, np.sum(priors))
         priors = np.log(priors)
-
-    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
-
 
     final_pop_per_run_new = []
     for r in range(runs):
