@@ -32,3 +32,19 @@ cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted reques
 hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
 print("number of possible languages is:")
 print(len(hypothesis_space))
+
+class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
+print('')
+print('')
+print("class_per_lang is:")
+print(class_per_lang)
+no_of_each_class = np.bincount(class_per_lang.astype(int))
+print('')
+print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+      "4 = other is:")
+print(no_of_each_class)
+
+
+def calc_prob_of_repair(language, costs, prob_of_noise):
+    for
+
