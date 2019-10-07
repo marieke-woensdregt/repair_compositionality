@@ -1,4 +1,5 @@
 import sys
+import string
 import numpy as np
 import itertools
 import random
@@ -31,17 +32,12 @@ def str_to_bool(s):
 # ALL PARAMETER SETTINGS GO HERE:
 
 # MY OWN CODE:
-meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = ['aa', 'ab', 'ba', 'bb']  # all possible forms, excluding their possible 'noisy variants'
-noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the forms above
-all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all possible forms, including both complete
-# forms and noisy variants
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 15  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -121,6 +117,30 @@ priors_simlang = [-0.9178860550328204, -10.749415928290118, -10.749415928290118,
 
 ###################################################################################################################
 # FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
+
+
+def create_all_possible_forms(n_characters, form_length_list):
+    """
+    Takes a number of characters and a list of allowed form lengths, and creates a list of all possible complete forms
+    based on that.
+
+    :param n_characters: the number of different characters that may be used
+    :param form_length_list: a list of all form lengths that are allowed
+    :return: a list of all possible complete forms
+    """
+    alphabet = string.ascii_lowercase
+    form_alphabet = alphabet[:n_characters]
+    all_forms = []
+    for length in form_length_list:
+        all_forms = all_forms+list(itertools.product(form_alphabet, repeat=length))
+    all_forms_as_strings = []
+    for form in all_forms:
+        string_form = ''
+        for i in range(len(form)):
+            string_form = string_form+form[i]
+        all_forms_as_strings.append(string_form)
+    return all_forms_as_strings
+
 
 def create_all_possible_languages(meaning_list, forms):
     """Creates all possible languages
@@ -317,6 +337,22 @@ def create_noisy_variants(form):
         # see: https://www.quora.com/How-do-you-change-one-character-in-a-string-in-Python
         noisy_variant_list.append(noisy_variant)
     return noisy_variant_list
+
+
+def create_all_possible_noisy_forms(all_complete_forms):
+    """
+    Takes a list of all possible complete forms and derives a list of all possible noisy forms.
+
+    :param all_complete_forms: list of all possible complete forms
+    :return: list of all possible noisy forms
+    """
+    noisy_forms = []
+    for form in all_complete_forms:
+        noisy_variants = create_noisy_variants(form)
+        for variant in noisy_variants:
+            if variant not in noisy_forms:
+                noisy_forms.append(variant)
+    return noisy_forms
 
 
 # we also need a function that removes every instance of a given element from a list (to use for
@@ -1113,17 +1149,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
         language_stats_over_gens.append(language_stats(population, class_per_language))
         data_over_gens.append(data)
         if i == n_gens-1:
-            print('')
-            print('')
-            print("i is:")
-            print(i)
-            print("n_gens is:")
-            print(n_gens)
-            print("i == n_gens!")
             final_pop = population
-            print('')
-            print("np.exp(np.array(final_pop)) is:")
-            print(np.exp(np.array(final_pop)))
         if turnover:
             population = new_population(pop_size, log_priors)
     return language_stats_over_gens, data_over_gens, final_pop
@@ -1160,6 +1186,24 @@ if __name__ == '__main__':
 
     ###################################################################################################################
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
+
+    meanings = ['02', '03', '12', '13']  # all possible meanings
+    forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible 'noisy variants'
+    print('')
+    print('')
+    print("forms_without_noise are:")
+    print(forms_without_noise)
+    print("len(forms_without_noise) are:")
+    print(len(forms_without_noise))
+    noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
+    print('')
+    print("noisy_forms are:")
+    print(noisy_forms)
+    print("len(noisy_forms) are:")
+    print(len(noisy_forms))
+    # all possible noisy variants of the forms above
+    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both complete
+    # forms and noisy variants
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     # print("number of possible languages is:")
@@ -1303,12 +1347,6 @@ if __name__ == '__main__':
     for r in range(runs):
         population = new_population(popsize, priors)
         language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
-
-        print('')
-        print('')
-        print("np.exp(np.array(final_pop)) is:")
-        print(np.exp(np.array(final_pop)))
-
         language_stats_over_gens_per_run.append(language_stats_over_gens)
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run.append(final_pop)
