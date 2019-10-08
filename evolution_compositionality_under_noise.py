@@ -38,7 +38,7 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 15  # the number of generations (Kirby et al., 2015 used 100)
+generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -215,6 +215,92 @@ def classify_language(lang, forms, meaning_list):
     # In all other cases, a language belongs to the 'other' category:
     else:
         return class_other
+
+
+
+def classify_language_new(lang, forms, meaning_list):
+    """
+    Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
+    or 'compositional' (3) (Kirby et al., 2015)
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :returns: integer corresponding to category that language belongs to:
+    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
+    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    """
+    # TODO: See if I can modify this function so that it can deal with any number of meanings.
+    class_degenerate = 0
+    class_holistic = 1
+    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
+    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
+    class_compositional = 3
+    class_other = 4
+
+    # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
+    if len(meaning_list) != 4:
+        raise ValueError("Sorry! At the moment this function only works if there are exactly 4 meanings")
+    if len(lang) != len(meaning_list):
+        raise ValueError("Lang should have same length as meanings")
+
+    # if the language uses the same form for every meaning, it is degenerate:
+    if lang.count(lang[0]) == len(lang):
+        return class_degenerate
+
+    # if each form is unique, the language is either compositional or holistic:
+    elif lang.count(lang[0]) == 1 and lang.count(lang[1]) == 1 and lang.count(lang[2]) == 1 and lang.count(lang[3]) == 1:
+        print('')
+        print('')
+        print("lang[0][:(len(lang) / 2)] is:")
+        print(lang[0][:(len(lang) / 2)])
+        print("lang[0][(len(lang) / 2):] is:")
+        print(lang[0][(len(lang) / 2):])
+        # if the same form element refers to the same meaning element for all forms, the language is compositional:
+        if lang[0][:(len(lang)/2)] == lang[1][:(len(lang)/2)] and lang[2][:(len(lang)/2)] == lang[3][:(len(lang)/2)] and lang[0][(len(lang)/2):] == lang[2][(len(lang)/2):] and lang[1][(len(lang)/2):] == lang[3][(len(lang))/2:]:
+            return class_compositional
+        # otherwise the language is holistic. Within holistic languages, we can distinguish between those in which at
+        # least one part form is mapped consistently onto one part meaning. This class we will call 'hybrid' (because
+        # for the purposes of repair, it is a hybrid between a holistic and a compositional language, because for half
+        # of the possible noisy forms that a listener could receive it allows the listener to figure out *part* of the
+        # meaning, and therefore use a restricted request for repair instead of an open request.
+        elif lang[0][:(len(lang)/2)] == lang[1][:(len(lang)/2)] and lang[2][:(len(lang)/2)] == lang[3][:(len(lang)/2)]:
+            return class_hybrid
+        elif lang[0][(len(lang)/2):] == lang[2][(len(lang)/2):] and lang[1][(len(lang)/2):] == lang[3][(len(lang))/2:]:
+            return class_hybrid
+        else:
+            return class_holistic
+
+    # In all other cases, a language belongs to the 'other' category:
+    else:
+        return class_other
+
+
+
+print('')
+print('')
+print('')
+print('')
+example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
+
+meanings = ['02', '03', '12', '13']
+
+forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible 'noisy variants'
+print('')
+print('')
+print("forms_without_noise are:")
+print(forms_without_noise)
+print("len(forms_without_noise) are:")
+print(len(forms_without_noise))
+
+example_lang_class = classify_language_new(example_lang, forms_without_noise, meanings)
+print('')
+print('')
+print("example_lang_class is:")
+print(example_lang_class)
+
+
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -1188,7 +1274,7 @@ if __name__ == '__main__':
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
 
     meanings = ['02', '03', '12', '13']  # all possible meanings
-    forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible 'noisy variants'
+    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible 'noisy variants'
     print('')
     print('')
     print("forms_without_noise are:")
@@ -1206,8 +1292,8 @@ if __name__ == '__main__':
     # forms and noisy variants
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-    # print("number of possible languages is:")
-    # print(len(hypothesis_space))
+    print("number of possible languages is:")
+    print(len(hypothesis_space))
 
     # Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
     # get with the SimLang lab 21:
