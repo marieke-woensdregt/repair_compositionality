@@ -218,20 +218,18 @@ def classify_language(lang, forms, meaning_list):
 
 
 
-def classify_language_new(lang, forms, meaning_list):
+def classify_language_new(lang, meaning_list):
     """
     Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
     or 'compositional' (3) (Kirby et al., 2015)
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
-    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :param meaning_list: list of strings corresponding to all possible meanings
     :returns: integer corresponding to category that language belongs to:
     0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
     ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     """
-    # TODO: See if I can modify this function so that it can deal with any number of meanings.
     class_degenerate = 0
     class_holistic = 1
     class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
@@ -240,53 +238,101 @@ def classify_language_new(lang, forms, meaning_list):
     class_other = 4
 
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
-    if len(meaning_list) != 4:
-        raise ValueError("Sorry! At the moment this function only works if there are exactly 4 meanings")
     if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
 
+    print('')
+    print('')
+    print("This is the classify_language_new() function:")
+    print('')
+    print("lang is:")
+    print(lang)
+    print("meaning_list is:")
+    print(meaning_list)
+
     # if the language uses the same form for every meaning, it is degenerate:
     if lang.count(lang[0]) == len(lang):
+        print('')
+        print("lang.count(lang[0]) == len(lang), so lang is degenerate")
         return class_degenerate
 
-    # if each form is unique, the language is either compositional or holistic:
-    elif lang.count(lang[0]) == 1 and lang.count(lang[1]) == 1 and lang.count(lang[2]) == 1 and lang.count(lang[3]) == 1:
-        print('')
-        print('')
-        print("lang[0][:(len(lang) / 2)] is:")
-        print(lang[0][:(len(lang) / 2)])
-        print("lang[0][(len(lang) / 2):] is:")
-        print(lang[0][(len(lang) / 2):])
-        # if the same form element refers to the same meaning element for all forms, the language is compositional:
-        if lang[0][:(len(lang)/2)] == lang[1][:(len(lang)/2)] and lang[2][:(len(lang)/2)] == lang[3][:(len(lang)/2)] and lang[0][(len(lang)/2):] == lang[2][(len(lang)/2):] and lang[1][(len(lang)/2):] == lang[3][(len(lang))/2:]:
-            return class_compositional
-        # otherwise the language is holistic. Within holistic languages, we can distinguish between those in which at
-        # least one part form is mapped consistently onto one part meaning. This class we will call 'hybrid' (because
-        # for the purposes of repair, it is a hybrid between a holistic and a compositional language, because for half
-        # of the possible noisy forms that a listener could receive it allows the listener to figure out *part* of the
-        # meaning, and therefore use a restricted request for repair instead of an open request.
-        elif lang[0][:(len(lang)/2)] == lang[1][:(len(lang)/2)] and lang[2][:(len(lang)/2)] == lang[3][:(len(lang)/2)]:
-            return class_hybrid
-        elif lang[0][(len(lang)/2):] == lang[2][(len(lang)/2):] and lang[1][(len(lang)/2):] == lang[3][(len(lang))/2:]:
-            return class_hybrid
-        else:
-            return class_holistic
-
-    # In all other cases, a language belongs to the 'other' category:
     else:
-        return class_other
+        # if each form is unique, the language is either compositional or holistic:
+        all_forms_unique = True
+        for form in lang:
+            if lang.count(form) != 1:
+                all_forms_unique = False
+        print('')
+        print("all_forms_unique is:")
+        print(all_forms_unique)
+        if all_forms_unique:
+            print("OK! all_forms_unique is True, now let's check whether the language is compositional!")
+            minimum_string_length = len(meaning_list[0])
+            # if the length of the form is longer than the minimum string length required to encode each feature
+            # separately, and the length of the form is a multiple of the minimum string length, we should check whether
+            # the form uses reduplication.
+            if len(lang[0]) > minimum_string_length and len(lang[0]) % minimum_string_length == 0:
+                print('ALLLRIGHT, WE SHOULD CHECK FOR REDUPLICATION!')
+                reduplication = True
+                for form in lang:
+                    # only if each subpart of the form is the same, reduplication is really true:
+                    subparts = [form[i:i+minimum_string_length] for i in range(0, len(form), minimum_string_length)]
+                    print("subparts are:")
+                    print(subparts)
+                    for part in subparts:
+                        if part != subparts[0]:
+                            reduplication = False
+            print('')
+            print("reduplication is:")
+            print(reduplication)
+            # the language is compositional if each form contains the same
+            compositionality = True
+            character_per_meaning_feature = np.zeros(len())
+            for i in range(len)
 
 
 
+
+
+    #
+    # elif lang.count(lang[0]) == 1 and lang.count(lang[1]) == 1 and lang.count(lang[2]) == 1 and lang.count(lang[3]) == 1:
+    #     # if the same form element refers to the same meaning element for all forms, the language is compositional:
+    #     # if lang[0][:int(len(lang[0])/2)] == lang[1][:int(len(lang[0])/2)] and lang[2][:int(len(lang[0])/2)] == lang[3][:int(len(lang[0])/2)] and lang[0][int(len(lang[0])/2):] == lang[2][int(len(lang[0])/2):] and lang[1][int(len(lang[0])/2):] == lang[3][int(len(lang[0])/2):]:
+    #     if lang[0][int(len(lang[0])/2):] = lang[0][:int(len(lang[0])/2)] and lang[1][int(len(lang[0])/2):] = lang[1][:int(len(lang[0])/2)] and lang[2][int(len(lang[0])/2):] = lang[2][:int(len(lang[0])/2)] and lang[0][int(len(lang[0])/2):] = lang[0][:int(len(lang[0])/2)]
+    #         return class_compositional
+    #     # otherwise the language is holistic. Within holistic languages, we can distinguish between those in which at
+    #     # least one part form is mapped consistently onto one part meaning. This class we will call 'hybrid' (because
+    #     # for the purposes of repair, it is a hybrid between a holistic and a compositional language, because for half
+    #     # of the possible noisy forms that a listener could receive it allows the listener to figure out *part* of the
+    #     # meaning, and therefore use a restricted request for repair instead of an open request.
+    #     elif lang[0][:int(len(lang[0])/2)] == lang[1][:int(len(lang[0])/2)] and lang[2][:int(len(lang[0])/2)] == lang[3][:int(len(lang[0])/2)]:
+    #         return class_hybrid
+    #     elif lang[0][int(len(lang[0])/2):] == lang[2][int(len(lang[0])/2):] and lang[1][int(len(lang[0])/2):] == lang[3][int(len(lang[0])/2):]:
+    #         return class_hybrid
+    #     else:
+    #         return class_holistic
+    #
+    # # In all other cases, a language belongs to the 'other' category:
+    # else:
+    #     return class_other
+
+
 print('')
 print('')
 print('')
 print('')
-example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
 
 meanings = ['02', '03', '12', '13']
+# meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
+# meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
 
-forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible 'noisy variants'
+example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
+# example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
+# example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+
+language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
+
+forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
 print('')
 print('')
 print("forms_without_noise are:")
@@ -294,13 +340,13 @@ print(forms_without_noise)
 print("len(forms_without_noise) are:")
 print(len(forms_without_noise))
 
-example_lang_class = classify_language_new(example_lang, forms_without_noise, meanings)
+example_lang_class = classify_language_new(example_lang, meanings)
 print('')
 print('')
 print("example_lang_class is:")
 print(example_lang_class)
-
-
+print("language_class_labels[example_lang_class] is:")
+print(language_class_labels[example_lang_class])
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -319,8 +365,28 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        class_per_lang[l] = classify_language(language_list[l], complete_forms, meaning_list)
+        class_per_lang[l] = classify_language_new(language_list[l], meaning_list)
     return class_per_lang
+
+
+
+def generate_rewrite_grammar(lang, language_class):
+    if language_class == 3:
+        rewrite_grammar = 'SAB.A0'+str(lang[0][:int(len(lang[0])/2)])+'.A1'+str(lang[2][:int(len(lang[0])/2)])+'.B2'+str(lang[0][int(len(lang[0])/2):])+'.B3'+str(lang[3][int(len(lang[0])/2):])
+    return rewrite_grammar
+
+
+
+example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
+example_lang_class = 3
+
+
+rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
+print("rewrite_grammar_example_lang is:")
+print(rewrite_grammar_example_lang)
+
+
+
 
 
 # NOW SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF LANGUAGES AND
