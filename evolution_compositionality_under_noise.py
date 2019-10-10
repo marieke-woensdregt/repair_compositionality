@@ -277,19 +277,29 @@ def classify_language_new(lang, meaning_list):
                 for form in lang:
                     # only if each subpart of the form is the same, reduplication is really true:
                     subparts = [form[i:i+minimum_string_length] for i in range(0, len(form), minimum_string_length)]
-                    print("subparts are:")
-                    print(subparts)
                     for part in subparts:
                         if part != subparts[0]:
                             reduplication = False
             print('')
             print("reduplication is:")
             print(reduplication)
-            # the language is compositional if each form contains the same
-            compositionality = True
-            character_per_meaning_feature = np.zeros(len())
-            for i in range(len)
-
+            if reduplication == True:
+                # the language is compositional if each form contains the same substring for the same meaning element:
+                print('A-HAH! reduplication is True so we should check for compositionality')
+                compositionality = True
+                substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1])+1)]
+                for i in range(len(meaning_list)):
+                    for j in range(len(meaning_list[i])):
+                        substring_per_meaning_element[int(meaning_list[i][j])].append(lang[i][j])
+                for substring in substring_per_meaning_element:
+                    if substring.count(substring[0]) != len(substring):
+                        compositionality = False
+            else:
+                compositionality = False
+            print("compositionality is:")
+            print(compositionality)
+            if compositionality == False:
+                print('HMMMM, OK, compositionality is false so we should check whether this language is a hybrid.')
 
 
 
@@ -326,7 +336,7 @@ meanings = ['02', '03', '12', '13']
 # meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
 # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
 
-example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
+example_lang = ['aaaa', 'abab', 'baba', 'bbba']
 # example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
 # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
 
