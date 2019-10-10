@@ -156,8 +156,8 @@ def create_all_possible_languages(meaning_list, forms):
 
 def classify_language(lang, forms, meaning_list):
     """
-    Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
-    or 'compositional' (3) (Kirby et al., 2015)
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+    (Kirby et al., 2015)
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
@@ -217,22 +217,81 @@ def classify_language(lang, forms, meaning_list):
         return class_other
 
 
+def check_reduplication(language, minimum_substring_length):
+    """
+    Checks to what extent a language makes use of reduplication (i.e. for each form in the language, it checks whether
+    it consists of the same substrings being repeated n times (where the substring length is given by the input
+    argument minimum_string_length, which should be equal to the number of meaning features. This constraint is set
+    because we are only interested in cases of reduplication in which the language might be a compositional (or hybrid)
+    language, which means that the minimum substring length should be equal to the number of meaning features, because
+    a compositional language requires at least one character to describe each meaning feature.
+
+    :param language: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param minimum_substring_length: the minimum substring length (int); should be equal to the number of meaning
+    features.
+    :return: a list of Booleans specifying for each form in the language whether it is a pure case of reduplication
+    (i.e. True) or not (i.e. False)
+    """
+
+    print('')
+    print('')
+    print('')
+    print("This is the check_reduplication() function:")
+
+    reduplication_per_form = [True for x in range(len(language))]
+    for i in range(len(language)):
+        print('')
+        print("i is:")
+        print(i)
+        form = language[i]
+        print("form is:")
+        print(form)
+        # only if each subpart of the form is the same, reduplication is really true:
+        subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
+        print("subparts are:")
+        print(subparts)
+        for part in subparts:
+            if part != subparts[0]:
+                reduplication_per_form[i] = False
+    return reduplication_per_form
+
+
+def check_compositionality(language, meaning_list):
+    """
+    Determines whether a language is compositional or not
+
+    :param language: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: True if lang is compositional, False otherwise (Boolean)
+    """
+    compositionality = True
+    substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
+    for i in range(len(meaning_list)):
+        for j in range(len(meaning_list[i])):
+            substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][j])
+    for substring in substring_per_meaning_element:
+        if substring.count(substring[0]) != len(substring):
+            compositionality = False
+    return compositionality
+
 
 def classify_language_new(lang, meaning_list):
     """
-    Classify one particular language as either 'degenerate' (0), 'holistic' (1), 'other' (2)
-    or 'compositional' (3) (Kirby et al., 2015)
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 3 = compositional, 4 = other
+    (Kirby et al., 2015)
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
     :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
+    0 = degenerate, 1 = holistic, 3 = compositional, 4 = other (here I'm following the
     ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
     """
     class_degenerate = 0
     class_holistic = 1
-    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
+    # class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
     # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
     class_compositional = 3
     class_other = 4
@@ -240,6 +299,12 @@ def classify_language_new(lang, meaning_list):
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
+    all_forms_same_length = True
+    for form in lang:
+        if len(form) != len(lang[0]):
+            all_forms_same_length = False
+    if all_forms_same_length is False:
+        raise ValueError("This function expects each form in the language to have the same length")
 
     print('')
     print('')
@@ -250,7 +315,7 @@ def classify_language_new(lang, meaning_list):
     print("meaning_list is:")
     print(meaning_list)
 
-    # if the language uses the same form for every meaning, it is degenerate:
+    # The language is DEGENERATE if it uses the same form for each meaning:
     if lang.count(lang[0]) == len(lang):
         print('')
         print("lang.count(lang[0]) == len(lang), so lang is degenerate")
@@ -266,65 +331,39 @@ def classify_language_new(lang, meaning_list):
         print("all_forms_unique is:")
         print(all_forms_unique)
         if all_forms_unique:
-            print("OK! all_forms_unique is True, now let's check whether the language is compositional!")
-            minimum_string_length = len(meaning_list[0])
+            print("ALRIGHT, all_forms_unique is True, now let's check whether the language is compositional!")
+            min_substring_length = len(meaning_list[0])
             # if the length of the form is longer than the minimum string length required to encode each feature
             # separately, and the length of the form is a multiple of the minimum string length, we should check whether
             # the form uses reduplication.
-            if len(lang[0]) > minimum_string_length and len(lang[0]) % minimum_string_length == 0:
-                print('ALLLRIGHT, WE SHOULD CHECK FOR REDUPLICATION!')
-                reduplication = True
-                for form in lang:
-                    # only if each subpart of the form is the same, reduplication is really true:
-                    subparts = [form[i:i+minimum_string_length] for i in range(0, len(form), minimum_string_length)]
-                    for part in subparts:
-                        if part != subparts[0]:
-                            reduplication = False
-            print('')
-            print("reduplication is:")
-            print(reduplication)
-            if reduplication == True:
-                # the language is compositional if each form contains the same substring for the same meaning element:
-                print('A-HAH! reduplication is True so we should check for compositionality')
-                compositionality = True
-                substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1])+1)]
-                for i in range(len(meaning_list)):
-                    for j in range(len(meaning_list[i])):
-                        substring_per_meaning_element[int(meaning_list[i][j])].append(lang[i][j])
-                for substring in substring_per_meaning_element:
-                    if substring.count(substring[0]) != len(substring):
-                        compositionality = False
+            if len(lang[0]) > min_substring_length and len(lang[0]) % min_substring_length == 0:
+                print('OK, the forms are longer than they need to be, so first we should check for reduplication:')
+                reduplication_per_form = check_reduplication(lang, min_substring_length)
+                print('')
+                print("reduplication_per_form is:")
+                print(reduplication_per_form)
+                if False not in reduplication_per_form:
+                    # The language is COMPOSITIONAL if each form contains the same substring for the same meaning
+                    # element:
+                    print('A-HAH! reduplication is True for all subparts, so we should check for compositionality!')
+                    compositionality = check_compositionality(lang, meaning_list)
+                else:
+                    print('WHOOPS! reduplication is NOT True for all subparts, so this cannot be a compositional language!')
+                    compositionality = False
             else:
-                compositionality = False
+                print("OK, the forms aren't shorter than they need to be, so we can directly check for compositionality:")
+                compositionality = check_compositionality(lang, meaning_list)
             print("compositionality is:")
             print(compositionality)
-            if compositionality == False:
-                print('HMMMM, OK, compositionality is false so we should check whether this language is a hybrid.')
-
-
-
-
-    #
-    # elif lang.count(lang[0]) == 1 and lang.count(lang[1]) == 1 and lang.count(lang[2]) == 1 and lang.count(lang[3]) == 1:
-    #     # if the same form element refers to the same meaning element for all forms, the language is compositional:
-    #     # if lang[0][:int(len(lang[0])/2)] == lang[1][:int(len(lang[0])/2)] and lang[2][:int(len(lang[0])/2)] == lang[3][:int(len(lang[0])/2)] and lang[0][int(len(lang[0])/2):] == lang[2][int(len(lang[0])/2):] and lang[1][int(len(lang[0])/2):] == lang[3][int(len(lang[0])/2):]:
-    #     if lang[0][int(len(lang[0])/2):] = lang[0][:int(len(lang[0])/2)] and lang[1][int(len(lang[0])/2):] = lang[1][:int(len(lang[0])/2)] and lang[2][int(len(lang[0])/2):] = lang[2][:int(len(lang[0])/2)] and lang[0][int(len(lang[0])/2):] = lang[0][:int(len(lang[0])/2)]
-    #         return class_compositional
-    #     # otherwise the language is holistic. Within holistic languages, we can distinguish between those in which at
-    #     # least one part form is mapped consistently onto one part meaning. This class we will call 'hybrid' (because
-    #     # for the purposes of repair, it is a hybrid between a holistic and a compositional language, because for half
-    #     # of the possible noisy forms that a listener could receive it allows the listener to figure out *part* of the
-    #     # meaning, and therefore use a restricted request for repair instead of an open request.
-    #     elif lang[0][:int(len(lang[0])/2)] == lang[1][:int(len(lang[0])/2)] and lang[2][:int(len(lang[0])/2)] == lang[3][:int(len(lang[0])/2)]:
-    #         return class_hybrid
-    #     elif lang[0][int(len(lang[0])/2):] == lang[2][int(len(lang[0])/2):] and lang[1][int(len(lang[0])/2):] == lang[3][int(len(lang[0])/2):]:
-    #         return class_hybrid
-    #     else:
-    #         return class_holistic
-    #
-    # # In all other cases, a language belongs to the 'other' category:
-    # else:
-    #     return class_other
+            if compositionality is True:
+                return class_compositional
+            # The language is HOLISTIC if all_forms_unique is True but the language is not compositional:
+            else:
+                return class_holistic
+        else:
+            # The language belongs to the OTHER class if it isn't degenerate, but also doesn't have a unique form for
+            # each meaning:
+            return class_other
 
 
 print('')
@@ -375,7 +414,10 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
+        # class_per_lang[l] = classify_language(language_list[l], complete_forms, meaning_list)
         class_per_lang[l] = classify_language_new(language_list[l], meaning_list)
+        print("class_per_lang[l] is:")
+        print(class_per_lang[l])
     return class_per_lang
 
 
