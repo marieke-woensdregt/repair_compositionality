@@ -37,7 +37,7 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 20  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -238,9 +238,12 @@ def check_reduplication(language, minimum_substring_length):
         form = language[i]
         # only if each subpart of the form is the same, reduplication is really true:
         subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
-        for subpart in subparts:
-            if subpart != subparts[0]:
-                reduplication_per_form[i] = False
+        if len(subparts) == 1:
+            reduplication_per_form[i] = False
+        else:
+            for subpart in subparts:
+                if subpart != subparts[0]:
+                    reduplication_per_form[i] = False
     return reduplication_per_form
 
 
@@ -331,36 +334,36 @@ def classify_language_general(lang, meaning_list):
             return class_other
 
 
-# print('')
-# print('')
-# print('')
-# print('')
-#
-# meanings = ['02', '03', '12', '13']
-# # meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
-# # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-#
-# example_lang = ['aaaa', 'abab', 'baba', 'bbba']
-# # example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
-# # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-#
-# language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
-#
-# forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
-# print('')
-# print('')
-# print("forms_without_noise are:")
-# print(forms_without_noise)
-# print("len(forms_without_noise) are:")
-# print(len(forms_without_noise))
-#
-# example_lang_class = classify_language_general(example_lang, meanings)
-# print('')
-# print('')
-# print("example_lang_class is:")
-# print(example_lang_class)
-# print("language_class_labels[example_lang_class] is:")
-# print(language_class_labels[example_lang_class])
+print('')
+print('')
+print('')
+print('')
+
+meanings = ['02', '03', '12', '13']
+# meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
+# meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+
+example_lang = ['aaaa', 'abab', 'baba', 'bb']
+# example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
+# example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+
+language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
+
+forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
+print('')
+print('')
+print("forms_without_noise are:")
+print(forms_without_noise)
+print("len(forms_without_noise) are:")
+print(len(forms_without_noise))
+
+example_lang_class = classify_language_general(example_lang, meanings)
+print('')
+print('')
+print("example_lang_class is:")
+print(example_lang_class)
+print("language_class_labels[example_lang_class] is:")
+print(language_class_labels[example_lang_class])
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -394,14 +397,16 @@ def generate_rewrite_grammar(lang, language_class):
 
 
 
-# example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
-# example_lang_class = 3
-#
-#
-# rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
-# print("rewrite_grammar_example_lang is:")
-# print(rewrite_grammar_example_lang)
-#
+
+
+example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
+example_lang_class = 3
+
+
+rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
+print("rewrite_grammar_example_lang is:")
+print(rewrite_grammar_example_lang)
+
 
 
 
@@ -1387,16 +1392,17 @@ if __name__ == '__main__':
     # print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
     # print(no_of_each_type)
 
-    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-    # print('')
-    # print('')
-    # print("class_per_lang is:")
-    # print(class_per_lang)
-    no_of_each_class = np.bincount(class_per_lang.astype(int))
-    # print('')
-    # print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
-    #       "4 = other is:")
-    # print(no_of_each_class)
+    if runs > 0:
+        class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
+        # print('')
+        # print('')
+        # print("class_per_lang is:")
+        # print(class_per_lang)
+        no_of_each_class = np.bincount(class_per_lang.astype(int))
+        # print('')
+        # print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+        #       "4 = other is:")
+        # print(no_of_each_class)
 
     # Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
     # create_all_languages() function, or in my classify_lang() function?
