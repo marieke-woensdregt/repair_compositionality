@@ -5,7 +5,7 @@ import itertools
 import random
 from copy import deepcopy
 from math import log
-import scipy.misc
+import scipy.special
 import pickle
 import time
 
@@ -37,7 +37,7 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -233,26 +233,13 @@ def check_reduplication(language, minimum_substring_length):
     :return: a list of Booleans specifying for each form in the language whether it is a pure case of reduplication
     (i.e. True) or not (i.e. False)
     """
-
-    print('')
-    print('')
-    print('')
-    print("This is the check_reduplication() function:")
-
     reduplication_per_form = [True for x in range(len(language))]
     for i in range(len(language)):
-        print('')
-        print("i is:")
-        print(i)
         form = language[i]
-        print("form is:")
-        print(form)
         # only if each subpart of the form is the same, reduplication is really true:
         subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
-        print("subparts are:")
-        print(subparts)
-        for part in subparts:
-            if part != subparts[0]:
+        for subpart in subparts:
+            if subpart != subparts[0]:
                 reduplication_per_form[i] = False
     return reduplication_per_form
 
@@ -281,10 +268,12 @@ def check_compositionality(language, meaning_list):
 def classify_language_general(lang, meaning_list):
     """
     Classify one particular language as either 0 = degenerate, 1 = holistic, 3 = compositional, 4 = other
-    (Kirby et al., 2015). NOTE that for the specific case of languages which consist of exactly 4 forms, where each
-    form consists of exactly 2 characters, you can also use the more specific classify_language_four_forms() function
-    above. ALSO NOTE that this function assumes that a langauge can be compositional only if reduplication is true for
-    all forms, or for none of the forms.
+    (Kirby et al., 2015). NOTE FIRSTLY that for the specific case of languages which consist of exactly 4 forms, where
+    each form consists of exactly 2 characters, you can also use the more specific classify_language_four_forms()
+    function above. NOTE SECONDLY that, in contrast to the classify_language_four_forms() function, this function does
+    not distinguish between languages of the 'hybrid' class and languages of the 'holistic' class; these are both
+    classed as 'holistic'. NOTE FINALLY that this function assumes that a langauge can be compositional only if
+    reduplication is true for all forms, or for none of the forms.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
@@ -304,32 +293,17 @@ def classify_language_general(lang, meaning_list):
     if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
 
-    print('')
-    print('')
-    print("This is the classify_language_new() function:")
-    print('')
-    print("lang is:")
-    print(lang)
-    print("meaning_list is:")
-    print(meaning_list)
-
     # The language is DEGENERATE if it uses the same form for each meaning:
     if lang.count(lang[0]) == len(lang):
-        print('')
-        print("lang.count(lang[0]) == len(lang), so lang is degenerate")
         return class_degenerate
 
     else:
-        # if each form is unique, the language is either compositional or holistic:
+        # If each form is unique, the language is either COMPOSITIONAL or HOLISTIC:
         all_forms_unique = True
         for form in lang:
             if lang.count(form) != 1:  # if a particular form occurs more than once in the language, all_forms_unique
                 all_forms_unique = False  # should be set to False
-        print('')
-        print("all_forms_unique is:")
-        print(all_forms_unique)
         if all_forms_unique:  # if all_forms_unique is True, we then check whether the language is compositional:
-            print("ALRIGHT, all_forms_unique is True, now let's check whether the language is compositional!")
             min_substring_length = len(meaning_list[0])
             # if the length of the form is longer than the minimum string length required to encode each meaning feature
             # separately, and the length of the form is a multiple of the minimum string length, we should check whether
@@ -339,22 +313,13 @@ def classify_language_general(lang, meaning_list):
                 if len(form) > min_substring_length and len(form) % min_substring_length == 0:
                     possible_reduplication = True
             if possible_reduplication:
-                print('OK, at least one of the forms is longer than it needs to be, and a multiple of the minimum_substring_length, so first we should check for reduplication:')
                 reduplication_per_form = check_reduplication(lang, min_substring_length)
-                print('')
-                print("reduplication_per_form is:")
-                print(reduplication_per_form)
                 if False not in reduplication_per_form:  # if reduplication is true for all forms, the language might be
-                    print('A-HAH! reduplication is True for all forms, so we should check for compositionality!')
-                    compositionality = check_compositionality(lang, meaning_list)  # compositional
+                    compositionality = check_compositionality(lang, meaning_list)  # COMPOSITIONAL
                 else:
-                    print('WHOOPS! reduplication is NOT True for all subparts, so this cannot be a compositional language!')
                     compositionality = False
-            else:  # if there is no reduplication in any of the forms, the language might also be compositional:
-                print("OK, the forms aren't shorter than they need to be, so we can directly check for compositionality:")
+            else:  # if there is no reduplication in any of the forms, the language might also be COMPOSITIONAL:
                 compositionality = check_compositionality(lang, meaning_list)
-            print("compositionality is:")
-            print(compositionality)
             if compositionality is True:
                 return class_compositional
             # The language is HOLISTIC if all_forms_unique is True but the language is not compositional:
@@ -366,36 +331,36 @@ def classify_language_general(lang, meaning_list):
             return class_other
 
 
-print('')
-print('')
-print('')
-print('')
-
-meanings = ['02', '03', '12', '13']
-# meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
-# meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-
-example_lang = ['aaaa', 'abab', 'baba', 'bbba']
-# example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
-# example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-
-language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
-
-forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
-print('')
-print('')
-print("forms_without_noise are:")
-print(forms_without_noise)
-print("len(forms_without_noise) are:")
-print(len(forms_without_noise))
-
-example_lang_class = classify_language_general(example_lang, meanings)
-print('')
-print('')
-print("example_lang_class is:")
-print(example_lang_class)
-print("language_class_labels[example_lang_class] is:")
-print(language_class_labels[example_lang_class])
+# print('')
+# print('')
+# print('')
+# print('')
+#
+# meanings = ['02', '03', '12', '13']
+# # meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
+# # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+#
+# example_lang = ['aaaa', 'abab', 'baba', 'bbba']
+# # example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
+# # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+#
+# language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
+#
+# forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
+# print('')
+# print('')
+# print("forms_without_noise are:")
+# print(forms_without_noise)
+# print("len(forms_without_noise) are:")
+# print(len(forms_without_noise))
+#
+# example_lang_class = classify_language_general(example_lang, meanings)
+# print('')
+# print('')
+# print("example_lang_class is:")
+# print(example_lang_class)
+# print("language_class_labels[example_lang_class] is:")
+# print(language_class_labels[example_lang_class])
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -414,10 +379,10 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        # class_per_lang[l] = classify_language(language_list[l], complete_forms, meaning_list)
-        class_per_lang[l] = classify_language_general(language_list[l], meaning_list)
-        print("class_per_lang[l] is:")
-        print(class_per_lang[l])
+        if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+            class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
+        else:
+            class_per_lang[l] = classify_language_general(language_list[l], meaning_list)
     return class_per_lang
 
 
@@ -429,14 +394,14 @@ def generate_rewrite_grammar(lang, language_class):
 
 
 
-example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
-example_lang_class = 3
-
-
-rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
-print("rewrite_grammar_example_lang is:")
-print(rewrite_grammar_example_lang)
-
+# example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
+# example_lang_class = 3
+#
+#
+# rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
+# print("rewrite_grammar_example_lang is:")
+# print(rewrite_grammar_example_lang)
+#
 
 
 
@@ -904,7 +869,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
-    new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.misc.logsumexp(new_log_posterior))
+    new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.special.logsumexp(new_log_posterior))
 
     return new_log_posterior_normalized
 
@@ -916,7 +881,7 @@ def normalize_logprobs_simlang(logprobs):
     :param logprobs: a list of LOG probabilities
     :return: a list of normalised LOG probabilities
     """
-    logtotal = scipy.misc.logsumexp(logprobs) #calculates the summed log probabilities
+    logtotal = scipy.special.logsumexp(logprobs) #calculates the summed log probabilities
     normedlogs = []
     for logp in logprobs:
         normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the
@@ -966,7 +931,7 @@ def log_roulette_wheel(normedlogs):
     for i in range(len(normedlogs)):
         if r < accumulator:
             return i
-        accumulator = scipy.misc.logsumexp([accumulator, normedlogs[i + 1]])
+        accumulator = scipy.special.logsumexp([accumulator, normedlogs[i + 1]])
 
 
 def sample(hypotheses, log_posterior):
@@ -1392,7 +1357,7 @@ if __name__ == '__main__':
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
 
     meanings = ['02', '03', '12', '13']  # all possible meanings
-    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible 'noisy variants'
+    forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible 'noisy variants'
     print('')
     print('')
     print("forms_without_noise are:")
@@ -1468,8 +1433,8 @@ if __name__ == '__main__':
     # # print(np.exp(new_log_prior))
     # print("new_log_prior.shape is:")
     # print(new_log_prior.shape)
-    # print("np.exp(scipy.misc.logsumexp(new_log_prior)) is:")
-    # print(np.exp(scipy.misc.logsumexp(new_log_prior)))
+    # print("np.exp(scipy.special.logsumexp(new_log_prior)) is:")
+    # print(np.exp(scipy.special.logsumexp(new_log_prior)))
 
     # Ok, this shows that for each language in the list of all_possible_languages generated by my own code, there is a
     # corresponding languages in the code from SimLang lab 21, so instead there must be something wrong with the way I
