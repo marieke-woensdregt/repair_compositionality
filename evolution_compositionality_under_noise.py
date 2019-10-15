@@ -257,11 +257,24 @@ def check_compositionality(language, meaning_list):
     :return: True if lang is compositional, False otherwise (Boolean)
     """
     # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element:
+
+    print('')
+    print('')
+    print('This is the check_compositionality() function:')
+
     compositionality = True
     substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
+
+    print("substring_per_meaning_element EMPTY is:")
+    print(substring_per_meaning_element)
+
     for i in range(len(meaning_list)):
         for j in range(len(meaning_list[i])):
             substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][j])
+
+    print("substring_per_meaning_element FILLED is:")
+    print(substring_per_meaning_element)
+
     for substring in substring_per_meaning_element:
         if substring.count(substring[0]) != len(substring):
             compositionality = False
@@ -307,22 +320,24 @@ def classify_language_general(lang, meaning_list):
             if lang.count(form) != 1:  # if a particular form occurs more than once in the language, all_forms_unique
                 all_forms_unique = False  # should be set to False
         if all_forms_unique:  # if all_forms_unique is True, we then check whether the language is compositional:
-            min_substring_length = len(meaning_list[0])
-            # if the length of the form is longer than the minimum string length required to encode each meaning feature
-            # separately, and the length of the form is a multiple of the minimum string length, we should check whether
-            # the form uses reduplication:
-            possible_reduplication = False
-            for form in lang:
-                if len(form) > min_substring_length and len(form) % min_substring_length == 0:
-                    possible_reduplication = True
-            if possible_reduplication:
-                reduplication_per_form = check_reduplication(lang, min_substring_length)
-                if False not in reduplication_per_form:  # if reduplication is true for all forms, the language might be
-                    compositionality = check_compositionality(lang, meaning_list)  # COMPOSITIONAL
-                else:
-                    compositionality = False
-            else:  # if there is no reduplication in any of the forms, the language might also be COMPOSITIONAL:
-                compositionality = check_compositionality(lang, meaning_list)
+
+            # min_substring_length = len(meaning_list[0])
+            # # if the length of the form is longer than the minimum string length required to encode each meaning feature
+            # # separately, and the length of the form is a multiple of the minimum string length, we should check whether
+            # # the form uses reduplication:
+            # possible_reduplication = False
+            # for form in lang:
+            #     if len(form) > min_substring_length and len(form) % min_substring_length == 0:
+            #         possible_reduplication = True
+            # if possible_reduplication:
+            #     reduplication_per_form = check_reduplication(lang, min_substring_length)
+            #     if False not in reduplication_per_form:  # if reduplication is true for all forms, the language might be
+            #         compositionality = check_compositionality(lang, meaning_list)  # COMPOSITIONAL
+            #     else:
+            #         compositionality = False
+            # else:  # if there is no reduplication in any of the forms, the language might also be COMPOSITIONAL:
+
+            compositionality = check_compositionality(lang, meaning_list)
             if compositionality is True:
                 return class_compositional
             # The language is HOLISTIC if all_forms_unique is True but the language is not compositional:
@@ -343,7 +358,7 @@ meanings = ['02', '03', '12', '13']
 # meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
 # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
 
-example_lang = ['aaaa', 'abab', 'baba', 'bb']
+example_lang = ['abba', 'abbb', 'baba', 'babb']
 # example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
 # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
 
@@ -360,6 +375,8 @@ print(len(forms_without_noise))
 example_lang_class = classify_language_general(example_lang, meanings)
 print('')
 print('')
+print("example_lang is:")
+print(example_lang)
 print("example_lang_class is:")
 print(example_lang_class)
 print("language_class_labels[example_lang_class] is:")
@@ -404,6 +421,8 @@ example_lang_class = 3
 
 
 rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
+print('')
+print('')
 print("rewrite_grammar_example_lang is:")
 print(rewrite_grammar_example_lang)
 
