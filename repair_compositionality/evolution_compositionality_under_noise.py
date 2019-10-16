@@ -257,27 +257,76 @@ def check_compositionality(language, meaning_list):
     :return: True if lang is compositional, False otherwise (Boolean)
     """
     # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element:
+    # If we allow for forms that are longer than the minimum number of characters required to uniquely specify each
+    # meaning element, there are multiple ways in which a language could be compositional. For instance, when meanings
+    # consist of two features, a language with forms of length 4 could be compositional by (i) having using a
+    # compositional substring of 2 characters for each possible meaning, and simply reduplicating that substring for
+    # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
+    # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
 
     print('')
     print('')
     print('This is the check_compositionality() function:')
+    print('')
+    print("language is:")
+    print(language)
 
-    compositionality = True
-    substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
+    compositionality = False
 
-    print("substring_per_meaning_element EMPTY is:")
-    print(substring_per_meaning_element)
+    max_form_length = 0
+    for form in language:
+        if len(form) > max_form_length:
+            max_form_length = len(form)
 
-    for i in range(len(meaning_list)):
-        for j in range(len(meaning_list[i])):
-            substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][j])
+    print("max_form_length is:")
+    print(max_form_length)
 
-    print("substring_per_meaning_element FILLED is:")
-    print(substring_per_meaning_element)
+    possible_substring_lengths = np.arange(1, max_form_length)
+    print("possible_substring_lengths are:")
+    print(possible_substring_lengths)
 
-    for substring in substring_per_meaning_element:
-        if substring.count(substring[0]) != len(substring):
-            compositionality = False
+    for length in possible_substring_lengths:
+
+        print('')
+        print('')
+        print('')
+        print('length is:')
+        print(length)
+
+        substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
+
+        print("substring_per_meaning_element EMPTY is:")
+        print(substring_per_meaning_element)
+
+        for i in range(len(meaning_list)):
+            for j in range(len(meaning_list[i])):
+                print('')
+                print("i is:")
+                print(i)
+                print("j is:")
+                print(j)
+                counter = j
+                print("meaning_list[i][j] is:")
+                print(meaning_list[i][j])
+                while counter+length <= len(language[i]):
+                    print("counter is:")
+                    print(counter)
+                    print('OK! counter+length <= len(language[i])')
+                    print("language[i][counter:counter + length] is:")
+                    print(language[i][counter:counter+length])
+                    substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][counter:counter+length])
+                    counter += length
+
+        print("substring_per_meaning_element FILLED is:")
+        print(substring_per_meaning_element)
+
+        for substring in substring_per_meaning_element:
+            if substring.count(substring[0]) == len(substring):
+                compositionality = True
+
+        print("compositionality is:")
+        print(compositionality)
+
     return compositionality
 
 
