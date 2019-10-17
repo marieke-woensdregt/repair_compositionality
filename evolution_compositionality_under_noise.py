@@ -264,6 +264,13 @@ def check_compositionality(language, meaning_list):
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
 
+
+    # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
+    for meaning in meaning_list:
+        if len(meaning) != 2:
+            raise ValueError("This function only works for meanings that consist of exactly 2 features")
+
+
     print('')
     print('')
     print('This is the check_compositionality() function:')
