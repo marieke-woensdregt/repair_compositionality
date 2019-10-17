@@ -37,8 +37,8 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 20  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -264,19 +264,10 @@ def check_compositionality(language, meaning_list):
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
 
-
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     for meaning in meaning_list:
         if len(meaning) != 2:
             raise ValueError("This function only works for meanings that consist of exactly 2 features")
-
-
-    print('')
-    print('')
-    print('This is the check_compositionality() function:')
-    print('')
-    print("language is:")
-    print(language)
 
     compositionality = False
 
@@ -284,72 +275,27 @@ def check_compositionality(language, meaning_list):
     for form in language:
         if len(form) > max_form_length:
             max_form_length = len(form)
-
-    print("max_form_length is:")
-    print(max_form_length)
-
     possible_substring_lengths = np.arange(1, max_form_length)
-    print("possible_substring_lengths are:")
-    print(possible_substring_lengths)
 
     for length in possible_substring_lengths:
 
-        print('')
-        print('')
-        print('')
-        print('length is:')
-        print(length)
-
-        substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
-
-        print("substring_per_meaning_element EMPTY is:")
-        print(substring_per_meaning_element)
-
+        substrings_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
         for i in range(len(meaning_list)):
             for j in range(len(meaning_list[i])):
-                print('')
-                print("i is:")
-                print(i)
-                print("j is:")
-                print(j)
-                counter = j
-                print("meaning_list[i][j] is:")
-                print(meaning_list[i][j])
-                while counter+length <= len(language[i]):
-                    print("counter is:")
-                    print(counter)
-                    print('OK! counter+length <= len(language[i])')
-                    print("language[i][counter:counter + length] is:")
-                    print(language[i][counter:counter+length])
-                    substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][counter:counter+length])
-                    counter += length
+                if j == 0:
+                    substring = language[i][:length]
+                elif j == 1:
+                    substring = language[i][length:]
+                substrings_per_meaning_element[int(meaning_list[i][j])].append(substring)
 
-        print("substring_per_meaning_element FILLED is:")
-        print(substring_per_meaning_element)
+        single_substring_per_meaning_element = [False for x in range(len(substrings_per_meaning_element))]
+        for k in range(len(substrings_per_meaning_element)):
+            substrings = substrings_per_meaning_element[k]
+            if substrings.count(substrings[0]) == len(substrings):
+                single_substring_per_meaning_element[k] = True
 
-        for substring in substring_per_meaning_element:
-            if substring.count(substring[0]) == len(substring):
-                compositionality = True
-
-        print("compositionality is:")
-        print(compositionality)
-
-    compositionality = True
-    substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
-
-    print("substring_per_meaning_element EMPTY is:")
-    print(substring_per_meaning_element)
-
-    for i in range(len(meaning_list)):
-        for j in range(len(meaning_list[i])):
-            substring_per_meaning_element[int(meaning_list[i][j])].append(language[i][j])
-
-    print("substring_per_meaning_element FILLED is:")
-    print(substring_per_meaning_element)
-
-    for substring in substring_per_meaning_element:
-        if substring.count(substring[0]) != len(substring):
-            compositionality = False
+        if False not in single_substring_per_meaning_element:
+            compositionality = True
 
     return compositionality
 
@@ -393,32 +339,16 @@ def classify_language_general(lang, meaning_list):
             if lang.count(form) != 1:  # if a particular form occurs more than once in the language, all_forms_unique
                 all_forms_unique = False  # should be set to False
         if all_forms_unique:  # if all_forms_unique is True, we then check whether the language is compositional:
-
-            # min_substring_length = len(meaning_list[0])
-            # # if the length of the form is longer than the minimum string length required to encode each meaning feature
-            # # separately, and the length of the form is a multiple of the minimum string length, we should check whether
-            # # the form uses reduplication:
-            # possible_reduplication = False
-            # for form in lang:
-            #     if len(form) > min_substring_length and len(form) % min_substring_length == 0:
-            #         possible_reduplication = True
-            # if possible_reduplication:
-            #     reduplication_per_form = check_reduplication(lang, min_substring_length)
-            #     if False not in reduplication_per_form:  # if reduplication is true for all forms, the language might be
-            #         compositionality = check_compositionality(lang, meaning_list)  # COMPOSITIONAL
-            #     else:
-            #         compositionality = False
-            # else:  # if there is no reduplication in any of the forms, the language might also be COMPOSITIONAL:
-
             compositionality = check_compositionality(lang, meaning_list)
             if compositionality is True:
                 return class_compositional
             # The language is HOLISTIC if all_forms_unique is True but the language is not compositional:
             else:
                 return class_holistic
+
+        # The language belongs to the OTHER class if it isn't degenerate, but also doesn't have a unique form for
+        # each meaning:
         else:
-            # The language belongs to the OTHER class if it isn't degenerate, but also doesn't have a unique form for
-            # each meaning:
             return class_other
 
 
@@ -428,11 +358,9 @@ print('')
 print('')
 
 meanings = ['02', '03', '12', '13']
-# meanings = ['024', '025', '034', '035', '124', '125', '134', '135']
 # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
 
 example_lang = ['abba', 'abbb', 'baba', 'babb']
-# example_lang = ['aaaaaa', 'aabaab', 'abaaba', 'abbabb', 'baabaa', 'babbab', 'bbabba', 'bbbbbb']
 # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
 
 language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
