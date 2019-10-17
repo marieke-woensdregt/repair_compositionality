@@ -5,11 +5,8 @@ import itertools
 import random
 from copy import deepcopy
 from math import log
-<<<<<<< HEAD
 import scipy.special
-=======
 import scipy.misc
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 import pickle
 import time
 
@@ -41,11 +38,8 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-<<<<<<< HEAD
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-=======
 runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 generations = 20  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
@@ -265,20 +259,16 @@ def check_compositionality(language, meaning_list):
     :return: True if lang is compositional, False otherwise (Boolean)
     """
     # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element:
-<<<<<<< HEAD
     # If we allow for forms that are longer than the minimum number of characters required to uniquely specify each
     # meaning element, there are multiple ways in which a language could be compositional. For instance, when meanings
     # consist of two features, a language with forms of length 4 could be compositional by (i) having using a
     # compositional substring of 2 characters for each possible meaning, and simply reduplicating that substring for
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
-=======
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 
     print('')
     print('')
     print('This is the check_compositionality() function:')
-<<<<<<< HEAD
     print('')
     print("language is:")
     print(language)
@@ -339,8 +329,6 @@ def check_compositionality(language, meaning_list):
         print("compositionality is:")
         print(compositionality)
 
-=======
-
     compositionality = True
     substring_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
 
@@ -357,7 +345,7 @@ def check_compositionality(language, meaning_list):
     for substring in substring_per_meaning_element:
         if substring.count(substring[0]) != len(substring):
             compositionality = False
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
+
     return compositionality
 
 
@@ -973,11 +961,8 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
-<<<<<<< HEAD
     new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.special.logsumexp(new_log_posterior))
-=======
     new_log_posterior_normalized = np.subtract(new_log_posterior, scipy.misc.logsumexp(new_log_posterior))
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 
     return new_log_posterior_normalized
 
@@ -989,11 +974,8 @@ def normalize_logprobs_simlang(logprobs):
     :param logprobs: a list of LOG probabilities
     :return: a list of normalised LOG probabilities
     """
-<<<<<<< HEAD
     logtotal = scipy.special.logsumexp(logprobs) #calculates the summed log probabilities
-=======
     logtotal = scipy.misc.logsumexp(logprobs) #calculates the summed log probabilities
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
     normedlogs = []
     for logp in logprobs:
         normedlogs.append(logp - logtotal) #normalise - subtracting in the log domain equivalent to divising in the
@@ -1043,11 +1025,8 @@ def log_roulette_wheel(normedlogs):
     for i in range(len(normedlogs)):
         if r < accumulator:
             return i
-<<<<<<< HEAD
         accumulator = scipy.special.logsumexp([accumulator, normedlogs[i + 1]])
-=======
         accumulator = scipy.misc.logsumexp([accumulator, normedlogs[i + 1]])
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 
 
 def sample(hypotheses, log_posterior):
@@ -1550,13 +1529,10 @@ if __name__ == '__main__':
     # # print(np.exp(new_log_prior))
     # print("new_log_prior.shape is:")
     # print(new_log_prior.shape)
-<<<<<<< HEAD
     # print("np.exp(scipy.special.logsumexp(new_log_prior)) is:")
     # print(np.exp(scipy.special.logsumexp(new_log_prior)))
-=======
     # print("np.exp(scipy.misc.logsumexp(new_log_prior)) is:")
     # print(np.exp(scipy.misc.logsumexp(new_log_prior)))
->>>>>>> 42d827ad4f0dd80e98e28b213d270610597a0f54
 
     # Ok, this shows that for each language in the list of all_possible_languages generated by my own code, there is a
     # corresponding languages in the code from SimLang lab 21, so instead there must be something wrong with the way I
