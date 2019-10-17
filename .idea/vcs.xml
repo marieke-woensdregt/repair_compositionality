@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
+<<<<<<< HEAD
     <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repair_compositionality" vcs="Git" />
   </component>
 </project>
+=======
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+</project>
+>>>>>>> c7d98f1be4f2c182325cb7f5f72f13ee58468223
