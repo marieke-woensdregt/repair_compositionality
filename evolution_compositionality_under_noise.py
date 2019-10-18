@@ -360,7 +360,7 @@ print('')
 meanings = ['02', '03', '12', '13']
 # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
 
-example_lang = ['abba', 'abbb', 'baba', 'babb']
+example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
 # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
 
 language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
