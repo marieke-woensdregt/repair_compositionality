@@ -33,3 +33,15 @@ print("number of possible languages is:")
 print(len(hypothesis_space))
 print("len(hypothesis_space)/256 is:")
 print(len(hypothesis_space)/256)
+
+
+L = ((2**30)-1)**8
+
+print("L is:")
+print(L)
+print("{:.2e}".format(L))
+
+import numpy as np
+
+h_space_size = np.power((np.power(2, 30)-1), 8)
+print(h_space_size)
