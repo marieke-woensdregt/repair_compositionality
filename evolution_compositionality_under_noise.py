@@ -85,7 +85,7 @@ if __name__ == '__main__':
     print("b is:")
     print(b)
 
-    noise_prob = float(sys.argv[2])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise masking part of an utterance
+    noise_prob = float(sys.argv[2])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring part of an utterance
     print('')
     print("noise_prob is:")
     print(noise_prob)
@@ -259,7 +259,7 @@ def check_compositionality(language, meaning_list):
     # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element:
     # If we allow for forms that are longer than the minimum number of characters required to uniquely specify each
     # meaning element, there are multiple ways in which a language could be compositional. For instance, when meanings
-    # consist of two features, a language with forms of length 4 could be compositional by (i) having using a
+    # consist of two features, a language with forms of length 4 could be compositional by (i) using a
     # compositional substring of 2 characters for each possible meaning, and simply reduplicating that substring for
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
@@ -352,36 +352,6 @@ def classify_language_general(lang, meaning_list):
             return class_other
 
 
-print('')
-print('')
-print('')
-print('')
-
-meanings = ['02', '03', '12', '13']
-# meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-
-example_lang = ['aaaa', 'abab', 'baba', 'bbbb']
-# example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-
-language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
-
-forms_without_noise = create_all_possible_forms(2, [2, 4])  #  all possible forms, excluding their possible 'noisy variants'
-print('')
-print('')
-print("forms_without_noise are:")
-print(forms_without_noise)
-print("len(forms_without_noise) are:")
-print(len(forms_without_noise))
-
-example_lang_class = classify_language_general(example_lang, meanings)
-print('')
-print('')
-print("example_lang is:")
-print(example_lang)
-print("example_lang_class is:")
-print(example_lang_class)
-print("language_class_labels[example_lang_class] is:")
-print(language_class_labels[example_lang_class])
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -415,17 +385,17 @@ def generate_rewrite_grammar(lang, language_class):
 
 
 
+if __name__ == '__main__':
+
+    example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
+    example_lang_class = 3
 
 
-example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
-example_lang_class = 3
-
-
-rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
-print('')
-print('')
-print("rewrite_grammar_example_lang is:")
-print(rewrite_grammar_example_lang)
+    rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
+    print('')
+    print('')
+    print("rewrite_grammar_example_lang is:")
+    print(rewrite_grammar_example_lang)
 
 
 
@@ -549,6 +519,53 @@ def create_all_possible_noisy_forms(all_complete_forms):
     return noisy_forms
 
 
+
+
+
+if __name__ == '__main__':
+
+    print('')
+    print('')
+    print('')
+    print('')
+
+    meanings = ['02', '03', '12', '13']
+    # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+
+    example_lang = ['aaaa', 'aaab', 'abaa', 'abab']
+    # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+
+    language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
+
+    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible 'noisy variants'
+    print('')
+    print('')
+    print("forms_without_noise are:")
+    print(forms_without_noise)
+    print("len(forms_without_noise) are:")
+    print(len(forms_without_noise))
+
+
+    example_lang_class = classify_language_general(example_lang, meanings)
+    print('')
+    print('')
+    print("meanings are:")
+    print(meanings)
+    print("example_lang is:")
+    print(example_lang)
+    print("example_lang_class is:")
+    print(example_lang_class)
+    print("language_class_labels[example_lang_class] is:")
+    print(language_class_labels[example_lang_class])
+
+
+
+
+
+
+
+
+
 # we also need a function that removes every instance of a given element from a list (to use for
 # removing the 'correct' forms_without_noisy_variants from a list of possible forms_without_noisy_variants for a given
 # topic:
@@ -576,7 +593,7 @@ def remove_all_instances(my_list, element_to_be_removed):
     return my_list
 
 
-def production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_prob, prob_of_noise):
+def production_likelihoods_with_noise(language, topic, meaning_list, forms, noisy_variants, ambiguity_penalty, error_prob, prob_of_noise):
     """
     Calculates the production probabilities for each of the possible forms (including both forms without noise and all
     possible noisy variants) given a language and topic, and the probability of environmental noise
@@ -585,17 +602,21 @@ def production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_
     mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
+    :param forms: list of all possible forms *excluding* their noisy variants
+    :param noisy_variants: list of all possible noisy variants of forms
     :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
     :param error_prob: the probability of making an error in production
     :param prob_of_noise: the probability of environmental noise masking part of the utterance
     :return: 1D numpy array containing a production probability for each possible form (where the index of the
     probability corresponds to the index of the form in the global variable "all_forms_including_noisy_variants")
     """
-    for m in range(len(meanings)):
-        if meanings[m] == topic:
+    all_possible_forms = forms + noisy_variants
+    for m in range(len(meaning_list)):
+        if meaning_list[m] == topic:
             topic_index = m
     correct_form = language[topic_index]
-    error_forms = list(forms_without_noise)  # This may seem a bit weird, but a speaker should be able to produce *any*
+    error_forms = list(forms)  # This may seem a bit weird, but a speaker should be able to produce *any*
     # form as an error form right? Not limited to only the other forms that exist within their language? (Otherwise a
     # speaker with a degenerate language could never make a production error).
     error_forms = remove_all_instances(error_forms, correct_form)
@@ -611,16 +632,16 @@ def production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_
         if f == correct_form:
             ambiguity += 1
     prop_to_prob_correct_form_complete = ((1./ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (1 - prob_of_noise)
-    prop_to_prob_error_form_complete = error_prob / (len(forms_without_noise) - 1) * (1 - prob_of_noise)
-    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_forms))
-    prop_to_prob_error_form_noisy = error_prob / (len(forms_without_noise) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_forms))
-    prop_to_prob_per_form_array = np.zeros(len(all_forms_including_noisy_variants))
-    for i in range(len(all_forms_including_noisy_variants)):
-        if all_forms_including_noisy_variants[i] == correct_form:
+    prop_to_prob_error_form_complete = error_prob / (len(forms) - 1) * (1 - prob_of_noise)
+    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_variants))
+    prop_to_prob_error_form_noisy = error_prob / (len(forms) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_variants))
+    prop_to_prob_per_form_array = np.zeros(len(all_possible_forms))
+    for i in range(len(all_possible_forms)):
+        if all_possible_forms[i] == correct_form:
             prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_complete
-        elif all_forms_including_noisy_variants[i] in noisy_variants_correct_form:
+        elif all_possible_forms[i] in noisy_variants_correct_form:
             prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_noisy
-        elif all_forms_including_noisy_variants[i] in noisy_variants_error_forms:
+        elif all_possible_forms[i] in noisy_variants_error_forms:
             prop_to_prob_per_form_array[i] = prop_to_prob_error_form_noisy
         else:
             prop_to_prob_per_form_array[i] = prop_to_prob_error_form_complete
@@ -645,7 +666,7 @@ def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_o
     noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
         """
     if noise_switch:
-        prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, ambiguity_penalty, error_prob, prob_of_noise)
+        prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error_prob, prob_of_noise)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
     else:
