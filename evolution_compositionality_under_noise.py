@@ -378,28 +378,6 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
 
 
 
-def generate_rewrite_grammar(lang, language_class):
-    if language_class == 3:
-        rewrite_grammar = 'SAB.A0'+str(lang[0][:int(len(lang[0])/2)])+'.A1'+str(lang[2][:int(len(lang[0])/2)])+'.B2'+str(lang[0][int(len(lang[0])/2):])+'.B3'+str(lang[3][int(len(lang[0])/2):])
-    return rewrite_grammar
-
-
-
-if __name__ == '__main__':
-
-    example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
-    example_lang_class = 3
-
-
-    rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
-    print('')
-    print('')
-    print("rewrite_grammar_example_lang is:")
-    print(rewrite_grammar_example_lang)
-
-
-
-
 
 # NOW SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF LANGUAGES AND
 # TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
