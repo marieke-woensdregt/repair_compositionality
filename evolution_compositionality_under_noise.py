@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 import random
 from copy import deepcopy
-from math import log
+from math import log, log2
 import scipy.special
 import pickle
 import time
@@ -115,11 +115,6 @@ types_simlang = [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
 priors_simlang = [-0.9178860550328204, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -2.304180416152711, -11.272664072079987, -10.749415928290118, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -10.749415928290118, -11.272664072079987, -2.304180416152711, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -0.9178860550328204]
 
 
-
-print('')
-print('')
-print("np.exp(priors_simlang) are:")
-print(np.exp(priors_simlang))
 
 ###################################################################################################################
 # FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
@@ -381,6 +376,231 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
         else:
             class_per_lang[l] = classify_language_general(language_list[l], meaning_list)
     return class_per_lang
+
+
+
+# Functions for calculating the simplicity prior (based on the compressibility of the languages):
+
+
+def mrf_degenerate(lang, meaning_list):
+    """
+    Takes a degenerate language and returns a minimally redundant form description of the language's context free
+    grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mrf_string = 'S'
+    for i in range(len(meaning_list)):
+        meaning = meaning_list[i]
+        if i != len(meaning_list) - 1:
+            mrf_string += str(meaning) + ','
+        else:
+            mrf_string += str(meaning)
+    mrf_string += lang[0]
+    return mrf_string
+
+
+def mrf_holistic(lang, meaning_list):
+    """
+    Takes a holistic OR hybrid language and returns a minimally redundant form description of the language's context
+    free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mrf_string = ''
+    for i in range(len(meaning_list)):
+        meaning = meaning_list[i]
+        form = lang[i]
+        if i != len(meaning_list) - 1:
+            mrf_string += 'S' + meaning + form + '.'
+        else:
+            mrf_string += 'S' + meaning + form
+    return mrf_string
+
+
+def mrf_compositional(lang, meaning_list):
+    """
+    Takes a compositional language and returns a minimally redundant form description of the language's context free
+    grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    n_features = len(meaning_list[0])
+    non_terminals = string.ascii_uppercase[:n_features]
+    mrf_string = 'S' + non_terminals
+    for i in range(len(non_terminals)):
+        non_terminal_symbol = non_terminals[i]
+        feature_values = []
+        feature_value_segments = []
+        for j in range(len(meaning_list)):
+            if meaning_list[j][i] not in feature_values:
+                feature_values.append(meaning_list[j][i])
+                feature_value_segments.append(lang[j][i])
+        for k in range(len(feature_values)):
+            value = feature_values[k]
+            segment = feature_value_segments[k]
+            mrf_string += "." + non_terminal_symbol + value + segment
+    return mrf_string
+
+
+def mrf_other(lang, meaning_list):
+    """
+    Takes a language of the 'other' category and returns a minimally redundant form description of the language's
+    context free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mapping_dict = {}
+    for i in range(len(lang)):
+        mapping_dict.setdefault(lang[i], []).append(meaning_list[i])
+    mrf_string = 'S'
+    counter = 0
+    for form in mapping_dict.keys():
+        for k in range(len(mapping_dict[form])):
+            meaning = mapping_dict[form][k]
+            if k != len(mapping_dict[form]) - 1:
+                mrf_string += meaning + ','
+            else:
+                mrf_string += meaning
+        if counter != len(mapping_dict.keys()) - 1:
+            mrf_string += form + '.S'
+        else:
+            mrf_string += form
+        counter += 1
+    return mrf_string
+
+
+def minimally_redundant_form(lang, complete_forms, meaning_list):
+    """
+    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
+    if lang_class == 0:  # the language is 'degenerate'
+        mrf_string = mrf_degenerate(lang, meaning_list)
+    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+        mrf_string = mrf_holistic(lang, meaning_list)
+    elif lang_class == 3:  # the language is 'compositional'
+        mrf_string = mrf_compositional(lang, meaning_list)
+    elif lang_class == 4:  # the language is of the 'other' category
+        mrf_string = mrf_other(lang, meaning_list)
+    return mrf_string
+
+
+def character_probs(mrf_string):
+    """
+    Takes a string in minimally redundant form and generates a dictionary specifying the probability of each of the
+    symbols used in the string
+
+    :param mrf_string: a string in minimally redundant form
+    :return: a dictionary with the symbols as keys and their corresponding probabilities as values
+    """
+    count_dict = {}
+    for character in mrf_string:
+        if character in count_dict.keys():
+            count_dict[character] += 1
+        else:
+            count_dict[character] = 1
+    prob_dict = {}
+    for character in count_dict.keys():
+        char_prob = count_dict[character] / len(mrf_string)
+        prob_dict[character] = char_prob
+    return prob_dict
+
+
+def coding_length(mrf_string):
+    """
+    Takes a string in minimally redundant form and returns its coding length in bits
+
+    :param mrf_string: a string in minimally redundant form
+    :return: coding length in bits
+    """
+    char_prob_dict = character_probs(mrf_string)
+    coding_len = 0
+    for character in mrf_string:
+        coding_len += log2(char_prob_dict[character])
+    return -coding_len
+
+
+def prior_single_lang(lang, complete_forms, meaning_list):
+    """
+    Takes a language and returns its PROPORTIONAL prior probability; this still needs to be normalized over all
+    languages in order to give the real prior probability.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: PROPORTIONAL prior probability (float)
+    """
+    mrf_string = minimally_redundant_form(lang, complete_forms, meaning_list)
+    coding_len = coding_length(mrf_string)
+    prior = 2 ** -coding_len
+    return prior
+
+
+
+
+###################################################################################################################
+if __name__ == '__main__':
+
+    # First, let's check whether the functions defined above work correctly
+    # for the example languages given in Kirby et al. (2015):
+
+    ## First some parameter settings:
+    meanings = ['02', '03', '12', '13']
+    forms_without_noisy_variants = ['aa', 'ab', 'ba', 'bb']
+
+    ## Then let's specify the example languages from Kirby et al. (2015)
+    example_languages = [['aa', 'aa', 'aa', 'aa'],
+                         ['ab', 'ab', 'ab', 'ab'],
+                         ['aa', 'aa', 'aa', 'ab'],
+                         ['aa', 'aa', 'aa', 'bb'],
+                         ['aa', 'ab', 'ba', 'bb'],
+                         ['aa', 'aa', 'ab', 'ba'],
+                         ['aa', 'aa', 'ab', 'bb'],
+                         ['aa', 'ab', 'bb', 'ba']]
+
+    ## And now let's calculate their coding lengths:
+    lang_classes_text = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
+    for i in range(len(example_languages)):
+        lang = example_languages[i]
+        print('')
+        print(i)
+        lang_class = classify_language_four_forms(lang, forms_without_noisy_variants, meanings)
+        lang_class_text = lang_classes_text[lang_class]
+        print("lang_class_text is:")
+        print(lang_class_text)
+        print("lang is:")
+        print(lang)
+        mrf_string = minimally_redundant_form(lang, forms_without_noisy_variants, meanings)
+        print("mrf_string is:")
+        print(mrf_string)
+        coding_len = coding_length(mrf_string)
+        print("coding_len is:")
+        print(round(coding_len, ndigits=2))
+        prior = prior_single_lang(lang, forms_without_noisy_variants, meanings)
+        print("prior this lang is:")
+        print(prior)
 
 
 
