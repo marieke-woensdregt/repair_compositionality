@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 import random
 from copy import deepcopy
-from math import log
+from math import log, log2
 import scipy.special
 import pickle
 import time
@@ -113,6 +113,7 @@ if __name__ == '__main__':
 languages_simlang = [[('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'aa'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ab'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'ba'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'aa'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ab'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'ba'), ('12', 'bb'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'aa'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ab'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'ba'), ('13', 'bb')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'aa')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ab')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'ba')], [('02', 'bb'), ('03', 'bb'), ('12', 'bb'), ('13', 'bb')]]
 types_simlang = [0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0]
 priors_simlang = [-0.9178860550328204, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -12.460704095246543, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -10.749415928290118, -10.749415928290118, -16.95425710594061, -17.294055179550075, -10.749415928290118, -2.304180416152711, -11.272664072079987, -10.749415928290118, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -16.95425710594061, -16.95425710594061, -16.95425710594061, -20.83821243446749, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -11.272664072079987, -11.272664072079987, -16.95425710594061, -10.749415928290118, -11.272664072079987, -2.304180416152711, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -12.460704095246543, -17.294055179550075, -17.294055179550075, -20.83821243446749, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -20.83821243446749, -17.294055179550075, -17.294055179550075, -12.460704095246543, -16.95425710594061, -16.95425710594061, -16.95425710594061, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -17.294055179550075, -17.294055179550075, -11.272664072079987, -17.294055179550075, -10.749415928290118, -16.95425710594061, -10.749415928290118, -17.294055179550075, -16.95425710594061, -10.749415928290118, -10.749415928290118, -11.272664072079987, -10.749415928290118, -10.749415928290118, -0.9178860550328204]
+
 
 
 ###################################################################################################################
@@ -378,24 +379,238 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
 
 
 
-def generate_rewrite_grammar(lang, language_class):
-    if language_class == 3:
-        rewrite_grammar = 'SAB.A0'+str(lang[0][:int(len(lang[0])/2)])+'.A1'+str(lang[2][:int(len(lang[0])/2)])+'.B2'+str(lang[0][int(len(lang[0])/2):])+'.B3'+str(lang[3][int(len(lang[0])/2):])
-    return rewrite_grammar
+# Functions for calculating the simplicity prior (based on the compressibility of the languages):
 
 
+def mrf_degenerate(lang, meaning_list):
+    """
+    Takes a degenerate language and returns a minimally redundant form description of the language's context free
+    grammar.
 
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mrf_string = 'S'
+    for i in range(len(meaning_list)):
+        meaning = meaning_list[i]
+        if i != len(meaning_list) - 1:
+            mrf_string += str(meaning) + ','
+        else:
+            mrf_string += str(meaning)
+    mrf_string += lang[0]
+    return mrf_string
+
+
+def mrf_holistic(lang, meaning_list):
+    """
+    Takes a holistic OR hybrid language and returns a minimally redundant form description of the language's context
+    free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mrf_string = ''
+    for i in range(len(meaning_list)):
+        meaning = meaning_list[i]
+        form = lang[i]
+        if i != len(meaning_list) - 1:
+            mrf_string += 'S' + meaning + form + '.'
+        else:
+            mrf_string += 'S' + meaning + form
+    return mrf_string
+
+
+def mrf_compositional(lang, meaning_list):
+    """
+    Takes a compositional language and returns a minimally redundant form description of the language's context free
+    grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    n_features = len(meaning_list[0])
+    non_terminals = string.ascii_uppercase[:n_features]
+    mrf_string = 'S' + non_terminals
+    for i in range(len(non_terminals)):
+        non_terminal_symbol = non_terminals[i]
+        feature_values = []
+        feature_value_segments = []
+        for j in range(len(meaning_list)):
+            if meaning_list[j][i] not in feature_values:
+                feature_values.append(meaning_list[j][i])
+                feature_value_segments.append(lang[j][i])
+        for k in range(len(feature_values)):
+            value = feature_values[k]
+            segment = feature_value_segments[k]
+            mrf_string += "." + non_terminal_symbol + value + segment
+    return mrf_string
+
+
+def mrf_other(lang, meaning_list):
+    """
+    Takes a language of the 'other' category and returns a minimally redundant form description of the language's
+    context free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    mapping_dict = {}
+    for i in range(len(lang)):
+        mapping_dict.setdefault(lang[i], []).append(meaning_list[i])
+    mrf_string = 'S'
+    counter = 0
+    for form in mapping_dict.keys():
+        for k in range(len(mapping_dict[form])):
+            meaning = mapping_dict[form][k]
+            if k != len(mapping_dict[form]) - 1:
+                mrf_string += meaning + ','
+            else:
+                mrf_string += meaning
+        if counter != len(mapping_dict.keys()) - 1:
+            mrf_string += form + '.S'
+        else:
+            mrf_string += form
+        counter += 1
+    return mrf_string
+
+
+def minimally_redundant_form(lang, complete_forms, meaning_list):
+    """
+    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+        lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
+    else:
+        lang_class = classify_language_general(lang, meaning_list)
+    if lang_class == 0:  # the language is 'degenerate'
+        mrf_string = mrf_degenerate(lang, meaning_list)
+    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+        mrf_string = mrf_holistic(lang, meaning_list)
+    elif lang_class == 3:  # the language is 'compositional'
+        mrf_string = mrf_compositional(lang, meaning_list)
+    elif lang_class == 4:  # the language is of the 'other' category
+        mrf_string = mrf_other(lang, meaning_list)
+    return mrf_string
+
+
+def character_probs(mrf_string):
+    """
+    Takes a string in minimally redundant form and generates a dictionary specifying the probability of each of the
+    symbols used in the string
+
+    :param mrf_string: a string in minimally redundant form
+    :return: a dictionary with the symbols as keys and their corresponding probabilities as values
+    """
+    count_dict = {}
+    for character in mrf_string:
+        if character in count_dict.keys():
+            count_dict[character] += 1
+        else:
+            count_dict[character] = 1
+    prob_dict = {}
+    for character in count_dict.keys():
+        char_prob = count_dict[character] / len(mrf_string)
+        prob_dict[character] = char_prob
+    return prob_dict
+
+
+def coding_length(mrf_string):
+    """
+    Takes a string in minimally redundant form and returns its coding length in bits
+
+    :param mrf_string: a string in minimally redundant form
+    :return: coding length in bits
+    """
+    char_prob_dict = character_probs(mrf_string)
+    coding_len = 0
+    for character in mrf_string:
+        coding_len += log2(char_prob_dict[character])
+    return -coding_len
+
+
+def prior_single_lang(lang, complete_forms, meaning_list):
+    """
+    Takes a language and returns its PROPORTIONAL prior probability; this still needs to be normalized over all
+    languages in order to give the real prior probability.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: PROPORTIONAL prior probability (float)
+    """
+    mrf_string = minimally_redundant_form(lang, complete_forms, meaning_list)
+    coding_len = coding_length(mrf_string)
+    prior = 2 ** -coding_len
+    return prior
+
+
+def prior(hypothesis_space, complete_forms, meaning_list):
+    logpriors = np.zeros(len(hypothesis_space))
+    for i in range(len(hypothesis_space)):
+        lang_prior = prior_single_lang(hypothesis_space[i], complete_forms, meaning_list)
+        logpriors[i] = np.log(lang_prior)
+    logpriors_normalized = np.subtract(logpriors, scipy.special.logsumexp(logpriors))
+    return logpriors_normalized
+
+
+###################################################################################################################
 if __name__ == '__main__':
 
-    example_lang_compositional = ['aa', 'ab', 'ba', 'bb']
-    example_lang_class = 3
+    # First, let's check whether the functions defined above work correctly
+    # for the example languages given in Kirby et al. (2015):
 
+    ## First some parameter settings:
+    meanings = ['02', '03', '12', '13']
+    forms_without_noisy_variants = ['aa', 'ab', 'ba', 'bb']
 
-    rewrite_grammar_example_lang = generate_rewrite_grammar(example_lang_compositional, example_lang_class)
-    print('')
-    print('')
-    print("rewrite_grammar_example_lang is:")
-    print(rewrite_grammar_example_lang)
+    ## Then let's specify the example languages from Kirby et al. (2015)
+    example_languages = [['aa', 'aa', 'aa', 'aa'],
+                         ['ab', 'ab', 'ab', 'ab'],
+                         ['aa', 'aa', 'aa', 'ab'],
+                         ['aa', 'aa', 'aa', 'bb'],
+                         ['aa', 'ab', 'ba', 'bb'],
+                         ['aa', 'aa', 'ab', 'ba'],
+                         ['aa', 'aa', 'ab', 'bb'],
+                         ['aa', 'ab', 'bb', 'ba']]
+
+    ## And now let's calculate their coding lengths:
+    lang_classes_text = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
+    for i in range(len(example_languages)):
+        lang = example_languages[i]
+        print('')
+        print(i)
+        lang_class = classify_language_four_forms(lang, forms_without_noisy_variants, meanings)
+        lang_class_text = lang_classes_text[lang_class]
+        print("lang_class_text is:")
+        print(lang_class_text)
+        print("lang is:")
+        print(lang)
+        mrf_string = minimally_redundant_form(lang, forms_without_noisy_variants, meanings)
+        print("mrf_string is:")
+        print(mrf_string)
+        coding_len = coding_length(mrf_string)
+        print("coding_len is:")
+        print(round(coding_len, ndigits=2))
+        lang_prior = prior_single_lang(lang, forms_without_noisy_variants, meanings)
+        print("prior this lang is:")
+        print(lang_prior)
 
 
 
@@ -424,28 +639,29 @@ def transform_all_languages_to_simlang_format(language_list, meaning_list):
     return all_langs_as_in_simlang
 
 
-def check_all_lang_lists_against_each_other(language_list_a, language_list_b, priors_simlang):
+def check_all_lang_lists_against_each_other(languages_my_order, languages_simlang_order, my_log_priors):
     """
     Takes two lists of languages of the same length and format, and checks for each languages in language_list_a,
     whether it is also present in language_list_b.
 
-    :param language_list_a: list of languages represented as in the SimLang lab 21 code, where each language is a list
+    :param languages_my_order: list of languages represented as in the SimLang lab 21 code, where each language is a list
     of 4 tuples, where each tuple consists of a meaning and its corresponding form.
-    :param language_list_b: list of languages of same format as language_list_b
-    :param priors_simlang: list of LOG priors copied from the SimLang lab 21 notebook
+    :param languages_simlang_order: list of languages of same format as language_list_b
+    :param my_log_priors: list of LOG priors
     :return: a list of binary values of the same length as language_list_a, where 1. means "is present in
-    language_list_b", and 0. means "not present".
+    language_list_b", and 0. means "not present", and a reordered version of my_log_priors, to match the order of
+    languages_simlang_order
     """
-    if len(language_list_a) != len(language_list_b):
+    if len(languages_my_order) != len(languages_simlang_order):
         raise ValueError("The two language lists should be of the same size")
-    new_log_prior = np.zeros(len(priors_simlang))
-    checks_per_lang = np.zeros(len(language_list_a))
-    for i in range(len(language_list_a)):
-        for j in range(len(language_list_b)):
-            if language_list_a[i] == language_list_b[j]:
+    checks_per_lang = np.zeros(len(languages_my_order))
+    my_log_priors_simlang_order = np.zeros(len(my_log_priors))
+    for i in range(len(languages_my_order)):
+        for j in range(len(languages_simlang_order)):
+            if languages_my_order[i] == languages_simlang_order[j]:
                 checks_per_lang[i] = 1.
-                new_log_prior[i] = priors_simlang[j]
-    return checks_per_lang, new_log_prior
+                my_log_priors_simlang_order[i] = my_log_priors[j]
+    return checks_per_lang, my_log_priors_simlang_order
 
 
 # NOW SOME FUNCTIONS THAT HANDLE PRODUCTION, NOISY PRODUCTION, AND RECEPTION WITH AND WITHOUT REPAIR:
@@ -1417,8 +1633,8 @@ if __name__ == '__main__':
     print("len(noisy_forms) are:")
     print(len(noisy_forms))
     # all possible noisy variants of the forms above
-    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both complete
-    # forms and noisy variants
+    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
+    # complete forms and noisy variants
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
@@ -1427,23 +1643,23 @@ if __name__ == '__main__':
     # Let's check whether the functions in this cell work correctly by comparing the number of languages of each type we
     # get with the SimLang lab 21:
 
-    # types_simlang = np.array(types_simlang)
-    # no_of_each_type = np.bincount(types_simlang)
-    # print('')
-    # print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
-    # print(no_of_each_type)
+    types_simlang = np.array(types_simlang)
+    no_of_each_type = np.bincount(types_simlang)
+    print('')
+    print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
+    print(no_of_each_type)
 
     if runs > 0:
         class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-        # print('')
-        # print('')
-        # print("class_per_lang is:")
-        # print(class_per_lang)
+        print('')
+        print('')
+        print("class_per_lang is:")
+        print(class_per_lang)
         no_of_each_class = np.bincount(class_per_lang.astype(int))
-        # print('')
-        # print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
-        #       "4 = other is:")
-        # print(no_of_each_class)
+        print('')
+        print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+              "4 = other is:")
+        print(no_of_each_class)
 
     # Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
     # create_all_languages() function, or in my classify_lang() function?
@@ -1453,92 +1669,157 @@ if __name__ == '__main__':
     # that of lab 21:
 
     all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
-    # print('')
-    # print('')
-    # # print("all_langs_as_in_simlang is:")
-    # # print(all_langs_as_in_simlang)
-    # print("len(all_langs_as_in_simlang) is:")
-    # print(len(all_langs_as_in_simlang))
-    # print("len(all_langs_as_in_simlang[0]) is:")
-    # print(len(all_langs_as_in_simlang[0]))
-    # print("len(all_langs_as_in_simlang[0][0]) is:")
-    # print(len(all_langs_as_in_simlang[0][0]))
+    print('')
+    print('')
+    # print("all_langs_as_in_simlang is:")
+    # print(all_langs_as_in_simlang)
+    print("len(all_langs_as_in_simlang) is:")
+    print(len(all_langs_as_in_simlang))
+    print("len(all_langs_as_in_simlang[0]) is:")
+    print(len(all_langs_as_in_simlang[0]))
+    print("len(all_langs_as_in_simlang[0][0]) is:")
+    print(len(all_langs_as_in_simlang[0][0]))
 
-    checks_per_language, new_log_prior = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages_simlang, priors_simlang)
-    # print('')
-    # print('')
-    # # print("checks_per_language is:")
-    # # print(checks_per_language)
-    # print("np.sum(checks_per_language) is:")
-    # print(np.sum(checks_per_language))
-    #
-    # print('')
-    # print('')
-    # # print("new_log_prior is:")
-    # # print(new_log_prior)
-    # # print("np.exp(new_log_prior) is:")
-    # # print(np.exp(new_log_prior))
-    # print("new_log_prior.shape is:")
-    # print(new_log_prior.shape)
-    # print("np.exp(scipy.special.logsumexp(new_log_prior)) is:")
-    # print(np.exp(scipy.special.logsumexp(new_log_prior)))
+
+    my_log_prior = prior(hypothesis_space, forms_without_noise, meanings)
+    print('')
+    print("my_log_prior is:")
+    print(my_log_prior)
+    print("my_log_prior.shape is:")
+    print(my_log_prior.shape)
+    print("np.exp(scipy.special.logsumexp(my_log_prior)) is:")
+    print(np.exp(scipy.special.logsumexp(my_log_prior)))
+
+
+    checks_per_language, log_priors_simlang_order = check_all_lang_lists_against_each_other(all_langs_as_in_simlang, languages_simlang, my_log_prior)
+    print('')
+    print('')
+    # print("checks_per_language is:")
+    # print(checks_per_language)
+    print("np.sum(checks_per_language) is:")
+    print(np.sum(checks_per_language))
+
+    print('')
+    print('')
+    print("log_priors_simlang_order is:")
+    print(log_priors_simlang_order)
+    # print("np.exp(log_priors_simlang_order) is:")
+    # print(np.exp(log_priors_simlang_order))
+    print("log_priors_simlang_order.shape is:")
+    print(log_priors_simlang_order.shape)
+    print("np.exp(scipy.special.logsumexp(log_priors_simlang_order)) is:")
+    print(np.exp(scipy.special.logsumexp(log_priors_simlang_order)))
 
     # Ok, this shows that for each language in the list of all_possible_languages generated by my own code, there is a
     # corresponding languages in the code from SimLang lab 21, so instead there must be something wrong with the way I
     # categorise the languages. Firstly, it looks like my classify_language() function underestimates the number of
     # compositional languages. So let's first have a look at which languages it classifies as compositional:
-    #
-    # compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
-    # print('')
-    # print('')
-    # print("compositional_langs_indices_my_code MY CODE are:")
-    # print(compositional_langs_indices_my_code)
-    # print("len(compositional_langs_indices_my_code) MY CODE are:")
-    # print(len(compositional_langs_indices_my_code))
-    #
-    # for index in compositional_langs_indices_my_code:
-    #     print('')
-    #     print("index MY CODE is:")
-    #     print(index)
-    #     print("all_possible_languages[index] MY CODE is:")
-    #     print(all_possible_languages[index])
+
+    compositional_langs_indices_my_code = np.where(class_per_lang==3)[0]
+    print('')
+    print('')
+    print("compositional_langs_indices_my_code MY CODE are:")
+    print(compositional_langs_indices_my_code)
+    print("len(compositional_langs_indices_my_code) MY CODE are:")
+    print(len(compositional_langs_indices_my_code))
+
+    for index in compositional_langs_indices_my_code:
+        print('')
+        print("index MY CODE is:")
+        print(index)
+        print("hypothesis_space[index] MY CODE is:")
+        print(hypothesis_space[index])
     #
     # # And now let's do the same for the languages from SimLang Lab 21:
-    #
-    # compositional_langs_indices_simlang = np.where(np.array(types_simlang)==3)[0]
-    # print('')
-    # print('')
-    # print("compositional_langs_indices_simlang SIMLANG CODE are:")
-    # print(compositional_langs_indices_simlang)
-    # print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
-    # print(len(compositional_langs_indices_simlang))
-    #
-    # for index in compositional_langs_indices_simlang:
-    #     print('')
-    #     print("index SIMLANG CODE is:")
-    #     print(index)
-    #     print("languages_simlang[index] SIMLANG CODE is:")
-    #     print(languages_simlang[index])
+
+    compositional_langs_indices_simlang = np.where(np.array(types_simlang)==3)[0]
+    print('')
+    print('')
+    print("compositional_langs_indices_simlang SIMLANG CODE are:")
+    print(compositional_langs_indices_simlang)
+    print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
+    print(len(compositional_langs_indices_simlang))
+
+    for index in compositional_langs_indices_simlang:
+        print('')
+        print("index SIMLANG CODE is:")
+        print(index)
+        print("languages_simlang[index] SIMLANG CODE is:")
+        print(languages_simlang[index])
 
     # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
     # code (or rather, in the code that generated the list of types that was copied into SimLang lab 21)
-    # Let's check whether maybe the holistic languages that are miscategorised as compositional in the SimLang code happen
-    # to be the ones we identified as "hybrids" (i.e. kind of in between holistic and compositional) above:
+    # Let's check whether maybe the holistic languages that are miscategorised as compositional in the SimLang code
+    # happen to be the ones I identified as "hybrids" (i.e. kind of in between holistic and compositional) above:
 
-    # hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
-    # print('')
-    # print('')
-    # print("hybrid_langs_indices_my_code MY CODE are:")
-    # print(hybrid_langs_indices_my_code)
-    # print("len(hybrid_langs_indices_my_code) MY CODE are:")
-    # print(len(hybrid_langs_indices_my_code))
-    #
-    # for index in hybrid_langs_indices_my_code:
-    #     print('')
-    #     print("index MY CODE is:")
-    #     print(index)
-    #     print("all_possible_languages[index] MY CODE is:")
-    #     print(all_possible_languages[index])
+    hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
+    print('')
+    print('')
+    print("hybrid_langs_indices_my_code MY CODE are:")
+    print(hybrid_langs_indices_my_code)
+    print("len(hybrid_langs_indices_my_code) MY CODE are:")
+    print(len(hybrid_langs_indices_my_code))
+
+    for index in hybrid_langs_indices_my_code:
+        print('')
+        print("index MY CODE is:")
+        print(index)
+        print("hypothesis_space[index] MY CODE is:")
+        print(hypothesis_space[index])
+
+    # Nope, that isn't the case.
+
+
+
+    ### Now let's check my log prior against the simlang one:
+
+    log_prior_checks_per_lang = np.zeros(len(log_priors_simlang_order))
+    log_prior_checks_per_lang_original_order = np.zeros(len(log_priors_simlang_order))
+    prob_prior_checks_per_lang = np.zeros(len(log_priors_simlang_order))
+    prob_prior_checks_per_lang_original_order = np.zeros(len(log_priors_simlang_order))
+    for i in range(len(log_priors_simlang_order)):
+        if np.round(log_priors_simlang_order[i], decimals=1) == np.round(priors_simlang[i], decimals=1):
+            log_prior_checks_per_lang[i] = 1.
+        if np.round(my_log_prior[i], decimals=1) == np.round(priors_simlang[i], decimals=1):
+            log_prior_checks_per_lang_original_order[i] = 1.
+        if np.round(np.exp(log_priors_simlang_order[i]), decimals=4) == np.round(np.exp(priors_simlang[i]), decimals=4):
+            prob_prior_checks_per_lang[i] = 1.
+        if np.round(np.exp(my_log_prior[i]), decimals=4) == np.round(np.exp(priors_simlang[i]), decimals=4):
+            prob_prior_checks_per_lang_original_order[i] = 1.
+
+
+    print('')
+    print('')
+    print("log_prior_checks_per_lang is:")
+    print(log_prior_checks_per_lang)
+    print("np.sum(log_prior_checks_per_lang) is:")
+    print(np.sum(log_prior_checks_per_lang))
+
+
+    print('')
+    print('')
+    print("log_prior_checks_per_lang_original_order is:")
+    print(log_prior_checks_per_lang_original_order)
+    print("np.sum(log_prior_checks_per_lang_original_order) is:")
+    print(np.sum(log_prior_checks_per_lang_original_order))
+
+
+    print('')
+    print('')
+    print("prob_prior_checks_per_lang is:")
+    print(prob_prior_checks_per_lang)
+    print("np.sum(prob_prior_checks_per_lang) is:")
+    print(np.sum(prob_prior_checks_per_lang))
+
+
+    print('')
+    print('')
+    print("prob_prior_checks_per_lang_original_order is:")
+    print(prob_prior_checks_per_lang_original_order)
+    print("np.sum(prob_prior_checks_per_lang_original_order) is:")
+    print(np.sum(prob_prior_checks_per_lang_original_order))
+
+
 
 
     ###################################################################################################################
