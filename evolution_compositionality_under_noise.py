@@ -39,9 +39,9 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 20  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
@@ -59,7 +59,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-noise = True  # parameter that determines whether environmental noise is on or off
+noise = False  # parameter that determines whether environmental noise is on or off
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -384,9 +384,8 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     return class_per_lang
 
 
-
-# Functions for calculating the simplicity prior (based on the compressibility of the languages):
-
+###################################################################################################################
+# THEN SOME FUNCTIONS FOR CALCULATING THE SIMPLICITY PRIOR (BASED ON THE COMPRESSIBILITY OF THE LANGUAGES):
 
 def mrf_degenerate(lang, meaning_list):
     """
@@ -576,6 +575,7 @@ def prior(hypothesis_space, complete_forms, meaning_list):
     return logpriors_normalized
 
 
+###################################################################################################################
 # NOW SOME FUNCTIONS THAT HANDLE PRODUCTION, NOISY PRODUCTION, AND RECEPTION WITH AND WITHOUT REPAIR:
 
 # A reproduction of the production function of Kirby et al. (2015):
@@ -647,44 +647,46 @@ def create_all_possible_noisy_forms(all_complete_forms):
     return noisy_forms
 
 
-if __name__ == '__main__':
-
-    print('')
-    print('')
-    print('')
-    print('')
-
-    meanings = ['02', '03', '12', '13']
-    # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-
-    example_lang = ['aaaa', 'aaab', 'abaa', 'abab']
-    # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-
-    language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
-
-    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
-    # 'noisy variants'
-    print('')
-    print('')
-    print("forms_without_noise are:")
-    print(forms_without_noise)
-    print("len(forms_without_noise) are:")
-    print(len(forms_without_noise))
 
 
-    example_lang_class = classify_language_general(example_lang, meanings)
-    print('')
-    print('')
-    print("meanings are:")
-    print(meanings)
-    print("example_lang is:")
-    print(example_lang)
-    print("example_lang_class is:")
-    print(example_lang_class)
-    print("language_class_labels[example_lang_class] is:")
-    print(language_class_labels[example_lang_class])
-
-
+# if __name__ == '__main__':
+#
+#     print('')
+#     print('')
+#     print('')
+#     print('')
+#
+#     meanings = ['02', '03', '12', '13']
+#     # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+#
+#     example_lang = ['aaaa', 'aaab', 'abaa', 'abab']
+#     # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+#
+#     language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
+#
+#     forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
+#     # 'noisy variants'
+#     print('')
+#     print('')
+#     print("forms_without_noise are:")
+#     print(forms_without_noise)
+#     print("len(forms_without_noise) are:")
+#     print(len(forms_without_noise))
+#
+#
+#     example_lang_class = classify_language_general(example_lang, meanings)
+#     print('')
+#     print('')
+#     print("meanings are:")
+#     print(meanings)
+#     print("example_lang is:")
+#     print(example_lang)
+#     print("example_lang_class is:")
+#     print(example_lang_class)
+#     print("language_class_labels[example_lang_class] is:")
+#     print(language_class_labels[example_lang_class])
+#
+#
 
 
 
