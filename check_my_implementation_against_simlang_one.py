@@ -5,25 +5,6 @@ from evolution_compositionality_under_noise import *
 # FIRST, LET'S DEFINE SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF
 # LANGUAGES AND TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
 
-def transform_all_languages_to_simlang_format(language_list, meaning_list):
-    """
-    Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
-    for each language, assuming the meaning for each form is specified by the
-    form's index), and turning it into a list of languages as represented in
-    SimLang lab 21 (which in turn is based on Kirby et al., 2015), in which a
-    <meaning, form> pair forms_without_noisy_variants a tuple, and four of those tuples in a list form
-    a language
-
-    :param language_list: list of all languages
-    :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
-    :returns: list of the input languages in the format of SimLang lab 21
-    """
-    all_langs_as_in_simlang = []
-    for l in range(len(language_list)):
-        lang_as_in_simlang = [(meaning_list[x], language_list[l][x]) for x in range(len(meaning_list))]
-        all_langs_as_in_simlang.append(lang_as_in_simlang)
-    return all_langs_as_in_simlang
-
 
 def check_language_lists_same_order(languages_my_code, languages_simlang_code):
     """
