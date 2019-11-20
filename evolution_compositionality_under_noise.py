@@ -9,9 +9,6 @@ import scipy.special
 import pickle
 import time
 
-from check_my_implementation_against_simlang_one import transform_all_languages_to_simlang_format
-
-
 ###################################################################################################################
 # THIS FUNCTION HAS TO BE DEFINED BEFORE EVERYTHING ELSE BECAUSE IT'S NEEDED TO GET SOME OF THE PARAMETER SETTINGS FROM
 # SYS.ARG
@@ -159,6 +156,27 @@ def create_all_possible_languages(meaning_list, forms):
     """
     all_possible_languages = list(itertools.product(forms, repeat=len(meaning_list)))
     return all_possible_languages
+
+
+# In case it's relevant for checking my implementation against the simlang one as a sanity check:
+def transform_all_languages_to_simlang_format(language_list, meaning_list):
+    """
+    Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
+    for each language, assuming the meaning for each form is specified by the
+    form's index), and turning it into a list of languages as represented in
+    SimLang lab 21 (which in turn is based on Kirby et al., 2015), in which a
+    <meaning, form> pair forms_without_noisy_variants a tuple, and four of those tuples in a list form
+    a language
+
+    :param language_list: list of all languages
+    :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
+    :returns: list of the input languages in the format of SimLang lab 21
+    """
+    all_langs_as_in_simlang = []
+    for l in range(len(language_list)):
+        lang_as_in_simlang = [(meaning_list[x], language_list[l][x]) for x in range(len(meaning_list))]
+        all_langs_as_in_simlang.append(lang_as_in_simlang)
+    return all_langs_as_in_simlang
 
 
 def classify_language_four_forms(lang, forms, meaning_list):
@@ -1555,10 +1573,10 @@ if __name__ == '__main__':
     print(len(hypothesis_space))
 
     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-    print('')
-    print('')
-    print("class_per_lang is:")
-    print(class_per_lang)
+    # print('')
+    # print('')
+    # print("class_per_lang is:")
+    # print(class_per_lang)
 
     if compressibility_bias:
         priors = prior(hypothesis_space, forms_without_noise, meanings)
@@ -1566,14 +1584,14 @@ if __name__ == '__main__':
         priors = np.ones(len(hypothesis_space))
         priors = np.divide(priors, np.sum(priors))
         priors = np.log(priors)
-    print('')
-    print('')
+    # print('')
+    # print('')
     # print("priors is:")
     # print(priors)
-    print("priors.shape is:")
-    print(priors.shape)
-    print("np.exp(scipy.special.logsumexp(priors)) is:")
-    print(np.exp(scipy.special.logsumexp(priors)))
+    # print("priors.shape is:")
+    # print(priors.shape)
+    # print("np.exp(scipy.special.logsumexp(priors)) is:")
+    # print(np.exp(scipy.special.logsumexp(priors)))
 
     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
 
