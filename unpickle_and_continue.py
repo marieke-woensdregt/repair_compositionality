@@ -89,38 +89,10 @@ for i in range(batches):
     data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
     final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
 
-
     if type(language_stats_over_gens_per_run) == list:
         language_stats_over_gens_per_run = np.array(language_stats_over_gens_per_run)
-    print('')
-    print('')
-    # print("language_stats_over_gens_per_run[-1] is:")
-    # print(language_stats_over_gens_per_run[-1])
-    print("language_stats_over_gens_per_run.shape is:")
-    print(language_stats_over_gens_per_run.shape)
-
-
-    print('')
-    print('')
-    # print("data_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
-    # print(data_over_gens_per_run[-1])
-    print("len(data_over_gens_per_run) BEFORE RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run))
-    print("len(data_over_gens_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run[0]))
-    print("len(data_over_gens_per_run[0][0]) BEFORE RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run[0][0]))
-
-    print('')
-    print('')
-    print("np.exp(np.array(final_pop_per_run)) BEFORE RUNNING EXTRA GENS is:")
-    print(np.exp(np.array(final_pop_per_run)))
-    print("len(final_pop_per_run) BEFORE RUNNING EXTRA GENS is:")
-    print(len(final_pop_per_run))
-    print("len(final_pop_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
-    print(len(final_pop_per_run[0]))
-    print("len(final_pop_per_run[0][0]) BEFORE RUNNING EXTRA GENS is:")
-    print(len(final_pop_per_run[0][0]))
+    if type(final_pop_per_run) == list:
+        final_pop_per_run = np.array(final_pop_per_run)
 
     ###################################################################################################################
     # NOW LET'S RUN THE ACTUAL SIMULATION:
@@ -149,18 +121,8 @@ for i in range(batches):
         print(r)
 
         final_pop = final_pop_per_run[r]
-        print('')
-        # print("final_pop NOW INITIAL is:")
-        # print(final_pop)
-        print("final_pop.shape NOW INITIAL is:")
-        print(final_pop.shape)
 
         initial_dataset = data_over_gens_per_run[r][-1]
-        print('')
-        # print("initial_dataset (PREVIOUSLY FINAL) is:")
-        # print(initial_dataset)
-        print("len(initial_dataset) (PREVIOUSLY FINAL) is:")
-        print(len(initial_dataset))
 
         language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
@@ -188,8 +150,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("final_pop_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
-    print(final_pop_per_run_new[-1])
+    # print("np.exp(final_pop_per_run_new[-1]) AFTER RUNNING EXTRA GENS is:")
+    # print(np.exp(final_pop_per_run_new[-1]))
     print("final_pop_per_run_new.shape AFTER RUNNING EXTRA GENS is:")
     print(final_pop_per_run_new.shape)
 
