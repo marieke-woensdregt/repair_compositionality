@@ -3,17 +3,19 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from evolution_compositionality_under_noise import create_all_possible_languages, classify_all_languages, convert_float_value_to_string, convert_array_to_string
+from evolution_compositionality_under_noise import create_all_possible_forms, create_all_possible_noisy_forms, create_all_possible_languages, classify_all_languages, convert_float_value_to_string, convert_array_to_string
 
 
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = ['aa', 'ab', 'ba', 'bb']  # all possible forms, excluding their possible 'noisy variants'
-noisy_forms = ['a_', 'b_', '_a', '_b']  # all possible noisy variants of the forms above
-all_forms_including_noisy_variants = forms_without_noise+noisy_forms  # all possible forms, including both complete
-# forms and noisy variants
+forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
+# 'noisy variants'
+noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
+# all possible noisy variants of the forms above
+all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
+# complete forms and noisy variants
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
@@ -23,13 +25,13 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 150  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
-compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
+compressibility_bias = True  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
@@ -43,14 +45,14 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
+burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
 
-noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise = False  # parameter that determines whether environmental noise is on or off
+noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -62,7 +64,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = True
+minimal_effort = False
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
