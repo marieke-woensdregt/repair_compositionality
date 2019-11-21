@@ -201,9 +201,9 @@ for i in range(batches):
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations+extra_gens) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
-    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
-    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
-    pickle.dump(final_pop_per_run_new, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
+    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats_"+str(i)+".p", "wb"))
+    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "wb"))
+    pickle.dump(final_pop_per_run_new, open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "wb"))
 
     t1 = time.process_time()
 
