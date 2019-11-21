@@ -91,8 +91,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("language_stats_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
-    print(language_stats_over_gens_per_run[-1])
+    # print("language_stats_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
+    # print(language_stats_over_gens_per_run[-1])
     print("len(language_stats_over_gens_per_run) BEFORE RUNNING EXTRA GENS is:")
     print(len(language_stats_over_gens_per_run))
     print("len(language_stats_over_gens_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
@@ -102,8 +102,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("data_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
-    print(data_over_gens_per_run[-1])
+    # print("data_over_gens_per_run[-1] BEFORE RUNNING EXTRA GENS is:")
+    # print(data_over_gens_per_run[-1])
     print("len(data_over_gens_per_run) BEFORE RUNNING EXTRA GENS is:")
     print(len(data_over_gens_per_run))
     print("len(data_over_gens_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
@@ -148,15 +148,15 @@ for i in range(batches):
 
         final_pop = final_pop_per_run[r]
         print('')
-        print("final_pop NOW INITIAL is:")
-        print(final_pop)
+        # print("final_pop NOW INITIAL is:")
+        # print(final_pop)
         print("final_pop.shape NOW INITIAL is:")
         print(final_pop.shape)
 
         initial_dataset = data_over_gens_per_run[r][-1]
         print('')
-        print("initial_dataset (PREVIOUSLY FINAL) is:")
-        print(initial_dataset)
+        # print("initial_dataset (PREVIOUSLY FINAL) is:")
+        # print(initial_dataset)
         print("len(initial_dataset) (PREVIOUSLY FINAL) is:")
         print(len(initial_dataset))
 
@@ -167,8 +167,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("language_stats_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
-    print(language_stats_over_gens_per_run[-1])
+    # print("language_stats_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
+    # print(language_stats_over_gens_per_run[-1])
     print("len(language_stats_over_gens_per_run) AFTER RUNNING EXTRA GENS is:")
     print(len(language_stats_over_gens_per_run))
     print("len(language_stats_over_gens_per_run[0]) AFTER RUNNING EXTRA GENS is:")
@@ -178,8 +178,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("data_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
-    print(data_over_gens_per_run[-1])
+    # print("data_over_gens_per_run[-1] AFTER RUNNING EXTRA GENS is:")
+    # print(data_over_gens_per_run[-1])
     print("len(data_over_gens_per_run) AFTER RUNNING EXTRA GENS is:")
     print(len(data_over_gens_per_run))
     print("len(data_over_gens_per_run[0]) AFTER RUNNING EXTRA GENS is:")
@@ -189,8 +189,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("final_pop_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
-    print(final_pop_per_run_new[-1])
+    # print("final_pop_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
+    # print(final_pop_per_run_new[-1])
     print("len(final_pop_per_run_new) AFTER RUNNING EXTRA GENS is:")
     print(len(final_pop_per_run_new))
     print("len(final_pop_per_run_new[0]) AFTER RUNNING EXTRA GENS is:")
