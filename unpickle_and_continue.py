@@ -130,32 +130,6 @@ for i in range(batches):
         data_over_gens_per_run_new.append(data_over_gens_per_run[r] + data_over_gens)
         final_pop_per_run_new[r] = final_pop
 
-    print('')
-    print('')
-    # print("language_stats_over_gens_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
-    # print(language_stats_over_gens_per_run_new[-1])
-    print("language_stats_over_gens_per_run_new.shape AFTER RUNNING EXTRA GENS is:")
-    print(language_stats_over_gens_per_run_new.shape)
-
-    print('')
-    print('')
-    # print("data_over_gens_per_run_new[-1] AFTER RUNNING EXTRA GENS is:")
-    # print(data_over_gens_per_run_new[-1])
-    print("len(data_over_gens_per_run_new) AFTER RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run_new))
-    print("len(data_over_gens_per_run_new[0]) AFTER RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run_new[0]))
-    print("len(data_over_gens_per_run_new[0][0]) AFTER RUNNING EXTRA GENS is:")
-    print(len(data_over_gens_per_run_new[0][0]))
-
-    print('')
-    print('')
-    # print("np.exp(final_pop_per_run_new[-1]) AFTER RUNNING EXTRA GENS is:")
-    # print(np.exp(final_pop_per_run_new[-1]))
-    print("final_pop_per_run_new.shape AFTER RUNNING EXTRA GENS is:")
-    print(final_pop_per_run_new.shape)
-
-
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations+extra_gens) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
