@@ -10,8 +10,7 @@ import pickle
 import time
 
 ###################################################################################################################
-# THIS FUNCTION HAS TO BE DEFINED BEFORE EVERYTHING ELSE BECAUSE IT'S NEEDED TO GET SOME OF THE PARAMETER SETTINGS FROM
-# SYS.ARG
+# THE FUNCTIONS BELOW HAVE TO BE DEFINED BEFORE SETTING THE PARAMETERS BECAUSE THEY ARE NEEDED TO DO SO.
 def str_to_bool(s):
     """
     Takes a string which is either 'True' or '1' or 'False' or '0' and turns it into the corresponding boolean.
@@ -27,17 +26,83 @@ def str_to_bool(s):
         raise ValueError("string does not seem to correspond to a boolean")
 
 
+def create_all_possible_forms(n_characters, form_length_list):
+    """
+    Takes a number of characters and a list of allowed form lengths, and creates a list of all possible complete forms
+    based on that.
+
+    :param n_characters: the number of different characters that may be used
+    :param form_length_list: a list of all form lengths that are allowed
+    :return: a list of all possible complete forms
+    """
+    alphabet = string.ascii_lowercase
+    form_alphabet = alphabet[:n_characters]
+    all_forms = []
+    for length in form_length_list:
+        all_forms = all_forms+list(itertools.product(form_alphabet, repeat=length))
+    all_forms_as_strings = []
+    for form in all_forms:
+        string_form = ''
+        for i in range(len(form)):
+            string_form = string_form+form[i]
+        all_forms_as_strings.append(string_form)
+    return all_forms_as_strings
+
+
+def create_noisy_variants(form):
+    """
+    Takes a form and generates all its possible noisy variants. NOTE however that in its current form, this function
+    only creates noisy variants in which only a single element of the original form is replaced with a blank! (So it
+    creates for instance 'a_' and '_b', but not '__'.)
+
+    :param form: a form (string)
+    :return: a list of possible noisy variants of that form
+    """
+    noisy_variant_list = []
+    for i in range(len(form)):
+        noisy_variant = form[:i] + '_' + form[i+1:]
+        # Instead of string slicing, another way of doing this would be to convert the string into a list, replace the
+        # element at the ith index, and then convert it back into a string using the 'join' method,
+        # see: https://www.quora.com/How-do-you-change-one-character-in-a-string-in-Python
+        noisy_variant_list.append(noisy_variant)
+    return noisy_variant_list
+
+
+def create_all_possible_noisy_forms(all_complete_forms):
+    """
+    Takes a list of all possible complete forms and derives a list of all possible noisy forms.
+
+    :param all_complete_forms: list of all possible complete forms
+    :return: list of all possible noisy forms
+    """
+    noisy_forms = []
+    for form in all_complete_forms:
+        noisy_variants = create_noisy_variants(form)
+        for variant in noisy_variants:
+            if variant not in noisy_forms:
+                noisy_forms.append(variant)
+    return noisy_forms
+
+
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
 
 # MY OWN CODE:
+meanings = ['02', '03', '12', '13']  # all possible meanings
+forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
+# 'noisy variants'
+noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
+# all possible noisy variants of the forms above
+all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
+# complete forms and noisy variants
+
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -121,29 +186,6 @@ if __name__ == '__main__':
 
 ###################################################################################################################
 # FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
-
-
-def create_all_possible_forms(n_characters, form_length_list):
-    """
-    Takes a number of characters and a list of allowed form lengths, and creates a list of all possible complete forms
-    based on that.
-
-    :param n_characters: the number of different characters that may be used
-    :param form_length_list: a list of all form lengths that are allowed
-    :return: a list of all possible complete forms
-    """
-    alphabet = string.ascii_lowercase
-    form_alphabet = alphabet[:n_characters]
-    all_forms = []
-    for length in form_length_list:
-        all_forms = all_forms+list(itertools.product(form_alphabet, repeat=length))
-    all_forms_as_strings = []
-    for form in all_forms:
-        string_form = ''
-        for i in range(len(form)):
-            string_form = string_form+form[i]
-        all_forms_as_strings.append(string_form)
-    return all_forms_as_strings
 
 
 def create_all_possible_languages(meaning_list, forms):
@@ -628,41 +670,6 @@ def production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error
         else:
             prop_to_prob_per_form_array[i] = prop_to_prob_error_form
     return prop_to_prob_per_form_array
-
-
-def create_noisy_variants(form):
-    """
-    Takes a form and generates all its possible noisy variants. NOTE however that in its current form, this function
-    only creates noisy variants in which only a single element of the original form is replaced with a blank! (So it
-    creates for instance 'a_' and '_b', but not '__'.)
-
-    :param form: a form (string)
-    :return: a list of possible noisy variants of that form
-    """
-    noisy_variant_list = []
-    for i in range(len(form)):
-        noisy_variant = form[:i] + '_' + form[i+1:]
-        # Instead of string slicing, another way of doing this would be to convert the string into a list, replace the
-        # element at the ith index, and then convert it back into a string using the 'join' method,
-        # see: https://www.quora.com/How-do-you-change-one-character-in-a-string-in-Python
-        noisy_variant_list.append(noisy_variant)
-    return noisy_variant_list
-
-
-def create_all_possible_noisy_forms(all_complete_forms):
-    """
-    Takes a list of all possible complete forms and derives a list of all possible noisy forms.
-
-    :param all_complete_forms: list of all possible complete forms
-    :return: list of all possible noisy forms
-    """
-    noisy_forms = []
-    for form in all_complete_forms:
-        noisy_variants = create_noisy_variants(form)
-        for variant in noisy_variants:
-            if variant not in noisy_forms:
-                noisy_forms.append(variant)
-    return noisy_forms
 
 
 
@@ -1548,25 +1555,6 @@ if __name__ == '__main__':
     # NOW LET'S RUN THE ACTUAL SIMULATION:
 
     t0 = time.process_time()
-
-    meanings = ['02', '03', '12', '13']  # all possible meanings
-    forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
-    # 'noisy variants'
-    print('')
-    print('')
-    print("forms_without_noise are:")
-    print(forms_without_noise)
-    print("len(forms_without_noise) are:")
-    print(len(forms_without_noise))
-    noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
-    print('')
-    print("noisy_forms are:")
-    print(noisy_forms)
-    print("len(noisy_forms) are:")
-    print(len(noisy_forms))
-    # all possible noisy variants of the forms above
-    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
-    # complete forms and noisy variants
 
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
