@@ -19,14 +19,14 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 150  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
 cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
-compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
+compressibility_bias = True  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
@@ -40,15 +40,15 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
 
-noise = True  # parameter that determines whether environmental noise is on or off
-noise_prob = 0.6  # the probability of environmental noise masking part of an utterance
+noise = False  # parameter that determines whether environmental noise is on or off
+noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -60,7 +60,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = True
+minimal_effort = False
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -72,7 +72,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 1
+batches = 5
 
 
 extra_gens = 10
@@ -85,9 +85,9 @@ for i in range(batches):
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
-    language_stats_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "rb"))
-    data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data"+".p", "rb"))
-    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
+    language_stats_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_lang_stats_"+str(i)+".p", "rb"))
+    data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
+    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
 
     print('')
     print('')
@@ -113,8 +113,8 @@ for i in range(batches):
 
     print('')
     print('')
-    print("np.exp(np.array(final_pop_per_run)) BEFORE RUNNING EXTRA GENS is:")
-    print(np.exp(np.array(final_pop_per_run)))
+    # print("np.exp(np.array(final_pop_per_run)) BEFORE RUNNING EXTRA GENS is:")
+    # print(np.exp(np.array(final_pop_per_run)))
     print("len(final_pop_per_run) BEFORE RUNNING EXTRA GENS is:")
     print(len(final_pop_per_run))
     print("len(final_pop_per_run[0]) BEFORE RUNNING EXTRA GENS is:")
