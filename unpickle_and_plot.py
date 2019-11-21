@@ -1,9 +1,7 @@
-import numpy as np
-import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from evolution_compositionality_under_noise import create_all_possible_forms, create_all_possible_noisy_forms, create_all_possible_languages, classify_all_languages, convert_float_value_to_string, convert_array_to_string
+from evolution_compositionality_under_noise import *
 
 
 ###################################################################################################################
@@ -20,10 +18,10 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 
 turnover = True  # determines whether new individuals enter the population or not
 b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
-        # used a bottleneck of 20 in the body of the paper.
+# used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
-            # a pair of agents.
+# a pair of agents.
 runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
@@ -45,7 +43,8 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after convergence
+burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after
+# convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
@@ -172,9 +171,9 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
     :param title: The title of the condition that should be on the plot (string)
     :param file_path: path to folder in which the figure file should be saved
     :param file_name: The file name that the plot should be saved under
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
+    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old
+    code was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and
+    'hybrid' languages, and 5 if the new code was used which does make this distinction.
     :return: Nothing. Just saves the plot and then shows it.
     """
     sns.set_style("whitegrid")
@@ -205,8 +204,8 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
 
 def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
     """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a barplot
-    (excluding the burn-in period)
+    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
+    barplot (excluding the burn-in period)
 
     :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
     and 'class'
@@ -216,11 +215,11 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     :param n_runs: the number of runs (int); corresponds to global variable 'runs'
     :param n_gens: the number of generations (int); corresponds to global variable 'generations'
     :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old code
-    was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-    languages, and 5 if the new code was used which does make this distinction.
-    :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the code that was
-    used, as described above.
+    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old
+    code was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and
+    'hybrid' languages, and 5 if the new code was used which does make this distinction.
+    :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the
+    code that was used, as described above.
     :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
     (i.e. 'holistic', 'hybrid', and 'compositional')
     :return: Nothing. Just saves the plot and then shows it.
