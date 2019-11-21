@@ -22,8 +22,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -75,7 +75,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 1
+batches = 5
 
 
 ###################################################################################################################
@@ -317,9 +317,9 @@ for i in range(batches):
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
-    language_stats_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "rb"))
-    data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data"+".p", "rb"))
-    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
+    language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
+    data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
+    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
 
     for j in range(len(language_stats_over_gens_per_run)):
         all_results.append(language_stats_over_gens_per_run[j])
