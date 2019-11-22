@@ -23,7 +23,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+generations = 2000  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -43,7 +43,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 1000  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
 n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
@@ -140,7 +140,7 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
 
 # And this function turns a pandas dataframe back into a list of lists of lists of language stats, just in case
 # that's needed:
-def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_language_classes):
+def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, n_language_classes):
     """
     Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
     populations' posterior probability distributions over generations.
@@ -156,7 +156,7 @@ def dataframe_to_language_stats(dataframe, n_runs, n_gens, n_language_classes):
     :return: a numpy array containing the proportions of the different language classes for each generation for each run
     """
     proportion_column = np.array(dataframe['proportion'])
-    proportion_column_as_results = proportion_column.reshape((n_runs, n_gens, n_language_classes))
+    proportion_column_as_results = proportion_column.reshape((n_runs*n_batches, n_gens, n_language_classes))
     return proportion_column_as_results
 
 
@@ -202,7 +202,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
     plt.show()
 
 
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
     barplot (excluding the burn-in period)
@@ -228,28 +228,28 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_gens, n_language_classes)
+    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_batches, n_gens, n_language_classes)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
     proportion_column_from_start_gen = proportion_column_from_start_gen.flatten()
 
     runs_column_from_start_gen = []
-    for i in range(n_runs):
+    for i in range(n_runs*n_batches):
         for j in range(gen_start, n_gens):
             for k in range(n_language_classes):
                 runs_column_from_start_gen.append(i)
     runs_column_from_start_gen = np.array(runs_column_from_start_gen)
 
     generation_column_from_start_gen = []
-    for i in range(n_runs):
+    for i in range(n_runs*n_batches):
         for j in range(gen_start, n_gens):
             for k in range(n_language_classes):
                 generation_column_from_start_gen.append(j)
     generation_column_from_start_gen = np.array(generation_column_from_start_gen)
 
     class_column_from_start_gen = []
-    for i in range(n_runs):
+    for i in range(n_runs*n_batches):
         for j in range(gen_start, n_gens):
             if n_language_classes == 4:
                 class_column_from_start_gen.append('degenerate')
@@ -395,4 +395,4 @@ print("baseline_proportions_fully_expressive are:")
 print(baseline_proportions_fully_expressive)
 
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, generations, burn_in, n_lang_classes, baseline_proportions_all, baseline_proportions_fully_expressive)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, n_lang_classes, baseline_proportions_all, baseline_proportions_fully_expressive)
