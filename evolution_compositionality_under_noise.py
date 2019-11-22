@@ -336,13 +336,16 @@ def check_reduplication(language, minimum_substring_length):
         subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
         print("subparts are:")
         print(subparts)
-        if len(subparts) == 1:  # reduplication is false if forms have only the minimum substring length (which is
-            # equal to the number of meaning features)
+        if len(subparts) == 1:  # reduplication should be False if forms have only the minimum substring length (which
+            # is equal to the number of meaning features)
             reduplication_per_form[i] = False
         else:
             for subpart in subparts:
-                if subpart != subparts[0]:
+                if subpart != subparts[0]:  # reduplication should also be False if the signal segments that are used
+                    # for a given meaning feature value aren't all the same
                     reduplication_per_form[i] = False
+    print("reduplication_per_form is:")
+    print(reduplication_per_form)
     return reduplication_per_form
 
 
@@ -449,44 +452,62 @@ def classify_language_general(lang, meaning_list):
 
 
 
-#
-# if __name__ == '__main__':
-#
-#     print('')
-#     print('')
-#     print('')
-#     print('')
-#
-#     meanings = ['02', '03', '12', '13']
-#     # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-#
-#     example_lang = ['aaaa', 'aaab', 'abaa', 'abab']
-#     # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-#
-#     language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
-#
-#     forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
-#     # 'noisy variants'
-#     print('')
-#     print('')
-#     print("forms_without_noise are:")
-#     print(forms_without_noise)
-#     print("len(forms_without_noise) are:")
-#     print(len(forms_without_noise))
-#
-#
-#     example_lang_class = classify_language_general(example_lang, meanings)
-#     print('')
-#     print('')
-#     print("meanings are:")
-#     print(meanings)
-#     print("example_lang is:")
-#     print(example_lang)
-#     print("example_lang_class is:")
-#     print(example_lang_class)
-#     print("language_class_labels[example_lang_class] is:")
-#     print(language_class_labels[example_lang_class])
-#
+
+if __name__ == '__main__':
+
+    print('')
+    print('')
+    print('')
+    print('')
+
+    meanings = ['02', '03', '12', '13']
+    # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+
+    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
+    # 'noisy variants'
+    print('')
+    print('')
+    print("forms_without_noise are:")
+    print(forms_without_noise)
+    print("len(forms_without_noise) are:")
+    print(len(forms_without_noise))
+
+    examples_languages = [['aaaa', 'abab', 'baba', 'bbbb'],
+                          ['aaaa', 'aabb', 'bbaa', 'bbbb'],
+                          ['aaaa', 'bbbb', 'abba', 'baab'],
+                          ['aa', 'ab', 'ba', 'bb'],
+                          ['aaaa', 'aaaa', 'baba', 'bbbb'],
+                          ['aa', 'aa', 'ba', 'bb'],
+                          ['aa', 'ab', 'bb', 'ba'],
+                          ['aaaa', 'abab', 'baba', 'bb']]
+
+    # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
+
+    example_lang_categories = ['compositional_reduplicate_signal', 'compositional_reduplicate_segment', 'holistic_diversify_signals', 'compositional', 'other', 'other', 'holistic', 'holistic']
+
+
+    language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
+
+    print('')
+    print('')
+    for i in range(len(examples_languages)):
+        print('')
+        print("i is:")
+        print(i)
+        print("meanings are:")
+        print(meanings)
+        example_lang = examples_languages[i]
+        print("example_lang is:")
+        print(example_lang)
+        example_lang_category = example_lang_categories[i]
+        print("example_lang_category is:")
+        print(example_lang_category)
+        example_lang_class = classify_language_general(example_lang, meanings)
+        print("example_lang_class is:")
+        print(example_lang_class)
+        print("language_class_labels[example_lang_class] is:")
+        print(language_class_labels[example_lang_class])
+
 
 
 
