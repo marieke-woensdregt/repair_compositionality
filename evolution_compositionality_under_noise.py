@@ -713,7 +713,7 @@ def prior(hypothesis_space, complete_forms, meaning_list):
 # NOW SOME FUNCTIONS THAT HANDLE PRODUCTION, NOISY PRODUCTION, AND RECEPTION WITH AND WITHOUT REPAIR:
 
 # A reproduction of the production function of Kirby et al. (2015):
-def production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error_prob):
+def production_likelihoods_kirby_et_al(language, topic, meaning_list, ambiguity_penalty, error_prob):
     """
     Calculates the production probabilities for each of the possible forms_without_noisy_variants given a language and
     topic, as defined by Kirby et al. (2015)
@@ -722,13 +722,14 @@ def production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error
     where each form is mapped to the meaning at the corresponding index
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
     :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
     :param error_prob: the probability of making an error in production
     :return: 1D numpy array containing a production probability for each possible form (where the index of the
     probability corresponds to the index of the form in the global variable "forms_without_noisy_variants")
     """
-    for m in range(len(meanings)):
-        if meanings[m] == topic:
+    for m in range(len(meaning_list)):
+        if meaning_list[m] == topic:
             topic_index = m
     correct_form = language[topic_index]
     ambiguity = 0
@@ -850,7 +851,7 @@ def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_o
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
     else:
-        prop_to_prob_per_form_array = production_likelihoods_kirby_et_al(language, topic, ambiguity_penalty, error_prob)
+        prop_to_prob_per_form_array = production_likelihoods_kirby_et_al(language, topic, meanings, ambiguity_penalty, error_prob)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(forms_without_noise, p=prob_per_form_array)
     return utterance
@@ -1091,7 +1092,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
         if noise_switch:
             likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error, prob_of_noise)
         else:
-            likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, ambiguity_penalty, error)
+            likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, meanings, ambiguity_penalty, error)
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
         new_log_posterior.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
 
