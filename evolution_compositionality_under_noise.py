@@ -358,10 +358,10 @@ def check_compositionality(language, meaning_list):
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: True if lang is compositional, False otherwise (Boolean)
     """
-    # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element:
-    # If we allow for forms that are longer than the minimum number of characters required to uniquely specify each
-    # meaning element, there are multiple ways in which a language could be compositional. For instance, when meanings
-    # consist of two features, a language with forms of length 4 could be compositional by (i) using a
+    # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element (i.e. feature
+    # value): If we allow for forms that are longer than the minimum number of characters required to uniquely specify
+    # each meaning feature, there are multiple ways in which a language could be compositional. For instance, when
+    # meanings consist of two features, a language with forms of length 4 could be compositional by (i) using a
     # compositional substring of 2 characters for each possible meaning, and simply reduplicating that substring for
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
