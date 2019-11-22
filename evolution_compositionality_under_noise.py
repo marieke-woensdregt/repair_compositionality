@@ -486,7 +486,7 @@ if __name__ == '__main__':
     example_lang_categories = ['compositional_reduplicate_signal', 'compositional_reduplicate_segment', 'holistic_diversify_signals', 'compositional', 'other', 'other', 'holistic', 'holistic']
 
 
-    language_class_labels = ['degenerate', 'holistic', 'compositional', 'other']
+    language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
 
     print('')
     print('')
