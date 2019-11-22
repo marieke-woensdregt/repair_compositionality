@@ -51,7 +51,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 
 pickle_file_path = "pickles/"
 
-extra_gens = 10
+extra_gens = 1000
 
 
 # THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     print("minimal_effort is:")
     print(minimal_effort)
 
-    batch_number = str_to_bool(sys.argv[6])  # Setting the 'minimal_effort' parameter based on the command-line input
+    batch_number = int(sys.argv[6])  # Setting the 'batch_number' parameter based on the command-line input
     # #NOTE: first argument in sys.argv list is always the name of the script
     print('')
     print("batch_number is:")
