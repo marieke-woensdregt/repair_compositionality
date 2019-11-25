@@ -100,7 +100,7 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 2  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
@@ -366,6 +366,11 @@ def check_compositionality(language, meaning_list):
     # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
     # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
 
+
+    print('')
+    print("This is the check_compositionality() function:")
+
+
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     for meaning in meaning_list:
         if len(meaning) != 2:
@@ -377,9 +382,28 @@ def check_compositionality(language, meaning_list):
     for form in language:
         if len(form) > max_form_length:
             max_form_length = len(form)
+
+    print('')
+    print("max_form_length OLD METHOD is:")
+    print(max_form_length)
+
+    form_lengths = [len(form) for form in language]
+    max_form_length = max(form_lengths)
+
+    print("max_form_length NEW METHOD is:")
+    print(max_form_length)
+
     possible_substring_lengths = np.arange(1, max_form_length)
 
+    print("possible_substring_lengths are:")
+    print(possible_substring_lengths)
+
+
     for length in possible_substring_lengths:
+
+        print('')
+        print("length is:")
+        print(length)
 
         substrings_per_meaning_element = [[] for x in range(int(meaning_list[-1][-1]) + 1)]
         for i in range(len(meaning_list)):
@@ -390,14 +414,24 @@ def check_compositionality(language, meaning_list):
                     substring = language[i][length:]
                 substrings_per_meaning_element[int(meaning_list[i][j])].append(substring)
 
+        print("substrings_per_meaning_element is:")
+        print(substrings_per_meaning_element)
+
         single_substring_per_meaning_element = [False for x in range(len(substrings_per_meaning_element))]
         for k in range(len(substrings_per_meaning_element)):
             substrings = substrings_per_meaning_element[k]
             if substrings.count(substrings[0]) == len(substrings):
                 single_substring_per_meaning_element[k] = True
 
+        print("single_substring_per_meaning_element is:")
+        print(single_substring_per_meaning_element)
+
         if False not in single_substring_per_meaning_element:
             compositionality = True
+
+    print('')
+    print("compositionality is:")
+    print(compositionality)
 
     return compositionality
 
@@ -1601,58 +1635,58 @@ def convert_array_to_string(array):
     return array_string
 
 
-###################################################################################################################
-if __name__ == '__main__':
-
-    ###################################################################################################################
-    # NOW LET'S RUN THE ACTUAL SIMULATION:
-
-    t0 = time.process_time()
-
-    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-    print("number of possible languages is:")
-    print(len(hypothesis_space))
-
-    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-
-    if compressibility_bias:
-        priors = prior(hypothesis_space, forms_without_noise, meanings)
-    else:
-        priors = np.ones(len(hypothesis_space))
-        priors = np.divide(priors, np.sum(priors))
-        priors = np.log(priors)
-
-    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
-
-    language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
-    data_over_gens_per_run = []
-    final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
-    for r in range(runs):
-        population = new_population(popsize, priors)
-
-        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
-
-        language_stats_over_gens_per_run[r] = language_stats_over_gens
-        data_over_gens_per_run.append(data_over_gens)
-        final_pop_per_run[r] = final_pop
-
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
-    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
-    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
-    pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
-
-    t1 = time.process_time()
-
-    print('')
-    print("number of minutes it took to run simulation:")
-    print(round((t1-t0)/60., ndigits=2))
-
-    print('')
-    print('results were saved in folder:')
-    print(pickle_file_path)
-
-    print('')
-    print('using filename:')
-    print(pickle_file_name)
+# ###################################################################################################################
+# if __name__ == '__main__':
+#
+#     ###################################################################################################################
+#     # NOW LET'S RUN THE ACTUAL SIMULATION:
+#
+#     t0 = time.process_time()
+#
+#     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
+#     print("number of possible languages is:")
+#     print(len(hypothesis_space))
+#
+#     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
+#
+#     if compressibility_bias:
+#         priors = prior(hypothesis_space, forms_without_noise, meanings)
+#     else:
+#         priors = np.ones(len(hypothesis_space))
+#         priors = np.divide(priors, np.sum(priors))
+#         priors = np.log(priors)
+#
+#     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
+#
+#     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
+#     data_over_gens_per_run = []
+#     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
+#     for r in range(runs):
+#         population = new_population(popsize, priors)
+#
+#         language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+#
+#         language_stats_over_gens_per_run[r] = language_stats_over_gens
+#         data_over_gens_per_run.append(data_over_gens)
+#         final_pop_per_run[r] = final_pop
+#
+#     timestr = time.strftime("%Y%m%d-%H%M%S")
+#
+#     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+#     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
+#     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+#     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
+#
+#     t1 = time.process_time()
+#
+#     print('')
+#     print("number of minutes it took to run simulation:")
+#     print(round((t1-t0)/60., ndigits=2))
+#
+#     print('')
+#     print('results were saved in folder:')
+#     print(pickle_file_path)
+#
+#     print('')
+#     print('using filename:')
+#     print(pickle_file_name)
