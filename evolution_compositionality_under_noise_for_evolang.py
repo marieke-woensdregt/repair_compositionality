@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # (Kirby et al. used a bottleneck of 20 in the body of the paper.
     rounds = 2 * b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
     print('')
-    print("b is:")
+    print("bottleneck b is:")
     print(b)
 
     compressibility_bias = str_to_bool(sys.argv[2])  # Setting the 'compressibility_bias' parameter based on the
@@ -1355,6 +1355,8 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
             final_pop = population
         if turnover:
             population = new_population(pop_size, log_priors)
+        if i % 10 == 0:  # shows the user that the program is making some progress
+            print('.')
     return language_stats_over_gens, data_over_gens, final_pop
 
 
@@ -1410,6 +1412,7 @@ if __name__ == '__main__':
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
+
     for r in range(runs):
         population = new_population(popsize, priors)
 
@@ -1419,9 +1422,9 @@ if __name__ == '__main__':
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run[r] = final_pop
 
-    timestr = time.strftime("%Y%m%d-%H%M%S")
+    #timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" #+ timestr  # uncomment this last bit and the statement above for defining the timestr in order to add a unique identifier to the filename (to prevent it from being overwritten when running the same simulation again)
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
