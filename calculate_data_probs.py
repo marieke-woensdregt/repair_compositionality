@@ -46,5 +46,5 @@ print(no_of_each_class)
 
 
 def calc_prob_of_repair(language, costs, prob_of_noise):
-    for
+    pass
 
