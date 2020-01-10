@@ -110,6 +110,41 @@ def cache_likelihoods_per_datapoint(all_datapoints, hypotheses):
     return likelihood_cache_matrix
 
 
+
+def cache_likelihoods_per_datapoint_new(meaning_list, forms_including_noisy_variants, hypotheses):
+    print('')
+    print('')
+    print("This is the cache_likelihoods_per_datapoint_new() function:")
+    likelihood_cache_matrix = np.zeros((len(meaning_list), len(forms_including_noisy_variants), len(hypotheses)))
+    print("likelihood_cache_matrix.shape is:")
+    print(likelihood_cache_matrix.shape)
+    for m in range(len(meaning_list)):
+        for f in range(len(forms_including_noisy_variants)):
+            print('')
+            topic = meaning_list[m]
+            print("topic is:")
+            print(topic)
+            form = forms_including_noisy_variants[f]
+            print("form is:")
+            print(form)
+            for h in range(len(hypotheses)):
+                print('')
+                print("h is:")
+                print(h)
+                prop_to_prob_per_form_array = production_likelihoods_with_noise(hypotheses[h], topic, meanings,
+                                                                                 forms_without_noise, noisy_forms, gamma,
+                                                                                 error, noise_prob)
+                print("len(prop_to_prob_per_form_array) is:")
+                print(len(prop_to_prob_per_form_array))
+                for i in range(len(prop_to_prob_per_form_array)):
+                    likelihood_cache_matrix[m][i][h] = prop_to_prob_per_form_array[i]
+        print('')
+        print("likelihood_cache_matrix is:")
+        print(likelihood_cache_matrix)
+    return likelihood_cache_matrix
+
+
+
 ###################################################################################################################
 # MEMOISING LIKELIHOODS FOR ALL POSSIBLE <MEANING, FORM> COMBINATIONS AND SAVING RESULTING MATRIX AS PICKLE FILE:
 
@@ -122,7 +157,22 @@ print(all_possible_datapoints)
 print("len(all_possible_datapoints) is:")
 print(len(all_possible_datapoints))
 
-likelihood_cache = cache_likelihoods_per_datapoint(all_possible_datapoints, hypothesis_space[0:10])
+#
+# likelihood_cache = cache_likelihoods_per_datapoint(all_possible_datapoints, hypothesis_space[0:10])
+# print('')
+# print('')
+# print("likelihood_cache is:")
+# print(likelihood_cache)
+# print('')
+# print('')
+# print("np.exp(likelihood_cache) is:")
+# print(np.exp(likelihood_cache))
+# print("likelihood_cache.shape is:")
+# print(likelihood_cache.shape)
+
+
+
+likelihood_cache = cache_likelihoods_per_datapoint_new(meanings, all_forms_including_noisy_variants, hypothesis_space[0:6])
 print('')
 print('')
 print("likelihood_cache is:")
