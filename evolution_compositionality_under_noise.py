@@ -88,7 +88,7 @@ def create_all_possible_noisy_forms(all_complete_forms):
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
+forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
 # 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
 # all possible noisy variants of the forms above
@@ -100,7 +100,7 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 0  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
@@ -120,7 +120,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-noise = False  # parameter that determines whether environmental noise is on or off
+noise = True  # parameter that determines whether environmental noise is on or off
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
