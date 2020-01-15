@@ -303,7 +303,7 @@ def check_reduplication(language, minimum_substring_length):
     """
     Checks to what extent a language makes use of reduplication (i.e. for each form in the language, it checks whether
     it consists of the same substrings being repeated n times (where the substring length is given by the input
-    argument minimum_string_length, which should be equal to the number of meaning features. This constraint is set
+    argument minimum_substring_length, which should be equal to the number of meaning features. This constraint is set
     because we are only interested in cases of reduplication in which the language might be a compositional (or hybrid)
     language, which means that the minimum substring length should be equal to the number of meaning features, because
     a compositional language requires at least one character to describe each meaning feature.
@@ -312,18 +312,35 @@ def check_reduplication(language, minimum_substring_length):
     same index in meanings
     :param minimum_substring_length: the minimum substring length (int); should be equal to the number of meaning
     features.
-    :return: a list of Booleans specifying for each form in the language whether it is a pure case of reduplication
-    (i.e. True) or not (i.e. False)
+    :return: two Booleans: the first indicating whether each form of the language uses reduplication per segment, and
+    the second indicating whether each form in the language uses reduplication per full signal
     """
 
     print('')
     print('')
     print('This is the check_reduplication() function:')
 
-    reduplication_per_form = [True for x in range(len(language))]
+    # If any of the forms in the language doesn't have a length that is a multiple of the minimum_substring_length
+    # (i.e. the number of meaning features) the language doesn't (systematically) make use of reduplication:
+    form_lengths = [len(form) for form in language]
+    print("form_lengths are:")
+    print(form_lengths)
+    for length in form_lengths:
+        print("length % minimum_substring_length is:")
+        print(length % minimum_substring_length)
+        if length % minimum_substring_length != 0:
+            return False, False
+
+
+    reduplicate_segments_per_form = [True for x in range(len(language))]
     print('')
-    print("reduplication_per_form BEFORE doing anything is:")
-    print(reduplication_per_form)
+    print("reduplicate_segments_per_form BEFORE doing anything is:")
+    print(reduplicate_segments_per_form)
+
+    reduplicate_full_signal_per_form = [True for x in range(len(language))]
+    print('')
+    print("reduplicate_full_signal_per_form BEFORE doing anything is:")
+    print(reduplicate_full_signal_per_form)
 
     for i in range(len(language)):
         print('')
@@ -332,21 +349,38 @@ def check_reduplication(language, minimum_substring_length):
         form = language[i]
         print("form is:")
         print(form)
-        # only if each subpart of the form is the same, reduplication is really true:
+        # The language uses the reduplicate_segments_per_form strategy, if each subpart consists of repetitions of
+        # the same character:
         subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
         print("subparts are:")
         print(subparts)
-        if len(subparts) == 1:  # reduplication should be False if forms have only the minimum substring length (which
-            # is equal to the number of meaning features)
-            reduplication_per_form[i] = False
-        else:
-            for subpart in subparts:
-                if subpart != subparts[0]:  # reduplication should also be False if the signal segments that are used
-                    # for a given meaning feature value aren't all the same
-                    reduplication_per_form[i] = False
-    print("reduplication_per_form is:")
-    print(reduplication_per_form)
-    return reduplication_per_form
+        for subpart in subparts:
+            for character in subpart:
+                if character != subpart[0]:
+                    reduplicate_segments_per_form[i] = False  # reduplication of segments should be False if each
+                    # character within a subpart of the minimum_substring_length is not the same
+        # The language uses the reduplicate_full_signal_per_form strategy, if each subpart of length
+        # minimum_substring_length is the same for each form:
+            if subpart != subparts[0]:  # reduplication of full signals should be False if the signal segments that are
+                # used for a given meaning feature value aren't all the same
+                reduplicate_full_signal_per_form[i] = False
+    print("reduplicate_segments_per_form is:")
+    print(reduplicate_segments_per_form)
+    print("reduplicate_full_signal_per_form is:")
+    print(reduplicate_full_signal_per_form)
+    if sum(reduplicate_segments_per_form) == len(language):
+        reduplicate_segments = True
+    else:
+        reduplicate_segments = False
+    if sum(reduplicate_full_signal_per_form) == len(language):
+        reduplicate_full_signal = True
+    else:
+        reduplicate_full_signal = False
+    print("reduplicate_segments is:")
+    print(reduplicate_segments)
+    print("reduplicate_full_signal is:")
+    print(reduplicate_full_signal)
+    return reduplicate_segments, reduplicate_full_signal
 
 
 def check_compositionality(language, meaning_list):
@@ -358,13 +392,18 @@ def check_compositionality(language, meaning_list):
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: True if lang is compositional, False otherwise (Boolean)
     """
-    # The language is COMPOSITIONAL if each form contains the same substring for the same meaning element (i.e. feature
-    # value): If we allow for forms that are longer than the minimum number of characters required to uniquely specify
-    # each meaning feature, there are multiple ways in which a language could be compositional. For instance, when
-    # meanings consist of two features, a language with forms of length 4 could be compositional by (i) using a
+    # A language is compositional if every meaning feature has a uniquely associated substring, such that the
+    # probability of the meaning feature given the substring equals 1, and the probability of the substring given the
+    # meaning feature also equals 1.
+    # That is, a language is compositional if each form contains the same substring for the same meaning element (i.e.
+    # feature value): If we allow for forms that are longer than the minimum number of characters required to uniquely
+    # specify each meaning feature, there are multiple ways in which a language could be compositional. For instance,
+    # when meanings consist of two features, a language with forms of length 4 could be compositional by (i) using a
     # compositional substring of 2 characters for each possible meaning, and simply reduplicating that substring for
-    # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using substrings of a length of 2 characters that
-    # uniquely and compositionally map to the individual meaning elements (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
+    # each meaning (e.g. ['aaaa', 'abab', 'baba', 'bbbb']), or (ii) using a substring of 1 character for each meaning
+    # feature, and reduplicating that substring for each meaning feature (e.g. ['aaaa', 'aabb', 'bbaa', 'bbbb']),
+    # or (iii) using substrings of a length of 2 characters that uniquely and compositionally map to the individual
+    # meaning features (e.g. ['aaba', 'aabb', 'abba', 'abbb']).
 
 
     print('')
@@ -376,16 +415,14 @@ def check_compositionality(language, meaning_list):
         if len(meaning) != 2:
             raise ValueError("This function only works for meanings that consist of exactly 2 features")
 
-    compositionality = False
-
-    max_form_length = 0
-    for form in language:
-        if len(form) > max_form_length:
-            max_form_length = len(form)
-
+    reduplicate_segments, reduplicate_full_signal = check_reduplication(language, len(meaning_list[0]))
     print('')
-    print("max_form_length OLD METHOD is:")
-    print(max_form_length)
+    print("reduplicate_segments is:")
+    print(reduplicate_segments)
+    print("reduplicate_full_signal is:")
+    print(reduplicate_full_signal)
+
+    compositionality = False
 
     form_lengths = [len(form) for form in language]
     max_form_length = max(form_lengths)
@@ -472,8 +509,13 @@ def classify_language_general(lang, meaning_list):
         # If each form is unique, the language is either COMPOSITIONAL or HOLISTIC:
         all_forms_unique = check_all_forms_unique(lang)
         if all_forms_unique is True:  # if all_forms_unique is True, we then first check whether the language is compositional:
-            compositionality = check_compositionality(lang, meaning_list)
-            if compositionality is True:
+
+            print("check_compositionality(lang, meaning_list) is:")
+            print(check_compositionality(lang, meaning_list))
+            print("type(check_compositionality(lang, meaning_list)) is:")
+            print(type(check_compositionality(lang, meaning_list)))
+
+            if check_compositionality(lang, meaning_list) is True:
                 return class_compositional
             # The language is HOLISTIC if all_forms_unique is True but the language is not compositional:
             else:
