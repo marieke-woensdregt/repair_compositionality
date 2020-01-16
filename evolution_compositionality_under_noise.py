@@ -315,45 +315,20 @@ def check_reduplication(language, minimum_substring_length):
     :return: two Booleans: the first indicating whether each form of the language uses reduplication per segment, and
     the second indicating whether each form in the language uses reduplication per full signal
     """
-
-    print('')
-    print('')
-    print('This is the check_reduplication() function:')
-
     # If any of the forms in the language doesn't have a length that is a multiple of the minimum_substring_length
     # (i.e. the number of meaning features) the language doesn't (systematically) make use of reduplication:
     form_lengths = [len(form) for form in language]
-    print("form_lengths are:")
-    print(form_lengths)
     for length in form_lengths:
-        print("length % minimum_substring_length is:")
-        print(length % minimum_substring_length)
-        if length % minimum_substring_length != 0:
+        if length <= minimum_substring_length or length % minimum_substring_length != 0:
             return False, False
 
-
     reduplicate_segments_per_form = [True for x in range(len(language))]
-    print('')
-    print("reduplicate_segments_per_form BEFORE doing anything is:")
-    print(reduplicate_segments_per_form)
-
     reduplicate_full_signal_per_form = [True for x in range(len(language))]
-    print('')
-    print("reduplicate_full_signal_per_form BEFORE doing anything is:")
-    print(reduplicate_full_signal_per_form)
-
     for i in range(len(language)):
-        print('')
-        print("i is:")
-        print(i)
         form = language[i]
-        print("form is:")
-        print(form)
         # The language uses the reduplicate_segments_per_form strategy, if each subpart consists of repetitions of
         # the same character:
         subparts = [form[x:x + minimum_substring_length] for x in range(0, len(form), minimum_substring_length)]
-        print("subparts are:")
-        print(subparts)
         for subpart in subparts:
             for character in subpart:
                 if character != subpart[0]:
@@ -364,10 +339,6 @@ def check_reduplication(language, minimum_substring_length):
             if subpart != subparts[0]:  # reduplication of full signals should be False if the signal segments that are
                 # used for a given meaning feature value aren't all the same
                 reduplicate_full_signal_per_form[i] = False
-    print("reduplicate_segments_per_form is:")
-    print(reduplicate_segments_per_form)
-    print("reduplicate_full_signal_per_form is:")
-    print(reduplicate_full_signal_per_form)
     if sum(reduplicate_segments_per_form) == len(language):
         reduplicate_segments = True
     else:
@@ -376,10 +347,6 @@ def check_reduplication(language, minimum_substring_length):
         reduplicate_full_signal = True
     else:
         reduplicate_full_signal = False
-    print("reduplicate_segments is:")
-    print(reduplicate_segments)
-    print("reduplicate_full_signal is:")
-    print(reduplicate_full_signal)
     return reduplicate_segments, reduplicate_full_signal
 
 
@@ -1213,12 +1180,13 @@ def normalize_logprobs_simlang(logprobs):
     return normedlogs
 
 
-def update_posterior_simlang(posterior, meaning, signal):
+def update_posterior_simlang(log_posterior, hypotheses, meaning, signal):
     """
     This function is copied directly from lab 21 of the SimLang course of 2019. I only renamed some of the variables
     below, in order to make it work with my code (under the "# Added by me" comment).
 
-    :param posterior: a list of LOG posterior probabilities
+    :param log_posterior: a list of LOG posterior probabilities
+    :param hypotheses: list of all possible languages
     :param meaning: the meaning from the meaning-signal pair that was observed (string)
     :param signal: the signal from the meaning-signal pair that was observed (string)
     :return: a list of normalised LOG posterior probabilities, updated based on the meaning-signal pair that was
@@ -1228,16 +1196,16 @@ def update_posterior_simlang(posterior, meaning, signal):
     # added by me:
     signals = forms_without_noise
     noise = error
-    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypothesis_space, meanings)
+    all_langs_as_in_simlang = transform_all_languages_to_simlang_format(hypotheses, meanings)
 
     in_language = log(1 - noise)
     out_of_language = log(noise / (len(signals) - 1))
     new_posterior = []
-    for i in range(len(posterior)):
+    for i in range(len(log_posterior)):
         if (meaning, signal) in all_langs_as_in_simlang[i]:
-            new_posterior.append(posterior[i] + in_language)
+            new_posterior.append(log_posterior[i] + in_language)
         else:
-            new_posterior.append(posterior[i] + out_of_language)
+            new_posterior.append(log_posterior[i] + out_of_language)
     return normalize_logprobs_simlang(new_posterior)
 
 
@@ -1364,11 +1332,11 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                 counter += 1
             if production == 'simlang':
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior_simlang(population[hearer_index], topic,
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, topic,
                                                                     utterance)  # (Thus, in this simplified version of
                 # the model, agents are still able to "track changes in their partners' linguistic behaviour over time
                 elif observed_meaning == 'inferred':
-                    population[hearer_index] = update_posterior_simlang(population[hearer_index], listener_response,
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, listener_response,
                                                                         utterance)  # (Thus, in this simplified version
                     # of the model, agents are still able to "track changes in their partners' linguistic behaviour over
                     # time
@@ -1388,12 +1356,12 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                 # they receive from their communication partner.
             if production == 'simlang':
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior_simlang(population[hearer_index], topic, utterance)
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, topic, utterance)
                     # Thus, in this simplified version of the model, agents are still able to "track changes in their
                     # partners' linguistic behaviour over time
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior_simlang(population[hearer_index], inferred_meaning,
+                    population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, inferred_meaning,
                                                                         utterance)  # Thus, in this simplified version
                     # of the model, agents are still able to "track changes in their partners' linguistic behaviour over
                     # time
@@ -1638,7 +1606,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
                 else:
                     meaning, signal = random.choice(data)
                 if production_implementation == 'simlang':
-                    population[j] = update_posterior_simlang(population[j], meaning, signal)
+                    population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
         data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
