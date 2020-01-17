@@ -455,18 +455,22 @@ def check_compositionality(language, meaning_list):
     return compositionality, reduplicate_segments, reduplicate_whole_signal
 
 
-
-def check_diversify_signal(lang):
-
-    form_lengths = [len(form) for form in lang]
+def check_diversify_signal(language):
+    """
+    :param language: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to
+    same index in meanings
+    :return: True if the language uses the "diversify signal" strategy (meaning that if one character is obscured by
+    noise in any position in any of the signals, all signals in the language can still be distinguished from one
+    another), and False otherwise.
+    """
+    form_lengths = [len(form) for form in language]
     for length in form_lengths:
         if length != form_lengths[0]:
             raise ValueError("This function only works if all forms in the language are of the same length")
-
     for i in range(form_lengths[0]):
-        for form_a in lang:
+        for form_a in language:
             form_a_with_noise = form_a[:i]+'_'+form_a[i+1:]
-            other_forms = deepcopy(lang)
+            other_forms = deepcopy(language)
             other_forms.remove(form_a)
             for form_b in other_forms:
                 form_b_with_noise = form_b[:i] + '_' + form_b[i+1:]
@@ -475,13 +479,6 @@ def check_diversify_signal(lang):
                     # strategy.
                     return False
     return True
-
-
-
-
-
-
-
 
 
 def classify_language_multiple_form_lengths(lang, meaning_list):
@@ -525,7 +522,7 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
             if compositionality is True:
                 if reduplicate_segments is True:
                     return class_compositional_reduplicate_segments
-                elif class_compositional_reduplicate_whole_signal is True:
+                elif reduplicate_whole_signal is True:
                     return class_compositional_reduplicate_whole_signal
                 else:
                     return class_compositional
