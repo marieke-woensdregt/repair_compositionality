@@ -470,7 +470,7 @@ def check_diversify_signal(language):
     for i in range(form_lengths[0]):
         for form_a in language:
             form_a_with_noise = form_a[:i]+'_'+form_a[i+1:]
-            other_forms = deepcopy(language)
+            other_forms = list(deepcopy(language))
             other_forms.remove(form_a)
             for form_b in other_forms:
                 form_b_with_noise = form_b[:i] + '_' + form_b[i+1:]
@@ -543,72 +543,66 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
             return class_other
 
 
-
-
-
-if __name__ == '__main__':
-
-    print('')
-    print('')
-    print('')
-    print('')
-
-    meanings = ['02', '03', '12', '13']
-    # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
-
-    forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
-    # 'noisy variants'
-    print('')
-    print('')
-    print("forms_without_noise are:")
-    print(forms_without_noise)
-    print("len(forms_without_noise) are:")
-    print(len(forms_without_noise))
-
-    examples_languages = [['aaaa', 'abab', 'baba', 'bbbb'],
-                          ['aaaa', 'aabb', 'bbaa', 'bbbb'],
-                          ['aaaa', 'bbbb', 'abba', 'baab'],
-                          ['aa', 'ab', 'ba', 'bb'],
-                          ['aaaa', 'aaaa', 'baba', 'bbbb'],
-                          ['aa', 'aa', 'ba', 'bb'],
-                          ['aa', 'ab', 'bb', 'ba'],
-                          ['aaaa', 'abab', 'baba', 'bb']]
-
-    # example_lang = ['aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc']
-
-    example_lang_categories = ['compositional_reduplicate_signal', 'compositional_reduplicate_segment', 'holistic_diversify_signals', 'compositional', 'other', 'other', 'holistic', 'holistic']
-
-
-    # language_class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']
-
-    language_class_labels = ['degenerate', 'holistic', 'holistic_diversify_signal', 'compositional', 'compositional_reduplicate_segments', 'compositional_reduplicate_whole_signal', 'other']
-
-    print('')
-    print('')
-    for i in range(len(examples_languages)):
-        print('')
-        print("i is:")
-        print(i)
-        print("meanings are:")
-        print(meanings)
-        example_lang = examples_languages[i]
-        print("example_lang is:")
-        print(example_lang)
-        example_lang_category = example_lang_categories[i]
-        print("example_lang_category is:")
-        print(example_lang_category)
-        example_lang_class = classify_language_multiple_form_lengths(example_lang, meanings)
-        print("example_lang_class is:")
-        print(example_lang_class)
-        print("language_class_labels[example_lang_class] is:")
-        print(language_class_labels[example_lang_class])
-
-
-
-
-
-
-
+#
+# if __name__ == '__main__':
+#
+#     print('')
+#     print('')
+#     print('')
+#     print('')
+#
+#     meanings = ['02', '03', '12', '13']
+#     # meanings = ['03', '04', '05', '13', '14', '15', '23', '24', '25']
+#
+#     forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their possible
+#     # 'noisy variants'
+#     # forms_without_noise = create_all_possible_forms(3, [2, 4])  # all possible forms, excluding their possible
+#     # # 'noisy variants'
+#     print('')
+#     print('')
+#     print("forms_without_noise are:")
+#     print(forms_without_noise)
+#     print("len(forms_without_noise) are:")
+#     print(len(forms_without_noise))
+#
+#     example_languages = [('aaaa', 'abab', 'baba', 'bbbb'),
+#                          ('aaaa', 'aabb', 'bbaa', 'bbbb'),
+#                          ('aaaa', 'bbbb', 'abba', 'baab'),
+#                          ('aa', 'ab', 'ba', 'bb'),
+#                          ('aaaa', 'aaaa', 'baba', 'bbbb'),
+#                          ('aa', 'aa', 'ba', 'bb'),
+#                          ('aa', 'ab', 'bb', 'ba'),
+#                          ('aaaa', 'abab', 'baba', 'bb'),
+#                          ('aaba', 'aabb', 'abba', 'abbb')]
+#
+#     # example_languages = [('aaaa', 'abab', 'acac', 'baba', 'bbbb', 'bcbc', 'caca', 'cbcb', 'cccc')]
+#
+#     example_lang_categories = ['compositional_reduplicate_signal', 'compositional_reduplicate_segment', 'holistic_diversify_signals', 'compositional', 'other', 'other', 'holistic', 'holistic', 'compositional']
+#
+#     # example_lang_categories = ['compositional_reduplicate_whole_signal']
+#
+#     language_class_labels = ['degenerate', 'holistic', 'holistic_diversify_signal', 'compositional', 'compositional_reduplicate_segments', 'compositional_reduplicate_whole_signal', 'other']
+#
+#     print('')
+#     print('')
+#     for i in range(len(example_languages)):
+#         print('')
+#         print("i is:")
+#         print(i)
+#         print("meanings are:")
+#         print(meanings)
+#         example_lang = example_languages[i]
+#         print("example_lang is:")
+#         print(example_lang)
+#         example_lang_category = example_lang_categories[i]
+#         print("example_lang_category is:")
+#         print(example_lang_category)
+#         example_lang_class = classify_language_multiple_form_lengths(example_lang, meanings)
+#         print("example_lang_class is:")
+#         print(example_lang_class)
+#         print("language_class_labels[example_lang_class] is:")
+#         print(language_class_labels[example_lang_class])
+#
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
@@ -1697,58 +1691,71 @@ def convert_array_to_string(array):
     return array_string
 
 
-# ###################################################################################################################
-# if __name__ == '__main__':
-#
-#     ###################################################################################################################
-#     # NOW LET'S RUN THE ACTUAL SIMULATION:
-#
-#     t0 = time.process_time()
-#
-#     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-#     print("number of possible languages is:")
-#     print(len(hypothesis_space))
-#
-#     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-#
-#     if compressibility_bias:
-#         priors = prior(hypothesis_space, forms_without_noise, meanings)
-#     else:
-#         priors = np.ones(len(hypothesis_space))
-#         priors = np.divide(priors, np.sum(priors))
-#         priors = np.log(priors)
-#
-#     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
-#
-#     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
-#     data_over_gens_per_run = []
-#     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
-#     for r in range(runs):
-#         population = new_population(popsize, priors)
-#
-#         language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
-#
-#         language_stats_over_gens_per_run[r] = language_stats_over_gens
-#         data_over_gens_per_run.append(data_over_gens)
-#         final_pop_per_run[r] = final_pop
-#
-#     timestr = time.strftime("%Y%m%d-%H%M%S")
-#
-#     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
-#     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
-#     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
-#     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
-#
-#     t1 = time.process_time()
-#
-#     print('')
-#     print("number of minutes it took to run simulation:")
-#     print(round((t1-t0)/60., ndigits=2))
-#
-#     print('')
-#     print('results were saved in folder:')
-#     print(pickle_file_path)
-#
-#     print('')
-#     print('using filename:')
-#     print(pickle_file_name)
+###################################################################################################################
+if __name__ == '__main__':
+
+    ###################################################################################################################
+    # NOW LET'S RUN THE ACTUAL SIMULATION:
+
+    t0 = time.process_time()
+
+    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
+    print("number of possible languages is:")
+    print(len(hypothesis_space))
+
+    t1 = time.process_time()
+    print('')
+    print("number of minutes it took to create all languages (i.e. the hypothesis space:")
+    print(round((t1-t0)/60., ndigits=2))
+
+
+    class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
+    print("class_per_lang.shape is:")
+    print(class_per_lang.shape)
+
+    t2 = time.process_time()
+    print('')
+    print("number of minutes it took to classify languages:")
+    print(round((t2-t1)/60., ndigits=2))
+
+    if compressibility_bias:
+        priors = prior(hypothesis_space, forms_without_noise, meanings)
+    else:
+        priors = np.ones(len(hypothesis_space))
+        priors = np.divide(priors, np.sum(priors))
+        priors = np.log(priors)
+
+    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
+
+    language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
+    data_over_gens_per_run = []
+    final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
+    for r in range(runs):
+        population = new_population(popsize, priors)
+
+        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+
+        language_stats_over_gens_per_run[r] = language_stats_over_gens
+        data_over_gens_per_run.append(data_over_gens)
+        final_pop_per_run[r] = final_pop
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
+    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+    pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
+
+    t3 = time.process_time()
+
+    print('')
+    print("number of minutes it took to run simulation:")
+    print(round((t3-t2)/60., ndigits=2))
+
+    print('')
+    print('results were saved in folder:')
+    print(pickle_file_path)
+
+    print('')
+    print('using filename:')
+    print(pickle_file_name)
