@@ -1,9 +1,149 @@
-from evolution_compositionality_under_noise import *
+import string
+import itertools
+import numpy as np
 
+
+def create_all_possible_forms(n_characters, form_length_list):
+    """
+    Takes a number of characters and a list of allowed form lengths, and creates a list of all possible complete forms
+    based on that.
+
+    :param n_characters: the number of different characters that may be used
+    :param form_length_list: a list of all form lengths that are allowed
+    :return: a list of all possible complete forms
+    """
+    alphabet = string.ascii_lowercase
+    form_alphabet = alphabet[:n_characters]
+    all_forms = []
+    for length in form_length_list:
+        all_forms = all_forms+list(itertools.product(form_alphabet, repeat=length))
+    all_forms_as_strings = []
+    for form in all_forms:
+        string_form = ''
+        for i in range(len(form)):
+            string_form = string_form+form[i]
+        all_forms_as_strings.append(string_form)
+    return all_forms_as_strings
+
+
+def create_all_possible_languages(meaning_list, forms):
+    """Creates all possible languages
+
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
+    :returns: list of tuples which represent languages, where each tuple consists of forms_without_noisy_variants and
+    has length len(meanings)
+    """
+    all_possible_languages = list(itertools.product(forms, repeat=len(meaning_list)))
+    return all_possible_languages
+
+
+# In case it's relevant for checking my implementation against the simlang one, just as a sanity check:
+def transform_all_languages_to_simlang_format(language_list, meaning_list):
+    """
+    Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
+    for each language, assuming the meaning for each form is specified by the
+    form's index), and turning it into a list of languages as represented in
+    SimLang lab 21 (which in turn is based on Kirby et al., 2015), in which a
+    <meaning, form> pair forms_without_noisy_variants a tuple, and four of those tuples in a list form
+    a language
+
+    :param language_list: list of all languages
+    :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
+    :returns: list of the input languages in the format of SimLang lab 21
+    """
+    all_langs_as_in_simlang = []
+    for l in range(len(language_list)):
+        lang_as_in_simlang = [(meaning_list[x], language_list[l][x]) for x in range(len(meaning_list))]
+        all_langs_as_in_simlang.append(lang_as_in_simlang)
+    return all_langs_as_in_simlang
+
+
+def classify_language_four_forms(lang, forms, meaning_list):
+    """
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+    (Kirby et al., 2015). NOTE that this function is specific to classifying languages that consist of exactly 4 forms,
+    where each form consists of exactly 2 characters. For a more general version of this function, see
+    classify_language_general() below.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :returns: integer corresponding to category that language belongs to:
+    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
+    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    """
+    class_degenerate = 0
+    class_holistic = 1
+    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
+    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
+    class_compositional = 3
+    class_other = 4
+
+    # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
+    if len(forms) != 4:
+        raise ValueError(
+            "This function only works for a world in which there are 4 possible forms_without_noisy_variants"
+        )
+    if len(forms[0]) != 2:
+        raise ValueError(
+            "This function only works when each form consists of 2 elements")
+    if len(lang) != len(meaning_list):
+        raise ValueError("Lang should have same length as meanings")
+
+    # lang is degenerate if it uses the same form for every meaning:
+    if lang[0] == lang[1] and lang[1] == lang[2] and lang[2] == lang[3]:
+        return class_degenerate
+
+    # lang is compositional if it makes use of all possible forms_without_noisy_variants, *and* each form element maps
+    # to the same meaning element for each form:
+    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[
+        3] in lang and lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][
+        1] == lang[2][1] and lang[1][1] == lang[3][1]:
+        return class_compositional
+
+    # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
+    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[3] in lang:
+        # within holistic languages, we can distinguish between those in which at least one part form is mapped
+        # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
+        # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
+        # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
+        # restricted request for repair instead of an open request.
+        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
+            return class_hybrid
+        elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
+            return class_hybrid
+        else:
+            return class_holistic
+
+    # In all other cases, a language belongs to the 'other' category:
+    else:
+        return class_other
+
+
+def classify_all_languages(language_list, complete_forms, meaning_list):
+    """
+    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
+    (Kirby et al., 2015)
+
+    :param language_list: list of all languages
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
+    :returns: 1D numpy array containing integer corresponding to category of corresponding
+    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
+    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
+    from SimLang lab 21)
+    """
+    class_per_lang = np.zeros(len(language_list))
+    for l in range(len(language_list)):
+        class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
+    return class_per_lang
 
 ###################################################################################################################
 # FIRST, LET'S DEFINE SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF
-# LANGUAGES AND TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE:
+# LANGUAGES AND TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE 2019:
 
 
 def check_language_lists_same_order(languages_my_code, languages_simlang_code):
@@ -27,7 +167,7 @@ if __name__ == '__main__':
     ###################################################################################################################
     # FIRST LET'S CHECK MY LANGUAGES AND THE CLASSIFICATION OF THEM AGAINST THE SIMLANG CODE, JUST AS A SANITY CHECK:
 
-    # COPIED FROM SIMLANG LAB 21:
+    # COPIED FROM SIMLANG LAB 21 (2019):
     languages_simlang = [[('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'aa')],
                          [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ab')],
                          [('02', 'aa'), ('03', 'aa'), ('12', 'aa'), ('13', 'ba')],
@@ -360,25 +500,14 @@ if __name__ == '__main__':
                       -11.272664072079987, -10.749415928290118, -10.749415928290118, -0.9178860550328204]
 
     meanings = ['02', '03', '12', '13']  # all possible meanings
-    forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
+    forms = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
     # 'noisy variants'
     print('')
     print('')
-    print("forms_without_noise are:")
-    print(forms_without_noise)
-    print("len(forms_without_noise) are:")
-    print(len(forms_without_noise))
-    noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
-    print('')
-    print("noisy_forms are:")
-    print(noisy_forms)
-    print("len(noisy_forms) are:")
-    print(len(noisy_forms))
-    # all possible noisy variants of the forms above
-    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
-    # complete forms and noisy variants
+    print("forms are:")
+    print(forms)
 
-    hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
+    hypothesis_space = create_all_possible_languages(meanings, forms)
     print("number of possible languages is:")
     print(len(hypothesis_space))
 
@@ -391,17 +520,17 @@ if __name__ == '__main__':
     print("no_of_each_type ACCORDING TO SIMLANG CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
     print(no_of_each_type)
 
-    if runs > 0:
-        class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
-        print('')
-        print('')
-        print("class_per_lang is:")
-        print(class_per_lang)
-        no_of_each_class = np.bincount(class_per_lang.astype(int))
-        print('')
-        print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
-              "4 = other is:")
-        print(no_of_each_class)
+
+    class_per_lang = classify_all_languages(hypothesis_space, forms, meanings)
+    print('')
+    print('')
+    print("class_per_lang is:")
+    print(class_per_lang)
+    no_of_each_class = np.bincount(class_per_lang.astype(int))
+    print('')
+    print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
+          "4 = other is:")
+    print(no_of_each_class)
 
     # Hmmm, that gives us slightly different numbers! Is that caused by a problem in my
     # create_all_languages() function, or in my classify_lang() function?
@@ -534,7 +663,7 @@ if __name__ == '__main__':
     ###################################################################################################################
     # FINALLY, LET'S CHECK MY PRIOR PROBABILITY DISTRIBUTION AGAINST THE SIMLANG ONE:
 
-    my_log_prior = prior(hypothesis_space, forms_without_noise, meanings)
+    my_log_prior = prior(hypothesis_space, forms, meanings)
     print('')
     print('')
     # print("my_log_prior is:")
