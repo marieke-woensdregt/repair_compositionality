@@ -535,6 +535,8 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
                 if form_lengths[0] > minimum_substring_length and sum(form_lengths) == form_lengths[0]*len(lang):
                     if check_diversify_signal(lang) is True:
                         return class_holistic_diversify_signal
+                    else:
+                        return class_holistic
                 else:
                     return class_holistic
         # The language belongs to the OTHER class if it isn't degenerate, but also doesn't have a unique form for
@@ -731,7 +733,7 @@ def mrf_other(lang, meaning_list):
     return mrf_string
 
 
-def minimally_redundant_form(lang, complete_forms, meaning_list):
+def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     """
     Takes a language of any class and returns a minimally redundant form description of its context free grammar.
 
@@ -753,6 +755,32 @@ def minimally_redundant_form(lang, complete_forms, meaning_list):
     elif lang_class == 3:  # the language is 'compositional'
         mrf_string = mrf_compositional(lang, meaning_list)
     elif lang_class == 4:  # the language is of the 'other' category
+        mrf_string = mrf_other(lang, meaning_list)
+    return mrf_string
+
+
+def minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list):
+    """
+    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :param complete_forms: list containing all possible complete forms; corresponds to global variable
+    'forms_without_noise'
+    :param meaning_list: list of strings corresponding to all possible meanings
+    :return: minimally redundant form description of the language's context free grammar (string)
+    """
+    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+        lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
+    else:
+        lang_class = classify_language_multiple_form_lengths(lang, meaning_list)
+    if lang_class == 0:  # the language is 'degenerate'
+        mrf_string = mrf_degenerate(lang, meaning_list)
+    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+        mrf_string = mrf_holistic(lang, meaning_list)
+    elif lang_class == 3 or lang_class == 4 or lang_class == 5:  # the language is 'compositional'
+        mrf_string = mrf_compositional(lang, meaning_list)
+    elif lang_class == 6:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
 
@@ -804,7 +832,10 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: PROPORTIONAL prior probability (float)
     """
-    mrf_string = minimally_redundant_form(lang, complete_forms, meaning_list)
+    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+        mrf_string = minimally_redundant_form_four_forms(lang, complete_forms, meaning_list)
+    else:
+        mrf_string = minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list)
     coding_len = coding_length(mrf_string)
     prior = 2 ** -coding_len
     return prior
@@ -1032,9 +1063,21 @@ def noisy_to_complete_forms(noisy_form, complete_forms):
     'forms_without_noise')
     :return: A list of complete forms that the noisy form is compatible with
     """
-    possible_complete_forms = []
+    print("complete_forms are:")
+    print(complete_forms)
+    print("noisy_form is:")
+    print(noisy_form)
+    complete_form_lengths = np.array([len(form) for form in complete_forms])
+    print("complete_form_lengths are:")
+    print(complete_form_lengths)
+    same_length_indices = np.where(complete_form_lengths == len(noisy_form))
+    print("same_length_indices are:")
+    print(same_length_indices)
+    print("complete_forms[same_length_indices][0] are:")
+    print(complete_forms[same_length_indices][0])
     amount_of_noise = noisy_form.count('_')
-    for complete_form in complete_forms:
+    possible_complete_forms = []
+    for complete_form in complete_forms[same_length_indices][0]:
         similarity_score = 0
         for i in range(len(noisy_form)):
             if noisy_form[i] == complete_form[i]:
@@ -1095,9 +1138,80 @@ def find_partial_meaning(language, noisy_form):
         return []
 
 
+def receive_with_repair_open_only(language, utterance, mutual_understanding_pressure, minimal_effort_pressure):
+    """
+    Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
+    these two response types are to happen depends on the settings of the paremeters 'mutual_understanding' and
+    'minimal_effort'. These three parameters are
+    all assumed to be global variables.
+
+    :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+    where each form is mapped to the meaning at the corresponding index
+    :param utterance: an utterance (string)
+    :param mutual_understanding_pressure: determines whether the pressure for mutual understanding is switched on or off
+    (i.e. set to True or False); corresponds to global variable 'mutual_understanding'
+    :param minimal_effort_pressure: determines whether the pressure for minimal effort is switched on or off
+    (i.e. set to True or False); corresponds to global variable 'minimal_effort'
+    :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator. A repair initiator
+    can be of two types: if the listener has grasped part of the meaning, it will be a restricted request, which is a
+    string containing the partial meaning that the listener did grasp, followed by a question mark. If the listener did
+    not grasp any of the meaning, it will be an open request, which is simply '??'
+    """
+    if not mutual_understanding_pressure and not minimal_effort_pressure:
+        raise ValueError(
+            "Sorry, this function has only been implemented for at least one of either mutual_understanding or minimal_"
+            "effort being True")
+    if '_' in utterance:
+        compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
+        possible_interpretations = find_possible_interpretations(language, compatible_forms)
+        if len(possible_interpretations) == 0:
+            possible_interpretations = meanings
+        partial_meaning = find_partial_meaning(language, utterance)
+        if mutual_understanding_pressure and minimal_effort_pressure:
+            prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
+            if len(partial_meaning) == 1:
+                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[1]
+                repair_initiator = str(partial_meaning[0])+'?'
+            elif len(partial_meaning) == 0:
+                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[2]
+                repair_initiator = '??'
+        elif mutual_understanding_pressure and not minimal_effort_pressure:
+            if len(possible_interpretations) > 1:
+                prop_to_prob_no_repair = 0.
+                prop_to_prob_repair = 1.
+                if len(partial_meaning) == 1:
+                    repair_initiator = str(partial_meaning[0])+'?'
+                elif len(partial_meaning) == 0:
+                    repair_initiator = '??'
+            elif len(possible_interpretations) == 1:
+                prop_to_prob_no_repair = 1.
+                prop_to_prob_repair = 0.
+        elif not mutual_understanding_pressure and minimal_effort_pressure:
+            prop_to_prob_no_repair = 1.
+            prop_to_prob_repair = 0.
+            if len(partial_meaning) == 1:
+                repair_initiator = str(partial_meaning[0])+'?'
+            elif len(partial_meaning) == 0:
+                repair_initiator = '??'
+        prop_to_prob_per_response = np.array([prop_to_prob_no_repair, prop_to_prob_repair])
+        for i in range(len(prop_to_prob_per_response)):
+            if prop_to_prob_per_response[i] < 0.0:
+                prop_to_prob_per_response[i] = 0.0
+        normalized_response_probs = np.divide(prop_to_prob_per_response, np.sum(prop_to_prob_per_response))
+        selected_response = np.random.choice(np.arange(2), p=normalized_response_probs)
+        if selected_response == 0:
+            response = random.choice(possible_interpretations)
+        elif selected_response == 1:
+            response = repair_initiator
+    else:
+        response = receive_without_repair(language, utterance)
+    return response
+
+
+
 #TODO: This has turned into a bit of a monster function. Maybe shorten it by pulling out the code that calculates the
 # probabilities for the different response options and putting that in a separate function?
-def receive_with_repair(language, utterance, mutual_understanding_pressure, minimal_effort_pressure):
+def receive_with_repair_open_and_closed(language, utterance, mutual_understanding_pressure, minimal_effort_pressure):
     """
     Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
     these two response types are to happen depends on the settings of the paremeters 'mutual_understanding' and
@@ -1363,7 +1477,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                 # whenever a speaker is called upon to produce a utterance, they first sample a language from their
                 # posterior probability distribution. So each agent keeps updating their language according to the data
                 # received from their communication partner.
-            listener_response = receive_with_repair(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
+            listener_response = receive_with_repair_open_and_closed(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
             counter = 0
             while '?' in listener_response:
                 if counter == 3:  # After 3 attempts, the listener stops trying to do repair
@@ -1374,7 +1488,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     utterance = produce(speaker_language, topic, ambiguity_penalty, error, noise_switch=False, prob_of_noise=0.0)
                     # For now, we assume that the speaker's response to a repair initiator always comes through without
                     # noise.
-                listener_response = receive_with_repair(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
+                listener_response = receive_with_repair_open_and_closed(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
                 counter += 1
             if production == 'simlang':
                 if observed_meaning == 'intended':
@@ -1725,12 +1839,22 @@ if __name__ == '__main__':
         priors = np.divide(priors, np.sum(priors))
         priors = np.log(priors)
 
+    t3 = time.process_time()
+    print('')
+    print("number of minutes it took to create prior:")
+    print(round((t3-t2)/60., ndigits=2))
+
     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
 
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
     for r in range(runs):
+
+        print('')
+        print("r is:")
+        print(r)
+
         population = new_population(popsize, priors)
 
         language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
@@ -1746,11 +1870,11 @@ if __name__ == '__main__':
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
 
-    t3 = time.process_time()
+    t4 = time.process_time()
 
     print('')
     print("number of minutes it took to run simulation:")
-    print(round((t3-t2)/60., ndigits=2))
+    print(round((t4-t3)/60., ndigits=2))
 
     print('')
     print('results were saved in folder:')
