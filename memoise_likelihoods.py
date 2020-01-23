@@ -1,4 +1,4 @@
-from evolution_compositionality_under_noise import *
+from evolution_compositionality_under_noise import create_all_possible_forms, create_all_possible_noisy_forms, create_all_possible_languages, convert_float_value_to_string
 from repair_vs_redundancy_model import production_likelihoods_with_noise_and_minimal_effort
 import numpy as np
 import time
@@ -117,7 +117,7 @@ print(likelihood_cache.shape)
 
 t2 = time.process_time()
 
-pickle.dump(likelihood_cache, open("pickles/likelihood_cache_noise_"+str(noise)+"_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
+pickle.dump(likelihood_cache, open("pickles/likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
 
 t3 = time.process_time()
 print('')
