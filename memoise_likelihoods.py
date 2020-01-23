@@ -1,4 +1,5 @@
 from evolution_compositionality_under_noise import *
+from repair_vs_redundancy_model import production_likelihoods_with_noise_and_minimal_effort
 import numpy as np
 import time
 import pickle
@@ -33,7 +34,7 @@ print('')
 print("len(hypothesis_space) is:")
 print(len(hypothesis_space))
 
-mutual_understanding = True  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE:
+mutual_understanding = False  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE:
 # first argument in sys.argv list is always the name of the script
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
@@ -43,6 +44,14 @@ else:
     gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
+
+minimal_effort = False
+if minimal_effort:
+    delta = 2  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+    # using long utterances)
+else:
+    delta = 0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+    # using long utterances)
 
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
@@ -57,12 +66,22 @@ noise_prob = 0.5  # the probability of environmental noise obscuring part of an 
 
 
 def cache_likelihoods_per_datapoint(meaning_list, forms_including_noisy_variants, hypotheses):
+    """
+    Calculates the likelihood of every possible datapoint (i.e. <meaning, form> pair) for every hypothesis, and saves
+    them all in one big 3D numpy matrix.
+
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
+    :param forms_including_noisy_variants: list of all possible forms INCLUDING noisy variants; corresponds to global
+    variable 'all_forms_including_noisy_variants'
+    :param hypotheses: list of all possible languages; corresponds to global parameter 'hypothesis_space'
+    :return: 3D numpy matrix with axis 0 = meanings, axis 1 = forms (incl. noisy variants), and axis 2 = hypotheses
+    """
     likelihood_cache_matrix = np.zeros((len(meaning_list), len(forms_including_noisy_variants), len(hypotheses)))
     for m in range(len(meaning_list)):
         topic = meaning_list[m]
         for h in range(len(hypotheses)):
-            prop_to_prob_per_form_array = production_likelihoods_with_noise(hypotheses[h], topic, meanings,
-                                                                             forms_without_noise, noisy_forms, gamma,
+            prop_to_prob_per_form_array = production_likelihoods_with_noise_and_minimal_effort(hypotheses[h], topic, meanings,
+                                                                             forms_without_noise, noisy_forms, gamma, delta,
                                                                              error, noise_prob)
             for f in range(len(prop_to_prob_per_form_array)):
                 likelihood_cache_matrix[m][f][h] = prop_to_prob_per_form_array[f]
@@ -98,7 +117,7 @@ print(likelihood_cache.shape)
 
 t2 = time.process_time()
 
-pickle.dump(likelihood_cache, open("pickles/likelihood_cache_noise_"+str(noise)+"_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
+pickle.dump(likelihood_cache, open("pickles/likelihood_cache_noise_"+str(noise)+"_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
 
 t3 = time.process_time()
 print('')
