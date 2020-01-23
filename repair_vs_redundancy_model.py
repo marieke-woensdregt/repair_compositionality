@@ -6,56 +6,112 @@ from evolution_compositionality_under_noise import *
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their 'noisy variants'
-print('')
-print('')
-print("forms_without_noise are:")
-print(forms_without_noise)
-print("len(forms_without_noise) are:")
-print(len(forms_without_noise))
+possible_form_lengths = [2, 4]  # all possible form lengths
+forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
+# possible 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
-print('')
-print("noisy_forms are:")
-print(noisy_forms)
-print("len(noisy_forms) are:")
-print(len(noisy_forms))
 # all possible noisy variants of the forms above
-all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both complete
-print('')
-print("len(all_forms_including_noisy_variants) are:")
-print(len(all_forms_including_noisy_variants))
-
-hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
-print('')
-print('')
-print("len(hypothesis_space) is:")
-print(len(hypothesis_space))
-
-mutual_understanding = True  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE:
-# first argument in sys.argv list is always the name of the script
-if mutual_understanding:
-    gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
-else:
-    gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
+all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
+# complete forms and noisy variants
 
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
-noise_prob = 0.5  # the probability of environmental noise obscuring part of an utterance
+turnover = True  # determines whether new individuals enter the population or not
+popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+# a pair of agents.
+runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 10  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
-###################################################################################################################
+production = 'my_code'  # can be set to 'simlang' or 'my_code'
+
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
+observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
+# be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
+# where the learner has access to the hearer's interpretation.
+interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+# used, but NOTE that it only works with a popsize of 2!
+n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
+# previous generation, or from multiple (can be set to either 'single' or 'multiple').
+
+# proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
+# measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
+# assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
+# language and we count the resulting proportions.
+
+noise = True  # parameter that determines whether environmental noise is on or off
+
+communicative_success = False  # determines whether there is a pressure for communicative success or not
+communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
+# successful interaction is to enter the data set that is passed on to the next generation, compared to a
+# <meaning, form> pair from a unsuccessful interaction.
+
+burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over
+# languages after convergence
+
+n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
+# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
+# languages, and 5 if the new code was used which does make this distinction.
+
+pickle_file_path = "pickles/"
 
 
+# THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
+# ARGUMENTS GIVEN TO THE PYTHON SCRIPT WHEN RUN FROM THE TERMINAL OR FROM A .SH SCRIPT:
+if __name__ == '__main__':
 
+    b = int(sys.argv[1])  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training
+    # (Kirby et al. used a bottleneck of 20 in the body of the paper.
+    rounds = 2 * b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
+    print('')
+    print("b is:")
+    print(b)
+
+    compressibility_bias = str_to_bool(sys.argv[2])  # Setting the 'compressibility_bias' parameter based on the
+    # command-line input #NOTE: first argument in sys.argv list is always the name of the script; Determines whether
+    # agents have a prior that favours compressibility, or a flat prior
+    print('')
+    print("compressibility_bias (i.e. learnability pressure) is:")
+    print(compressibility_bias)
+
+    noise_prob = float(sys.argv[3])  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
+    # argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring
+    # part of an utterance
+    print('')
+    print("noise_prob is:")
+    print(noise_prob)
+
+    mutual_understanding = str_to_bool(sys.argv[4])  # Setting the 'mutual_understanding' parameter based on the
+    # command-line input #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("mutual_understanding is:")
+    print(mutual_understanding)
+    if mutual_understanding:
+        gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+        # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+        # conditions
+    else:
+        gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+        # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+        # conditions
+
+    minimal_effort = str_to_bool(sys.argv[5])  # Setting the 'minimal_effort' parameter based on the command-line input
+    # #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("minimal_effort is:")
+    print(minimal_effort)
+    if minimal_effort:
+        delta = 2  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+        # using long utterances)
+    else:
+        delta = 0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+        # using long utterances)
 
 ###################################################################################################################
 # NOW SOME FUNCTIONS THAT HANDLE PRODUCTION, NOISY PRODUCTION, AND RECEPTION WITH AND WITHOUT REPAIR:
 
 
-def production_likelihoods_with_noise(language, topic, meaning_list, forms, noisy_variants, ambiguity_penalty, error_prob, prob_of_noise):
+def production_likelihoods_with_noise_and_minimal_effort(language, topic, meaning_list, forms, noisy_variants, ambiguity_penalty, effort_penalty, error_prob, prob_of_noise):
     """
     Calculates the production probabilities for each of the possible forms (including both forms without noise and all
     possible noisy variants) given a language and topic, and the probability of environmental noise
@@ -68,6 +124,8 @@ def production_likelihoods_with_noise(language, topic, meaning_list, forms, nois
     :param forms: list of all possible forms *excluding* their noisy variants
     :param noisy_variants: list of all possible noisy variants of forms
     :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
+    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
+    length)
     :param error_prob: the probability of making an error in production
     :param prob_of_noise: the probability of environmental noise masking part of the utterance
     :return: 1D numpy array containing a production probability for each possible form (where the index of the
@@ -93,25 +151,26 @@ def production_likelihoods_with_noise(language, topic, meaning_list, forms, nois
     for f in language:
         if f == correct_form:
             ambiguity += 1
-    prop_to_prob_correct_form_complete = ((1./ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (1 - prob_of_noise)
-    prop_to_prob_error_form_complete = error_prob / (len(forms) - 1) * (1 - prob_of_noise)
-    prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_variants))
-    prop_to_prob_error_form_noisy = error_prob / (len(forms) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_variants))
+    # prop_to_prob_correct_form_complete = ((1./ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (1 - prob_of_noise)
+    # prop_to_prob_error_form_complete = error_prob / (len(forms) - 1) * (1 - prob_of_noise)
+    # prop_to_prob_correct_form_noisy = ((1. / ambiguity) ** ambiguity_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_variants))
+    # prop_to_prob_error_form_noisy = error_prob / (len(forms) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_variants))
     prop_to_prob_per_form_array = np.zeros(len(all_possible_forms))
     for i in range(len(all_possible_forms)):
-        if all_possible_forms[i] == correct_form:
-            prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_complete
-        elif all_possible_forms[i] in noisy_variants_correct_form:
-            prop_to_prob_per_form_array[i] = prop_to_prob_correct_form_noisy
-        elif all_possible_forms[i] in noisy_variants_error_forms:
-            prop_to_prob_per_form_array[i] = prop_to_prob_error_form_noisy
+        possible_form = all_possible_forms[i]
+        if possible_form == correct_form:
+            prop_to_prob_per_form_array[i] = ((1./ambiguity) ** ambiguity_penalty) * ((1./len(possible_form)) ** effort_penalty) * (1. - error_prob) * (1 - prob_of_noise)
+        elif possible_form in noisy_variants_correct_form:
+            prop_to_prob_per_form_array[i] = ((1. / ambiguity) ** ambiguity_penalty) * ((1./len(possible_form)) ** effort_penalty) * (1. - error_prob) * (prob_of_noise / len(noisy_variants))
+        elif possible_form in noisy_variants_error_forms:
+            prop_to_prob_per_form_array[i] = error_prob / (len(forms) - 1) * (1 - prob_of_noise) * (prob_of_noise / len(noisy_variants))
         else:
-            prop_to_prob_per_form_array[i] = prop_to_prob_error_form_complete
+            prop_to_prob_per_form_array[i] = error_prob / (len(forms) - 1) * (1 - prob_of_noise)
     return prop_to_prob_per_form_array
 
 
 # And finally, let's write a function that actually produces an utterance, given a language and a topic:
-def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_of_noise):
+def produce_with_minimal_effort(language, topic, ambiguity_penalty, effort_penalty, error_prob, noise_switch, prob_of_noise):
     """
     Produces an actual utterance, given a language and a topic
 
@@ -120,6 +179,8 @@ def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_o
     :param topic: the index of the topic (corresponding to an index in the globally defined meaning list) that the
     speaker intends to communicate
     :param ambiguity_penalty: parameter that determines the strength of the penalty on ambiguity (gamma)
+    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
+    length)
     :param error_prob: the probability of making an error in production
     :param noise_switch: turns noise on when set to True, and off when set to False
     :param prob_of_noise: the probability of noise happening (only relevant when noise_switch is set to True);
@@ -128,7 +189,7 @@ def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_o
     noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
         """
     if noise_switch:
-        prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error_prob, prob_of_noise)
+        prop_to_prob_per_form_array = production_likelihoods_with_noise_and_minimal_effort(language, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, effort_penalty, error_prob, prob_of_noise)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
     else:
@@ -138,10 +199,7 @@ def produce(language, topic, ambiguity_penalty, error_prob, noise_switch, prob_o
     return utterance
 
 
-
-#TODO: This has turned into a bit of a monster function. Maybe shorten it by pulling out the code that calculates the
-# probabilities for the different response options and putting that in a separate function?
-def receive_with_repair(language, utterance, mutual_understanding_pressure, minimal_effort_pressure):
+def receive_with_repair_open_only(language, utterance):
     """
     Receives and utterance and gives a response, which can either be an interpretation or a repair initiator. How likely
     these two response types are to happen depends on the settings of the paremeters 'mutual_understanding' and
@@ -151,70 +209,28 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
     where each form is mapped to the meaning at the corresponding index
     :param utterance: an utterance (string)
-    :param mutual_understanding_pressure: determines whether the pressure for mutual understanding is switched on or off
-    (i.e. set to True or False); corresponds to global variable 'mutual_understanding'
-    :param minimal_effort_pressure: determines whether the pressure for minimal effort is switched on or off
-    (i.e. set to True or False); corresponds to global variable 'minimal_effort'
-    :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator. A repair initiator
-    can be of two types: if the listener has grasped part of the meaning, it will be a restricted request, which is a
-    string containing the partial meaning that the listener did grasp, followed by a question mark. If the listener did
-    not grasp any of the meaning, it will be an open request, which is simply '??'
+    :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator ('??'). The listener
+    initiates repair whenever there is any ambiguity about how to interpret the utterance according to the language
+    (either caused by noise or by ambiguity in the language), the listener initiates repair.
     """
-    if not mutual_understanding_pressure and not minimal_effort_pressure:
-        raise ValueError(
-            "Sorry, this function has only been implemented for at least one of either mutual_understanding or minimal_"
-            "effort being True")
     if '_' in utterance:
         compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
         possible_interpretations = find_possible_interpretations(language, compatible_forms)
-        if len(possible_interpretations) == 0:
-            possible_interpretations = meanings
-        partial_meaning = find_partial_meaning(language, utterance)
-        if mutual_understanding_pressure and minimal_effort_pressure:
-            prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
-            if len(partial_meaning) == 1:
-                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[1]
-                repair_initiator = str(partial_meaning[0])+'?'
-            elif len(partial_meaning) == 0:
-                prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[2]
-                repair_initiator = '??'
-        elif mutual_understanding_pressure and not minimal_effort_pressure:
-            if len(possible_interpretations) > 1:
-                prop_to_prob_no_repair = 0.
-                prop_to_prob_repair = 1.
-                if len(partial_meaning) == 1:
-                    repair_initiator = str(partial_meaning[0])+'?'
-                elif len(partial_meaning) == 0:
-                    repair_initiator = '??'
-            elif len(possible_interpretations) == 1:
-                prop_to_prob_no_repair = 1.
-                prop_to_prob_repair = 0.
-        elif not mutual_understanding_pressure and minimal_effort_pressure:
-            prop_to_prob_no_repair = 1.
-            prop_to_prob_repair = 0.
-            if len(partial_meaning) == 1:
-                repair_initiator = str(partial_meaning[0])+'?'
-            elif len(partial_meaning) == 0:
-                repair_initiator = '??'
-        prop_to_prob_per_response = np.array([prop_to_prob_no_repair, prop_to_prob_repair])
-        for i in range(len(prop_to_prob_per_response)):
-            if prop_to_prob_per_response[i] < 0.0:
-                prop_to_prob_per_response[i] = 0.0
-        normalized_response_probs = np.divide(prop_to_prob_per_response, np.sum(prop_to_prob_per_response))
-        selected_response = np.random.choice(np.arange(2), p=normalized_response_probs)
-        if selected_response == 0:
-            response = random.choice(possible_interpretations)
-        elif selected_response == 1:
-            response = repair_initiator
     else:
-        response = receive_without_repair(language, utterance)
+        possible_interpretations = find_possible_interpretations(language, [utterance])
+    if len(possible_interpretations) == 0:
+        possible_interpretations = meanings
+    if len(possible_interpretations) == 1:
+        response = possible_interpretations[0]
+    else:
+        response = '??'
     return response
 
 
 
 # AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
-def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms):
+def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_possible_forms):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
     distribution accordingly
@@ -226,6 +242,8 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
     True)
     :param ambiguity_penalty: parameter that determines extent to which speaker tries to avoid ambiguity; corresponds
     to global variable 'gamma'
+    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
+    length)
     :param noise_switch: determines whether noise is on or off (set to either True or False); corresponds to global
     variable 'noise'
     :param prob_of_noise: the probability of noise (only relevant when noise_switch == True); corresponds to global
@@ -245,7 +263,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
     for j in range(len(log_posterior)):
         hypothesis = hypotheses[j]
         if noise_switch:
-            likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error, prob_of_noise)
+            likelihood_per_form_array = production_likelihoods_with_noise_and_minimal_effort(hypothesis, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, effort_penalty, error, prob_of_noise)
         else:
             likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, meanings, ambiguity_penalty, error)
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
@@ -262,7 +280,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
 #  separate functions (e.g. for the different possible settings of the mutual_understanding and minimal_effort
 #  parameters. Also, there has to be a way to not have exactly the same lines of code for doing the communicative
 #  success pressure stuff in there twice (should probably be a separate function)!
-def population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses):
+def population_communication(population, n_rounds, mutual_understanding_pressure, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses):
     """
     Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
     is updated every time the agent gets assigned the role of hearer)
@@ -275,6 +293,8 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
     corresponds to global variable 'mutual_understanding'
     :param ambiguity_penalty: parameter which determines the extent to which the speaker tries to avoid ambiguity;
     corresponds to global variable 'gamma'
+    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
+    length)
     :param noise_switch: determines whether noise is on or off (i.e. set to True or False); corresponds to global
     variable 'noise'
     :param prob_of_noise: the probability of noise happening (only relevant when noise_switch == True); corresponds to
@@ -313,11 +333,11 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
-                utterance = produce(speaker_language, topic, ambiguity_penalty, error, noise_switch, prob_of_noise)
+                utterance = produce_with_minimal_effort(speaker_language, topic, ambiguity_penalty, effort_penalty, error, noise_switch, prob_of_noise)
                 # whenever a speaker is called upon to produce a utterance, they first sample a language from their
                 # posterior probability distribution. So each agent keeps updating their language according to the data
                 # received from their communication partner.
-            listener_response = receive_with_repair(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
+            listener_response = receive_with_repair_open_only(hearer_language, utterance)
             counter = 0
             while '?' in listener_response:
                 if counter == 3:  # After 3 attempts, the listener stops trying to do repair
@@ -325,10 +345,10 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                 if production == 'simlang':
                     utterance = produce_simlang(speaker_language, topic)
                 else:
-                    utterance = produce(speaker_language, topic, ambiguity_penalty, error, noise_switch=False, prob_of_noise=0.0)
+                    utterance = produce_with_minimal_effort(speaker_language, topic, ambiguity_penalty, effort_penalty, error, noise_switch=False, prob_of_noise=0.0)
                     # For now, we assume that the speaker's response to a repair initiator always comes through without
                     # noise.
-                listener_response = receive_with_repair(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure)
+                listener_response = receive_with_repair_open_only(hearer_language, utterance)
                 counter += 1
             if production == 'simlang':
                 if observed_meaning == 'intended':
@@ -342,15 +362,15 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
 
         elif mutual_understanding_pressure is False:
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
-                utterance = produce(speaker_language, topic, ambiguity_penalty, error, noise_switch, prob_of_noise)
+                utterance = produce_with_minimal_effort(speaker_language, topic, ambiguity_penalty, effort_penalty, error, noise_switch, prob_of_noise)
                 # whenever a speaker is called upon to produce a utterance, they first sample a language from their
                 # posterior probability distribution. So each agent keeps updating their language according to the data
                 # they receive from their communication partner.
@@ -367,10 +387,10 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, utterance, ambiguity_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
 
@@ -466,7 +486,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
+def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_possible_forms, mutual_understanding_pressure, communicative_success_pressure):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
@@ -486,6 +506,8 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
     :param production_implementation: can be set to either 'my_code' or 'simlang'
     :param ambiguity_penalty: parameter that determines the extent to which the speaker tries to avoid ambiguity;
     corresponds to global variable 'gamma'
+    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
+    length)
     :param noise_switch: determines whether noise is on or off (set to either True or False); corresponds to global
     variable 'noise'
     :param prob_of_noise: probability of noise (only relevant when noise_switch == True); corresponds to global variable
@@ -494,8 +516,6 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
     'all_forms_including_noisy_variants'
     :param mutual_understanding_pressure: determines whether the pressure for mutual understanding is switched on or off
     (set to either True or False); corresponds to global variable 'mutual_understanding'
-    :param minimal_effort_pressure: determines whether the pressure for minimal effort is switched on or off
-    (set to either True or False); corresponds to global variable 'minimal_effort'
     :param communicative_success_pressure: determines whether pressure for communicative success is turned on or off
     (i.e. set to True or False); corresponds to global variable 'communicative_succes'
     :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains
@@ -504,6 +524,9 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
     language_stats_over_gens = np.zeros((n_gens, int(max(class_per_language)+1)))
     data_over_gens = []
     for i in range(n_gens):
+
+        print('gen: '+str(i))
+
         for j in range(pop_size):
             for k in range(bottleneck):
                 if interaction_order == 'taking_turns':
@@ -519,8 +542,8 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
                 if production_implementation == 'simlang':
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
-                    population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, noise_switch, prob_of_noise, all_possible_forms)
-        data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
+                    population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_possible_forms)
+        data = population_communication(population, n_rounds, mutual_understanding_pressure, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
         if i == n_gens-1:
@@ -537,9 +560,7 @@ if __name__ == '__main__':
 
 
 
-    likelihood_cache = pickle.load(open(
-        "pickles/likelihood_cache_noise_" + str(noise) + "_" + convert_float_value_to_string(
-            noise_prob) + "_gamma_" + str(gamma) + "_error_" + convert_float_value_to_string(error) + ".p", "rb"))
+    likelihood_cache = pickle.load(open("pickles/likelihood_cache_noise_"+str(noise)+"_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
     print('')
     print("likelihood_cache.shape is:")
     print(likelihood_cache.shape)
@@ -597,7 +618,7 @@ if __name__ == '__main__':
 
         population = new_population(popsize, priors)
 
-        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, delta, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, communicative_success)
 
         language_stats_over_gens_per_run[r] = language_stats_over_gens
         data_over_gens_per_run.append(data_over_gens)
