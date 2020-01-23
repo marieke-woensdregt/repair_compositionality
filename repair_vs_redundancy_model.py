@@ -211,7 +211,7 @@ def receive_with_repair_open_only(language, utterance):
     :param utterance: an utterance (string)
     :return: a response, which can either be an interpretation (i.e. meaning) or a repair initiator ('??'). The listener
     initiates repair whenever there is any ambiguity about how to interpret the utterance according to the language
-    (either caused by noise or by ambiguity in the language), the listener initiates repair.
+    (either caused by noise or just by ambiguity in the language itself).
     """
     if '_' in utterance:
         compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
@@ -230,12 +230,14 @@ def receive_with_repair_open_only(language, utterance):
 
 # AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
-def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_possible_forms):
+def update_posterior_from_cache(log_posterior, likelihood_cache, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meaning_list, all_possible_forms):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
     distribution accordingly
 
     :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
+    :param likelihood_cache: 3D numpy array with axis 0 = meanings, axis 1 = all possible forms, and axis 2 = likelihood
+    of corresponding <meaning, form> pair for each hypothesis
     :param hypotheses: list of all possible languages
     :param topic: a topic (string from the global variable meanings)
     :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is
@@ -248,15 +250,21 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
     variable 'noise'
     :param prob_of_noise: the probability of noise (only relevant when noise_switch == True); corresponds to global
     variable 'noise_prob'
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
     :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
     'all_forms_including_noisy_variants'
     :return: the updated (and normalized) log_posterior (1D numpy array)
     """
-    # First, let's find out what the index of the utterance is in the list of all possible forms (including the noisy
+    # First let's find out what the index of the meaning is:
+    for i in range(len(meanings)):
+        if meaning_list[i] == topic:
+            meaning_index = i
+    # Then, let's find out what the index of the utterance is in the list of all possible forms (including the noisy
     # variants):
     for i in range(len(all_possible_forms)):
         if all_possible_forms[i] == utterance:
             utterance_index = i
+
     # Now, let's go through each hypothesis (i.e. language), and update its posterior probability given the
     # <topic, utterance> pair that was given as input:
     new_log_posterior = []
@@ -362,9 +370,9 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior_from_cache(population[hearer_index], likelihood_cache, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meanings, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior_from_cache(population[hearer_index], likelihood_cache, hypotheses, listener_response, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meanings, all_forms_including_noisy_variants)
 
         elif mutual_understanding_pressure is False:
             if production == 'simlang':
@@ -387,10 +395,10 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior_from_cache(population[hearer_index], likelihood_cache, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meanings, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior_from_cache(population[hearer_index], likelihood_cache, hypotheses, inferred_meaning, utterance, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meanings, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
 
@@ -542,7 +550,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, hypotheses, c
                 if production_implementation == 'simlang':
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
-                    population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, all_possible_forms)
+                    population[j] = update_posterior_from_cache(population[j], likelihood_cache, hypotheses, meaning, signal, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, meanings, all_possible_forms)
         data = population_communication(population, n_rounds, mutual_understanding_pressure, ambiguity_penalty, effort_penalty, noise_switch, prob_of_noise, communicative_success_pressure, hypotheses)
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
@@ -560,7 +568,7 @@ if __name__ == '__main__':
 
 
 
-    likelihood_cache = pickle.load(open("pickles/likelihood_cache_noise_"+str(noise)+"_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
+    likelihood_cache = pickle.load(open("pickles/likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
     print('')
     print("likelihood_cache.shape is:")
     print(likelihood_cache.shape)
