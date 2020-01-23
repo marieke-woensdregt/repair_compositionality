@@ -65,7 +65,7 @@ noise_prob = 0.5  # the probability of environmental noise obscuring part of an 
 
 
 
-def cache_likelihoods_per_datapoint(meaning_list, forms_including_noisy_variants, hypotheses):
+def cache_log_likelihoods_per_datapoint(meaning_list, forms_including_noisy_variants, hypotheses):
     """
     Calculates the likelihood of every possible datapoint (i.e. <meaning, form> pair) for every hypothesis, and saves
     them all in one big 3D numpy matrix.
@@ -74,18 +74,20 @@ def cache_likelihoods_per_datapoint(meaning_list, forms_including_noisy_variants
     :param forms_including_noisy_variants: list of all possible forms INCLUDING noisy variants; corresponds to global
     variable 'all_forms_including_noisy_variants'
     :param hypotheses: list of all possible languages; corresponds to global parameter 'hypothesis_space'
-    :return: 3D numpy matrix with axis 0 = meanings, axis 1 = forms (incl. noisy variants), and axis 2 = hypotheses
+    :return: 3D numpy matrix with axis 0 = meanings, axis 1 = forms (incl. noisy variants), and axis 2 = LOG likelihood
+    values for each hypothesis
     """
     likelihood_cache_matrix = np.zeros((len(meaning_list), len(forms_including_noisy_variants), len(hypotheses)))
     for m in range(len(meaning_list)):
         topic = meaning_list[m]
         for h in range(len(hypotheses)):
-            prop_to_prob_per_form_array = production_likelihoods_with_noise_and_minimal_effort(hypotheses[h], topic, meanings,
+            likelihood_per_form_array = production_likelihoods_with_noise_and_minimal_effort(hypotheses[h], topic, meanings,
                                                                              forms_without_noise, noisy_forms, gamma, delta,
                                                                              error, noise_prob)
-            for f in range(len(prop_to_prob_per_form_array)):
-                likelihood_cache_matrix[m][f][h] = prop_to_prob_per_form_array[f]
-    return likelihood_cache_matrix
+            for f in range(len(likelihood_per_form_array)):
+                likelihood_cache_matrix[m][f][h] = likelihood_per_form_array[f]
+    log_likelihood_cache_matrix = np.log(likelihood_cache_matrix)
+    return log_likelihood_cache_matrix
 
 
 
@@ -94,7 +96,7 @@ def cache_likelihoods_per_datapoint(meaning_list, forms_including_noisy_variants
 
 t0 = time.process_time()
 
-likelihood_cache = cache_likelihoods_per_datapoint(meanings, all_forms_including_noisy_variants, hypothesis_space)
+log_likelihood_cache = cache_log_likelihoods_per_datapoint(meanings, all_forms_including_noisy_variants, hypothesis_space)
 
 t1 = time.process_time()
 
@@ -105,19 +107,13 @@ print((t1-t0)/60)
 
 print('')
 print('')
-# print("likelihood_cache is:")
-# print(likelihood_cache)
-print('')
-print('')
-print("np.exp(likelihood_cache) is:")
-print(np.exp(likelihood_cache))
 print("likelihood_cache.shape is:")
-print(likelihood_cache.shape)
+print(log_likelihood_cache.shape)
 
 
 t2 = time.process_time()
 
-pickle.dump(likelihood_cache, open("pickles/likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
+pickle.dump(log_likelihood_cache, open("pickles/log_likelihood_cache_noise_prob_" + convert_float_value_to_string(noise_prob) + "_gamma_" + str(gamma) + "_delta_" + str(delta) + "_error_" + convert_float_value_to_string(error) + ".p", "wb"))
 
 t3 = time.process_time()
 print('')
