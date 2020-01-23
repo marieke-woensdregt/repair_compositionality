@@ -1565,31 +1565,31 @@ def dataset_from_language(language, meaning_list):
     return meaning_form_pairs
 
 
-def create_initial_dataset(desired_class, bottleneck, language_list, class_per_language, meaning_list):
+def create_initial_dataset(desired_class, bottleneck, language_list, class_per_language, meaning_list, possible_form_lengths):
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
-    :param desired_class: 'degenerate', 'holistic', 'hybrid', 'compositional', or 'other'; category indices as hardcoded
-    in classify_language function are: 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm
-    following the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    :param desired_class: string corresponding to desired language class: 'degenerate', 'holistic',
+    'holistic_diversify_signal', 'compositional', 'class_compositional_reduplicate_segments',
+    'class_compositional_reduplicate_whole_signal', or 'other'
     :param bottleneck: the transmission bottleneck (int); corresponds to global variable 'b'
     :param language_list: list of all languages
     :param class_per_language: list of len(hypothesis_space) which contains an integer indicating the class of the
     language at the corresponding index in the global variable hypothesis_space
     :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: a dataset (list containing tuples, where each tuple is a meaning-form pair, with the meaning followed by
     the form) from a randomly chosen language of the desired class
     """
-    if desired_class == 'degenerate':
-        class_index = 0
-    elif desired_class == 'holistic':
-        class_index = 1
-    elif desired_class == 'hybrid':
-        class_index = 2
-    elif desired_class == 'compositional':
-        class_index = 3
-    elif desired_class == 'other':
-        class_index = 4
+    if len(possible_form_lengths) == 1:
+        class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']  # if there's only one possible
+        # form length, language classification only distinguishes between these 5 classes
+    else:
+        class_labels = ['degenerate', 'holistic', 'holistic_diversify_signal', 'compositional', 'class_compositional_reduplicate_segments', 'class_compositional_reduplicate_whole_signal', 'other']  # if instead there are multiple possible form lengths, language classification
+        # distinguishes between these 7 classes
+    for i in range(len(class_labels)):
+        if class_labels[i] == desired_class:
+            class_index = i
     language_class_indices = np.where(class_per_language == class_index)[0]
     class_languages = []
     for index in language_class_indices:
@@ -1769,7 +1769,7 @@ if __name__ == '__main__':
     print("number of minutes it took to create prior:")
     print(round((t3-t2)/60., ndigits=2))
 
-    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings)  # the data that the first generation learns from
+    initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings, possible_form_lengths)  # the data that the first generation learns from
 
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
