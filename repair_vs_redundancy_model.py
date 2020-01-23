@@ -187,7 +187,7 @@ def receive_with_repair_open_only(language, utterance):
 
 # AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
-def update_posterior_from_cache(log_posterior, log_likelihood_cache, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, prob_of_noise, meaning_list, all_possible_forms):
+def update_posterior_from_cache(log_posterior, log_likelihood_cache, topic, utterance, meaning_list, all_possible_forms):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
     distribution accordingly
@@ -195,16 +195,9 @@ def update_posterior_from_cache(log_posterior, log_likelihood_cache, hypotheses,
     :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
     :param log_likelihood_cache: 3D numpy array with axis 0 = meanings, axis 1 = all possible forms, and axis 2 = LOG
     likelihood of corresponding <meaning, form> pair for each hypothesis
-    :param hypotheses: list of all possible languages
     :param topic: a topic (string from the global variable meanings)
     :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is
     True)
-    :param ambiguity_penalty: parameter that determines extent to which speaker tries to avoid ambiguity; corresponds
-    to global variable 'gamma'
-    :param effort_penalty: parameter that determines the strength of the penalty on speaker effort (i.e. utterance
-    length)
-    :param prob_of_noise: the probability of noise (only relevant when noise_switch == True); corresponds to global
-    variable 'noise_prob'
     :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
     :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
     'all_forms_including_noisy_variants'
@@ -219,33 +212,12 @@ def update_posterior_from_cache(log_posterior, log_likelihood_cache, hypotheses,
     for i in range(len(all_possible_forms)):
         if all_possible_forms[i] == utterance:
             utterance_index = i
-
     # Now, let's retrieve the corresponding log_likelihood values for this particular <meaning, form> pair form the
     # log_likelihood_cache, and update the posterior accordingly (addition in logspace == multiplication in probability
     # space).
     new_log_posterior_new_method = np.add(log_posterior, log_likelihood_cache[meaning_index][utterance_index])
-
     new_log_posterior_normalized_new_method = np.subtract(new_log_posterior_new_method,
                                                           scipy.special.logsumexp(new_log_posterior_new_method))
-
-    # Now, let's go through each hypothesis (i.e. language), and update its posterior probability given the
-    # <topic, utterance> pair that was given as input:
-    new_log_posterior_old_method = []
-    for j in range(len(log_posterior)):
-        hypothesis = hypotheses[j]
-        likelihood_per_form_array = production_likelihoods_with_noise_and_minimal_effort(hypothesis, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, effort_penalty, error, prob_of_noise)
-        log_likelihood_per_form_array = np.log(likelihood_per_form_array)
-        new_log_posterior_old_method.append(log_posterior[j] + log_likelihood_per_form_array[utterance_index])
-
-    new_log_posterior_normalized_old_method = np.subtract(new_log_posterior_old_method, scipy.special.logsumexp(new_log_posterior_old_method))
-
-    if np.array_equal(new_log_posterior_normalized_new_method, new_log_posterior_normalized_old_method):
-        print('')
-        print('YAY! new method and old method give same outcome!')
-    else:
-        print('')
-        print('NAY! NEW METHOD AND OLD METHOD DO NOT GIVE SAME OUTCOME :( :( :(')
-
     return new_log_posterior_normalized_new_method
 
 
@@ -305,7 +277,7 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
             listener_response = receive_with_repair_open_only(hearer_language, utterance)
             counter += 1
 
-        population[hearer_index] = update_posterior_from_cache(population[hearer_index], log_likelihood_cache, hypotheses, topic, utterance, ambiguity_penalty, effort_penalty, prob_of_noise, meanings, all_forms_including_noisy_variants)
+        population[hearer_index] = update_posterior_from_cache(population[hearer_index], log_likelihood_cache, topic, utterance, meanings, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
             if speaker_index == random_parent_index:
@@ -366,7 +338,7 @@ def simulation_repair_vs_redundancy(population, n_gens, n_rounds, bottleneck, po
                     meaning, signal = data[k]
                 else:
                     meaning, signal = random.choice(data)
-                population[j] = update_posterior_from_cache(population[j], log_likelihood_cache, hypotheses, meaning, signal, ambiguity_penalty, effort_penalty, prob_of_noise, meanings, all_possible_forms)
+                population[j] = update_posterior_from_cache(population[j], log_likelihood_cache, meaning, signal, meanings, all_possible_forms)
         data = population_communication_mutual_understanding(population, n_rounds, ambiguity_penalty, effort_penalty, prob_of_noise, hypotheses, log_likelihood_cache)
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
