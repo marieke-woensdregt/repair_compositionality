@@ -34,24 +34,13 @@ print('')
 print("len(hypothesis_space) is:")
 print(len(hypothesis_space))
 
-mutual_understanding = False  # Setting the 'mutual_understanding' parameter based on the command-line input #NOTE:
-# first argument in sys.argv list is always the name of the script
-if mutual_understanding:
-    gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
-else:
-    gamma = 0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
-    # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
-    # conditions
 
-minimal_effort = False
-if minimal_effort:
-    delta = 2  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
-    # using long utterances)
-else:
-    delta = 0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
-    # using long utterances)
+gamma = 2.0  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
+# "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
+# conditions
+
+delta = 2.0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+# using long utterances)
 
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
@@ -113,7 +102,7 @@ print(log_likelihood_cache.shape)
 
 t2 = time.process_time()
 
-pickle.dump(log_likelihood_cache, open("pickles/log_likelihood_cache_noise_prob_" + convert_float_value_to_string(noise_prob) + "_gamma_" + str(gamma) + "_delta_" + str(delta) + "_error_" + convert_float_value_to_string(error) + ".p", "wb"))
+pickle.dump(log_likelihood_cache, open("pickles/log_likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
 
 t3 = time.process_time()
 print('')
