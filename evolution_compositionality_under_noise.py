@@ -88,7 +88,7 @@ def create_all_possible_noisy_forms(all_complete_forms):
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-possible_form_lengths = [2, 4]  # all possible form lengths
+possible_form_lengths = np.array([2, 4])  # all possible form lengths
 forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
 # possible 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
@@ -293,11 +293,11 @@ def check_all_forms_unique(lang):
     index in meanings
     :return: True if all forms in the language are unique, False otherwise.
     """
-    all_forms_unique = True
-    for form in lang:
-        if lang.count(form) != 1:  # if a particular form occurs more than once in the language, all_forms_unique
-            all_forms_unique = False  # should be set to False
-    return all_forms_unique
+    form_counts = np.unique(np.array(lang), return_counts=True)
+    if np.any(form_counts[1] != 1):  # if any form occurs more than once in the language, all_forms_unique = False
+        return False
+    else:
+        return True
 
 
 def check_reduplication(language, minimum_substring_length):
