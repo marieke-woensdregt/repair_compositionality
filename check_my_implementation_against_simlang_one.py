@@ -244,7 +244,7 @@ def mrf_holistic(lang, meaning_list):
     return mrf_string
 
 
-def mrf_compositional(lang, meaning_list, reverse_meanings):
+def mrf_compositional_debugged(lang, meaning_list, reverse_meanings):
     """
     Takes a compositional language and returns a minimally redundant form description of the language's context free
     grammar.
@@ -306,7 +306,7 @@ def mrf_other(lang, meaning_list):
     return mrf_string
 
 
-def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
+def minimally_redundant_form_four_forms_debugged(lang, complete_forms, meaning_list):
     """
     Takes a language of any class and returns a minimally redundant form description of its context free grammar.
 
@@ -325,9 +325,9 @@ def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
         mrf_string = mrf_holistic(lang, meaning_list)
     elif lang_class == 3:  # the language is 'compositional'
-        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=False)
+        mrf_string = mrf_compositional_debugged(lang, meaning_list, reverse_meanings=False)
     elif lang_class == 4:  # the language is of the 'compositional_reverse' category
-        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=True)
+        mrf_string = mrf_compositional_debugged(lang, meaning_list, reverse_meanings=True)
     elif lang_class == 5:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
@@ -381,7 +381,7 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     :return: PROPORTIONAL prior probability (float)
     """
     if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
-        mrf_string = minimally_redundant_form_four_forms(lang, complete_forms, meaning_list)
+        mrf_string = minimally_redundant_form_four_forms_debugged(lang, complete_forms, meaning_list)
     # else:
     #     mrf_string = minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list)
     coding_len = coding_length(mrf_string)
@@ -892,7 +892,7 @@ if __name__ == '__main__':
         print(lang_class_text)
         print("lang is:")
         print(lang)
-        mrf_string = minimally_redundant_form_four_forms(lang, forms_without_noisy_variants, meanings)
+        mrf_string = minimally_redundant_form_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
         print("mrf_string is:")
         print(mrf_string)
         coding_len = coding_length(mrf_string)
@@ -917,7 +917,7 @@ if __name__ == '__main__':
         print(lang_class_text)
         print("lang is:")
         print(lang)
-        mrf_string = minimally_redundant_form_four_forms(lang, forms_without_noisy_variants, meanings)
+        mrf_string = minimally_redundant_form_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
         print("mrf_string is:")
         print(mrf_string)
         coding_len = coding_length(mrf_string)
