@@ -355,7 +355,7 @@ if __name__ == '__main__':
     ###################################################################################################################
     # FIRST LET'S RETRIEVE THE RELEVANT LOG LIKELIHOOD CACHE:
 
-    log_likelihood_cache = pickle.load(open("pickles/log_likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+str(gamma)+"_delta_"+str(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
+    log_likelihood_cache = pickle.load(open("pickles/log_likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
     print('')
     print("log_likelihood_cache.shape is:")
     print(log_likelihood_cache.shape)
@@ -368,10 +368,9 @@ if __name__ == '__main__':
     hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
     print("number of possible languages is:")
     print(len(hypothesis_space))
-
     t1 = time.process_time()
     print('')
-    print("number of minutes it took to create all languages (i.e. the hypothesis space:")
+    print("number of minutes it took to create all languages (i.e. the hypothesis space):")
     print(round((t1-t0)/60., ndigits=2))
 
     class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
@@ -396,6 +395,9 @@ if __name__ == '__main__':
     print(round((t3-t2)/60., ndigits=2))
 
     initial_dataset = create_initial_dataset(initial_language_type, b, hypothesis_space, class_per_lang, meanings, possible_form_lengths)  # the data that the first generation learns from
+    print('')
+    print("initial_dataset is:")
+    print(initial_dataset)
 
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
@@ -416,7 +418,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + str(gamma) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
