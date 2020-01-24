@@ -1,4 +1,4 @@
-from evolution_compositionality_under_noise import create_all_possible_forms, create_all_possible_noisy_forms, create_all_possible_languages, convert_float_value_to_string
+from evolution_compositionality_under_noise import create_all_possible_forms, create_all_possible_noisy_forms, create_all_possible_languages, convert_float_value_to_string, convert_array_to_string
 from repair_vs_redundancy_model import production_likelihoods_with_noise_and_minimal_effort
 import numpy as np
 import time
@@ -9,7 +9,8 @@ import pickle
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = create_all_possible_forms(2, [2, 4])  # all possible forms, excluding their 'noisy variants'
+possible_form_lengths = np.array([2, 4])  # all possible form lengths
+forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their 'noisy variants'
 print('')
 print('')
 print("forms_without_noise are:")
@@ -102,7 +103,7 @@ print(log_likelihood_cache.shape)
 
 t2 = time.process_time()
 
-pickle.dump(log_likelihood_cache, open("pickles/log_likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
+pickle.dump(log_likelihood_cache, open("pickles/log_likelihood_cache_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "wb"))
 
 t3 = time.process_time()
 print('')
