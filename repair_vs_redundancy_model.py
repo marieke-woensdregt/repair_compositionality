@@ -4,7 +4,7 @@ from evolution_compositionality_under_noise import *
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-possible_form_lengths = [2, 4]  # all possible form lengths
+possible_form_lengths = np.array([2, 4])  # all possible form lengths
 forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
 # possible 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
@@ -355,7 +355,7 @@ if __name__ == '__main__':
     ###################################################################################################################
     # FIRST LET'S RETRIEVE THE RELEVANT LOG LIKELIHOOD CACHE:
 
-    log_likelihood_cache = pickle.load(open("pickles/log_likelihood_cache_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
+    log_likelihood_cache = pickle.load(open("pickles/log_likelihood_cache_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_noise_prob_"+convert_float_value_to_string(noise_prob)+"_gamma_"+convert_float_value_to_string(gamma)+"_delta_"+convert_float_value_to_string(delta)+"_error_"+convert_float_value_to_string(error)+".p", "rb"))
     print('')
     print("log_likelihood_cache.shape is:")
     print(log_likelihood_cache.shape)
@@ -418,7 +418,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
