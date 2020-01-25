@@ -88,7 +88,7 @@ def create_all_possible_noisy_forms(all_complete_forms):
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-possible_form_lengths = np.array([2, 4])  # all possible form lengths
+possible_form_lengths = np.array([2])  # all possible form lengths
 forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
 # possible 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
@@ -103,7 +103,7 @@ popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a populati
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 10  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+initial_language_type = 'compositional'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
@@ -617,7 +617,8 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
     """
-    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
+    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
+    4 = compositional_reverse, and 5 = other
     (Kirby et al., 2015)
 
     :param language_list: list of all languages
@@ -626,8 +627,7 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
     language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
-    from SimLang lab 21)
+    3 = compositional, 4 = compositional_reverse, and 5 = other (Kirby et al., 2015)
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
@@ -1594,14 +1594,21 @@ def create_initial_dataset(desired_class, bottleneck, language_list, class_per_l
     the form) from a randomly chosen language of the desired class
     """
     if len(possible_form_lengths) == 1:
-        class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'other']  # if there's only one possible
-        # form length, language classification only distinguishes between these 5 classes
+        class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'compositional_reverse', 'other']
     else:
         class_labels = ['degenerate', 'holistic', 'holistic_diversify_signal', 'compositional', 'class_compositional_reduplicate_segments', 'class_compositional_reduplicate_whole_signal', 'other']  # if instead there are multiple possible form lengths, language classification
         # distinguishes between these 7 classes
-    for i in range(len(class_labels)):
-        if class_labels[i] == desired_class:
-            class_index = i
+    if len(possible_form_lengths) == 1 and desired_class == 'compositional':
+        print(len(possible_form_lengths) == 1 and desired_class == 'compositional')
+        candidate_indices = []
+        for i in range(len(class_labels)):
+            if desired_class in class_labels[i]:
+                candidate_indices.append(i)
+        class_index = random.choice(candidate_indices)
+    else:
+        for i in range(len(class_labels)):
+            if class_labels[i] == desired_class:
+                class_index = i
     language_class_indices = np.where(class_per_language == class_index)[0]
     class_languages = []
     for index in language_class_indices:
