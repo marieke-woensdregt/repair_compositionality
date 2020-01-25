@@ -617,8 +617,8 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
     """
-    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
-    (Kirby et al., 2015)
+    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
+    4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
 
     :param language_list: list of all languages
     :param complete_forms: list containing all possible complete forms; corresponds to global variable
@@ -626,15 +626,11 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
     language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
-    from SimLang lab 21)
+    3 = compositional, 4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
-            class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
-        else:
-            class_per_lang[l] = classify_language_multiple_form_lengths(language_list[l], meaning_list)
+        class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
     return class_per_lang
 
 
