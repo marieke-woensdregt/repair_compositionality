@@ -679,7 +679,7 @@ def mrf_holistic(lang, meaning_list):
     return mrf_string
 
 
-def mrf_compositional(lang, meaning_list):
+def mrf_compositional(lang, meaning_list, reverse_meanings):
     """
     Takes a compositional language and returns a minimally redundant form description of the language's context free
     grammar.
@@ -687,8 +687,12 @@ def mrf_compositional(lang, meaning_list):
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
+    :param reverse_meanings: Boolean: True if the compositional mappings are to the meaning elements in reverse order
     :return: minimally redundant form description of the language's context free grammar (string)
     """
+    if reverse_meanings:
+        meaning_list_reversed = [meaning[::-1] for meaning in meaning_list]
+        meaning_list = meaning_list_reversed
     n_features = len(meaning_list[0])
     non_terminals = string.ascii_uppercase[:n_features]
     mrf_string = 'S' + non_terminals
