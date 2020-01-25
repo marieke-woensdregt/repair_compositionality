@@ -1638,10 +1638,11 @@ def language_stats(population, possible_form_lengths, class_per_language):
     population
     """
     if len(possible_form_lengths) == 1:
-        stats = np.zeros(5)  # if there's only one possible form length, language classification only distinguishes
-        # between (0) degenerate, (1) holistic, (2) hybrid, (3) compositional, and (4) other
+        stats = np.zeros(int(max(class_per_language)+1))  # if there's only one possible form length, language classification only distinguishes
+        # between 0 = degenerate, 1 = holistic, 2 = hybrid,  3 = compositional, 4 = compositional_reverse, and 5 = other
+        # (Kirby et al., 2015)
     else:
-        stats = np.zeros(7)  # if instead there are multiple possible form lengths, language classification
+        stats = np.zeros(int(max(class_per_language)+1))  # if instead there are multiple possible form lengths, language classification
         # distinguishes between (0) degenerate, (1) holistic, (2) holistic_diversify_signal, (3) compositional,
         # (4) class_compositional_reduplicate_segments, (5) class_compositional_reduplicate_whole_signal, and (6) other
     for p in population:
