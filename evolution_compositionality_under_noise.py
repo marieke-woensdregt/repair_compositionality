@@ -752,17 +752,18 @@ def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: minimally redundant form description of the language's context free grammar (string)
     """
-    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
-        lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
-    else:
-        lang_class = classify_language_multiple_form_lengths(lang, meaning_list)
+    if len(complete_forms) != 4 or len(complete_forms[0]) != 2:
+        raise ValueError("This function only works for forms of length 2")
+    lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
     if lang_class == 0:  # the language is 'degenerate'
         mrf_string = mrf_degenerate(lang, meaning_list)
     elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
         mrf_string = mrf_holistic(lang, meaning_list)
     elif lang_class == 3:  # the language is 'compositional'
-        mrf_string = mrf_compositional(lang, meaning_list)
-    elif lang_class == 4:  # the language is of the 'other' category
+        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=False)
+    elif lang_class == 4:  # the language is of the 'compositional_reverse' category
+        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=True)
+    elif lang_class == 5:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
 
