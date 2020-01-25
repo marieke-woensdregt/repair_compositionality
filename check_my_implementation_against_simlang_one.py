@@ -1,31 +1,5 @@
-import string
-import itertools
-import numpy as np
-from math import log2
-from scipy.special import logsumexp
+from evolution_compositionality_under_noise import *
 
-
-def create_all_possible_forms(n_characters, form_length_list):
-    """
-    Takes a number of characters and a list of allowed form lengths, and creates a list of all possible complete forms
-    based on that.
-
-    :param n_characters: the number of different characters that may be used
-    :param form_length_list: a list of all form lengths that are allowed
-    :return: a list of all possible complete forms
-    """
-    alphabet = string.ascii_lowercase
-    form_alphabet = alphabet[:n_characters]
-    all_forms = []
-    for length in form_length_list:
-        all_forms = all_forms+list(itertools.product(form_alphabet, repeat=length))
-    all_forms_as_strings = []
-    for form in all_forms:
-        string_form = ''
-        for i in range(len(form)):
-            string_form = string_form+form[i]
-        all_forms_as_strings.append(string_form)
-    return all_forms_as_strings
 
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
@@ -41,145 +15,9 @@ print(forms)
 
 ###################################################################################################################
 
-def create_all_possible_languages(meaning_list, forms):
-    """Creates all possible languages
-
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
-    :returns: list of tuples which represent languages, where each tuple consists of forms_without_noisy_variants and
-    has length len(meanings)
-    """
-    all_possible_languages = list(itertools.product(forms, repeat=len(meaning_list)))
-    return all_possible_languages
-
-
-# In case it's relevant for checking my implementation against the simlang one, just as a sanity check:
-def transform_all_languages_to_simlang_format(language_list, meaning_list):
-    """
-    Takes a list of languages as represented by me (with only the forms_without_noisy_variants listed
-    for each language, assuming the meaning for each form is specified by the
-    form's index), and turning it into a list of languages as represented in
-    SimLang lab 21 (which in turn is based on Kirby et al., 2015), in which a
-    <meaning, form> pair forms_without_noisy_variants a tuple, and four of those tuples in a list form
-    a language
-
-    :param language_list: list of all languages
-    :param meaning_list: list of all possible meanings; corresponds to global variable 'meanings'
-    :returns: list of the input languages in the format of SimLang lab 21
-    """
-    all_langs_as_in_simlang = []
-    for l in range(len(language_list)):
-        lang_as_in_simlang = [(meaning_list[x], language_list[l][x]) for x in range(len(meaning_list))]
-        all_langs_as_in_simlang.append(lang_as_in_simlang)
-    return all_langs_as_in_simlang
-
-
-def check_all_forms_unique(lang):
-    """
-    Takes a language and checks whether each form used by the language is unique; i.e. whether the language is fully
-    expressive.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :return: True if all forms in the language are unique, False otherwise.
-    """
-    form_counts = np.unique(np.array(lang), return_counts=True)
-    if np.any(form_counts[1] != 1):  # if any form occurs more than once in the language, all_forms_unique = False
-        return False
-    else:
-        return True
-
-
-def classify_language_four_forms_debugged(lang, forms, meaning_list):
-    """
-    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
-    4 = compositional_reverse, and 5 = other (Kirby et al., 2015). NOTE that this function is specific to classifying
-    languages that consist of exactly 4 forms, where each form consists of exactly 2 characters. For a more general
-    version of this function, see classify_language_general() below.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param forms: list of strings corresponding to all possible forms_without_noisy_variants
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = compositional_reverse, and 5 = other
-    (Kirby et al., 2015).
-    """
-    class_degenerate = 0
-    class_holistic = 1
-    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
-    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
-    class_compositional = 3
-    class_compositional_reverse = 4
-    class_other = 5
-
-    # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
-    if len(forms) != 4:
-        raise ValueError(
-            "This function only works for a world in which there are 4 possible forms_without_noisy_variants"
-        )
-    if len(forms[0]) != 2:
-        raise ValueError(
-            "This function only works when each form consists of 2 elements")
-    if len(lang) != len(meaning_list):
-        raise ValueError("Lang should have same length as meanings")
-
-    # lang is degenerate if it uses the same form for every meaning:
-    if lang[0] == lang[1] and lang[1] == lang[2] and lang[2] == lang[3]:
-        return class_degenerate
-
-    # If each form is unique, the language is either COMPOSITIONAL or HOLISTIC:
-    all_forms_unique = check_all_forms_unique(lang)
-    if all_forms_unique is True:
-        # lang is compositional if each form element maps to the same meaning element for each form:
-        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
-            return class_compositional
-        elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0] and lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
-            return class_compositional_reverse
-
-        # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
-        else:
-            # within holistic languages, we can distinguish between those in which at least one part form is mapped
-            # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
-            # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
-            # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
-            # restricted request for repair instead of an open request.
-            if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
-                return class_hybrid
-            elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
-                return class_hybrid
-            elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0]:
-                return class_hybrid
-            elif lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
-                return class_hybrid
-            else:
-                return class_holistic
-
-    # In all other cases, a language belongs to the 'other' category:
-    else:
-        return class_other
-
-
-def classify_all_languages_debugged(language_list, complete_forms, meaning_list):
-    """
-    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
-    4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
-
-    :param language_list: list of all languages
-    :param complete_forms: list containing all possible complete forms; corresponds to global variable
-    'forms_without_noise'
-    :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
-    :returns: 1D numpy array containing integer corresponding to category of corresponding
-    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
-    """
-    class_per_lang = np.zeros(len(language_list))
-    for l in range(len(language_list)):
-        class_per_lang[l] = classify_language_four_forms_debugged(language_list[l], complete_forms, meaning_list)
-    return class_per_lang
 
 ###################################################################################################################
-# FIRST, LET'S DEFINE SOME FUNCTIONS TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF
+# FIRST, LET'S DEFINE A FUNCTION TO CHECK MY CODE FOR CREATING AND CLASSIFYING ALL LANGUAGES AGAINST THE LISTS OF
 # LANGUAGES AND TYPES THAT WERE COPIED INTO LAB 21 OF THE SIMLANG COURSE 2019:
 
 
@@ -196,208 +34,6 @@ def check_language_lists_same_order(languages_my_code, languages_simlang_code):
         if languages_my_code[l] != languages_simlang_code[l]:
             same_order = False
     return same_order
-
-
-
-###################################################################################################################
-# THEN SOME FUNCTIONS FOR CALCULATING THE SIMPLICITY PRIOR (BASED ON THE COMPRESSIBILITY OF THE LANGUAGES):
-
-def mrf_degenerate(lang, meaning_list):
-    """
-    Takes a degenerate language and returns a minimally redundant form description of the language's context free
-    grammar.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :return: minimally redundant form description of the language's context free grammar (string)
-    """
-    mrf_string = 'S'
-    for i in range(len(meaning_list)):
-        meaning = meaning_list[i]
-        if i != len(meaning_list) - 1:
-            mrf_string += str(meaning) + ','
-        else:
-            mrf_string += str(meaning)
-    mrf_string += lang[0]
-    return mrf_string
-
-
-def mrf_holistic(lang, meaning_list):
-    """
-    Takes a holistic OR hybrid language and returns a minimally redundant form description of the language's context
-    free grammar.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :return: minimally redundant form description of the language's context free grammar (string)
-    """
-    mrf_string = ''
-    for i in range(len(meaning_list)):
-        meaning = meaning_list[i]
-        form = lang[i]
-        if i != len(meaning_list) - 1:
-            mrf_string += 'S' + meaning + form + '.'
-        else:
-            mrf_string += 'S' + meaning + form
-    return mrf_string
-
-
-def mrf_compositional_debugged(lang, meaning_list, reverse_meanings):
-    """
-    Takes a compositional language and returns a minimally redundant form description of the language's context free
-    grammar.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :param reverse_meanings: Boolean: True if the compositional mappings are to the meaning elements in reverse order
-    :return: minimally redundant form description of the language's context free grammar (string)
-    """
-    if reverse_meanings:
-        meaning_list_reversed = [meaning[::-1] for meaning in meaning_list]
-        meaning_list = meaning_list_reversed
-    n_features = len(meaning_list[0])
-    non_terminals = string.ascii_uppercase[:n_features]
-    mrf_string = 'S' + non_terminals
-    for i in range(len(non_terminals)):
-        non_terminal_symbol = non_terminals[i]
-        feature_values = []
-        feature_value_segments = []
-        for j in range(len(meaning_list)):
-            if meaning_list[j][i] not in feature_values:
-                feature_values.append(meaning_list[j][i])
-                feature_value_segments.append(lang[j][i])
-        for k in range(len(feature_values)):
-            value = feature_values[k]
-            segment = feature_value_segments[k]
-            mrf_string += "." + non_terminal_symbol + value + segment
-    return mrf_string
-
-
-def mrf_other(lang, meaning_list):
-    """
-    Takes a language of the 'other' category and returns a minimally redundant form description of the language's
-    context free grammar.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :return: minimally redundant form description of the language's context free grammar (string)
-    """
-    mapping_dict = {}
-    for i in range(len(lang)):
-        mapping_dict.setdefault(lang[i], []).append(meaning_list[i])
-    mrf_string = 'S'
-    counter = 0
-    for form in mapping_dict.keys():
-        for k in range(len(mapping_dict[form])):
-            meaning = mapping_dict[form][k]
-            if k != len(mapping_dict[form]) - 1:
-                mrf_string += meaning + ','
-            else:
-                mrf_string += meaning
-        if counter != len(mapping_dict.keys()) - 1:
-            mrf_string += form + '.S'
-        else:
-            mrf_string += form
-        counter += 1
-    return mrf_string
-
-
-def minimally_redundant_form_four_forms_debugged(lang, complete_forms, meaning_list):
-    """
-    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param complete_forms: list containing all possible complete forms; corresponds to global variable
-    'forms_without_noise'
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :return: minimally redundant form description of the language's context free grammar (string)
-    """
-    if len(complete_forms) != 4 or len(complete_forms[0]) != 2:
-        raise ValueError("This function only works for forms of length 2")
-    lang_class = classify_language_four_forms_debugged(lang, complete_forms, meaning_list)
-    if lang_class == 0:  # the language is 'degenerate'
-        mrf_string = mrf_degenerate(lang, meaning_list)
-    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
-        mrf_string = mrf_holistic(lang, meaning_list)
-    elif lang_class == 3:  # the language is 'compositional'
-        mrf_string = mrf_compositional_debugged(lang, meaning_list, reverse_meanings=False)
-    elif lang_class == 4:  # the language is of the 'compositional_reverse' category
-        mrf_string = mrf_compositional_debugged(lang, meaning_list, reverse_meanings=True)
-    elif lang_class == 5:  # the language is of the 'other' category
-        mrf_string = mrf_other(lang, meaning_list)
-    return mrf_string
-
-
-def character_probs(mrf_string):
-    """
-    Takes a string in minimally redundant form and generates a dictionary specifying the probability of each of the
-    symbols used in the string
-
-    :param mrf_string: a string in minimally redundant form
-    :return: a dictionary with the symbols as keys and their corresponding probabilities as values
-    """
-    count_dict = {}
-    for character in mrf_string:
-        if character in count_dict.keys():
-            count_dict[character] += 1
-        else:
-            count_dict[character] = 1
-    prob_dict = {}
-    for character in count_dict.keys():
-        char_prob = count_dict[character] / len(mrf_string)
-        prob_dict[character] = char_prob
-    return prob_dict
-
-
-def coding_length(mrf_string):
-    """
-    Takes a string in minimally redundant form and returns its coding length in bits
-
-    :param mrf_string: a string in minimally redundant form
-    :return: coding length in bits
-    """
-    char_prob_dict = character_probs(mrf_string)
-    coding_len = 0
-    for character in mrf_string:
-        coding_len += log2(char_prob_dict[character])
-    return -coding_len
-
-
-def prior_single_lang(lang, complete_forms, meaning_list):
-    """
-    Takes a language and returns its PROPORTIONAL prior probability; this still needs to be normalized over all
-    languages in order to give the real prior probability.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :param complete_forms: list containing all possible complete forms; corresponds to global variable
-    'forms_without_noise'
-    :param meaning_list: list of strings corresponding to all possible meanings
-    :return: PROPORTIONAL prior probability (float)
-    """
-    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
-        mrf_string = minimally_redundant_form_four_forms_debugged(lang, complete_forms, meaning_list)
-    # else:
-    #     mrf_string = minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list)
-    coding_len = coding_length(mrf_string)
-    prior = 2 ** -coding_len
-    return prior
-
-
-def prior(hypothesis_space, complete_forms, meaning_list):
-    logpriors = np.zeros(len(hypothesis_space))
-    for i in range(len(hypothesis_space)):
-        lang_prior = prior_single_lang(hypothesis_space[i], complete_forms, meaning_list)
-        logpriors[i] = np.log(lang_prior)
-    logpriors_normalized = np.subtract(logpriors, logsumexp(logpriors))
-    return logpriors_normalized
-
-
 
 
 ###################################################################################################################
@@ -750,7 +386,7 @@ if __name__ == '__main__':
     print(no_of_each_type)
 
 
-    class_per_lang = classify_all_languages_debugged(hypothesis_space, forms, meanings)
+    class_per_lang = classify_all_languages(hypothesis_space, forms, meanings)
     # print('')
     # print('')
     # print("class_per_lang is:")
@@ -886,13 +522,13 @@ if __name__ == '__main__':
         lang = example_languages[i]
         print('')
         print(i)
-        lang_class = classify_language_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
+        lang_class = classify_language_four_forms(lang, forms_without_noisy_variants, meanings)
         lang_class_text = lang_classes_text[lang_class]
         print("lang_class_text is:")
         print(lang_class_text)
         print("lang is:")
         print(lang)
-        mrf_string = minimally_redundant_form_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
+        mrf_string = minimally_redundant_form_four_forms(lang, forms_without_noisy_variants, meanings)
         print("mrf_string is:")
         print(mrf_string)
         coding_len = coding_length(mrf_string)
@@ -911,13 +547,13 @@ if __name__ == '__main__':
         lang = compositional_langs_simlang_code[i]
         print('')
         print(i)
-        lang_class = classify_language_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
+        lang_class = classify_language_four_forms(lang, forms_without_noisy_variants, meanings)
         lang_class_text = lang_classes_text[lang_class]
         print("lang_class_text is:")
         print(lang_class_text)
         print("lang is:")
         print(lang)
-        mrf_string = minimally_redundant_form_four_forms_debugged(lang, forms_without_noisy_variants, meanings)
+        mrf_string = minimally_redundant_form_four_forms(lang, forms_without_noisy_variants, meanings)
         print("mrf_string is:")
         print(mrf_string)
         coding_len = coding_length(mrf_string)
@@ -938,16 +574,16 @@ if __name__ == '__main__':
     # print(my_log_prior)
     print("my_log_prior.shape is:")
     print(my_log_prior.shape)
-    print("np.exp(logsumexp(my_log_prior)) is:")
-    print(np.exp(logsumexp(my_log_prior)))
+    print("np.exp(scipy.special.logsumexp(my_log_prior)) is:")
+    print(np.exp(scipy.special.logsumexp(my_log_prior)))
 
     print('')
     # print("np.array(priors_simlang) is:")
     # print(np.array(priors_simlang))
     print("np.array(priors_simlang).shape is:")
     print(np.array(priors_simlang).shape)
-    print("np.exp(logsumexp(priors_simlang)) is:")
-    print(np.exp(logsumexp(priors_simlang)))
+    print("np.exp(scipy.special.logsumexp(priors_simlang)) is:")
+    print(np.exp(scipy.special.logsumexp(priors_simlang)))
 
     log_prior_checks_per_lang = np.zeros(len(my_log_prior))
     prob_prior_checks_per_lang = np.zeros(len(my_log_prior))
@@ -1033,12 +669,12 @@ if __name__ == '__main__':
     # print("log_priors_simlang_code is:")
     # print(log_priors_simlang_code)
 
-    sum_my_code = logsumexp(log_priors_my_code)
+    sum_my_code = scipy.special.logsumexp(log_priors_my_code)
     print('')
     print("np.exp(sum_my_code) is:")
     print(np.exp(sum_my_code))
 
-    sum_simlang_code = logsumexp(log_priors_simlang_code)
+    sum_simlang_code = scipy.special.logsumexp(log_priors_simlang_code)
     print('')
     print("np.exp(sum_simlang_code) is:")
     print(np.exp(sum_simlang_code))
