@@ -617,8 +617,8 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
     """
-    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
-    4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
+    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
+    (Kirby et al., 2015)
 
     :param language_list: list of all languages
     :param complete_forms: list containing all possible complete forms; corresponds to global variable
@@ -626,11 +626,15 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
     language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = compositional_reverse, and 5 = other (Kirby et al., 2015).
+    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
+    from SimLang lab 21)
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
-        class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
+        if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+            class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
+        else:
+            class_per_lang[l] = classify_language_multiple_form_lengths(language_list[l], meaning_list)
     return class_per_lang
 
 
@@ -679,7 +683,7 @@ def mrf_holistic(lang, meaning_list):
     return mrf_string
 
 
-def mrf_compositional(lang, meaning_list, reverse_meanings):
+def mrf_compositional(lang, meaning_list):
     """
     Takes a compositional language and returns a minimally redundant form description of the language's context free
     grammar.
@@ -687,12 +691,8 @@ def mrf_compositional(lang, meaning_list, reverse_meanings):
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
-    :param reverse_meanings: Boolean: True if the compositional mappings are to the meaning elements in reverse order
     :return: minimally redundant form description of the language's context free grammar (string)
     """
-    if reverse_meanings:
-        meaning_list_reversed = [meaning[::-1] for meaning in meaning_list]
-        meaning_list = meaning_list_reversed
     n_features = len(meaning_list[0])
     non_terminals = string.ascii_uppercase[:n_features]
     mrf_string = 'S' + non_terminals
@@ -752,18 +752,17 @@ def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: minimally redundant form description of the language's context free grammar (string)
     """
-    if len(complete_forms) != 4 or len(complete_forms[0]) != 2:
-        raise ValueError("This function only works for forms of length 2")
-    lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
+    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+        lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
+    else:
+        lang_class = classify_language_multiple_form_lengths(lang, meaning_list)
     if lang_class == 0:  # the language is 'degenerate'
         mrf_string = mrf_degenerate(lang, meaning_list)
     elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
         mrf_string = mrf_holistic(lang, meaning_list)
     elif lang_class == 3:  # the language is 'compositional'
-        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=False)
-    elif lang_class == 4:  # the language is of the 'compositional_reverse' category
-        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=True)
-    elif lang_class == 5:  # the language is of the 'other' category
+        mrf_string = mrf_compositional(lang, meaning_list)
+    elif lang_class == 4:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
 
