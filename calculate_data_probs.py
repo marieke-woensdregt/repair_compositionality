@@ -40,8 +40,8 @@ print("class_per_lang is:")
 print(class_per_lang)
 no_of_each_class = np.bincount(class_per_lang.astype(int))
 print('')
-print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, "
-      "4 = other is:")
+print("no_of_each_class ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = compositional, "
+      "3 = other is:")
 print(no_of_each_class)
 
 
