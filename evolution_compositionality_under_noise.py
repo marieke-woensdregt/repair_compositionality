@@ -103,7 +103,7 @@ popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a populati
 # a pair of agents.
 runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 200  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'compositional'  # set the language class that the first generation is trained on
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
@@ -130,10 +130,6 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 
 burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over
 # languages after convergence
-
-n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
-# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-# languages, and 5 if the new code was used which does make this distinction.
 
 pickle_file_path = "pickles/"
 
@@ -221,10 +217,26 @@ def transform_all_languages_to_simlang_format(language_list, meaning_list):
     return all_langs_as_in_simlang
 
 
+def check_all_forms_unique(lang):
+    """
+    Takes a language and checks whether each form used by the language is unique; i.e. whether the language is fully
+    expressive.
+
+    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
+    index in meanings
+    :return: True if all forms in the language are unique, False otherwise.
+    """
+    form_counts = np.unique(np.array(lang), return_counts=True)
+    if np.any(form_counts[1] != 1):  # if any form occurs more than once in the language, all_forms_unique = False
+        return False
+    else:
+        return True
+
+
 def classify_language_four_forms(lang, forms, meaning_list):
     """
-    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
-    4 = compositional_reverse, and 5 = other (Kirby et al., 2015). NOTE that this function is specific to classifying
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = compositional,
+    3 = compositional_reverse, and 4 = other (Kirby et al., 2015). NOTE that this function is specific to classifying
     languages that consist of exactly 4 forms, where each form consists of exactly 2 characters. For a more general
     version of this function, see classify_language_general() below.
 
@@ -232,17 +244,14 @@ def classify_language_four_forms(lang, forms, meaning_list):
     index in meanings
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :param meaning_list: list of strings corresponding to all possible meanings
-    :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = compositional_reverse, and 5 = other
-    (Kirby et al., 2015).
+    :returns: integer corresponding to category that language belongs to: 0 = degenerate, 1 = holistic,
+    2 = compositional, 3 = compositional_reverse, and 4 = other (Kirby et al., 2015).
     """
     class_degenerate = 0
     class_holistic = 1
-    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
-    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
-    class_compositional = 3
-    class_compositional_reverse = 4
-    class_other = 5
+    class_compositional = 2
+    class_compositional_reverse = 3
+    class_other = 4
 
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(forms) != 4:
@@ -267,44 +276,13 @@ def classify_language_four_forms(lang, forms, meaning_list):
             return class_compositional
         elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0] and lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
             return class_compositional_reverse
-
-        # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
+        # lang is holistic if it is *not* compositional, but *does* make use of all possible complete forms:
         else:
-            # within holistic languages, we can distinguish between those in which at least one part form is mapped
-            # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
-            # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
-            # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
-            # restricted request for repair instead of an open request.
-            if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
-                return class_hybrid
-            elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
-                return class_hybrid
-            elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0]:
-                return class_hybrid
-            elif lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
-                return class_hybrid
-            else:
-                return class_holistic
+            return class_holistic
 
     # In all other cases, a language belongs to the 'other' category:
     else:
         return class_other
-
-
-def check_all_forms_unique(lang):
-    """
-    Takes a language and checks whether each form used by the language is unique; i.e. whether the language is fully
-    expressive.
-
-    :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
-    index in meanings
-    :return: True if all forms in the language are unique, False otherwise.
-    """
-    form_counts = np.unique(np.array(lang), return_counts=True)
-    if np.any(form_counts[1] != 1):  # if any form occurs more than once in the language, all_forms_unique = False
-        return False
-    else:
-        return True
 
 
 def check_reduplication(language, minimum_substring_length):
@@ -312,9 +290,9 @@ def check_reduplication(language, minimum_substring_length):
     Checks to what extent a language makes use of reduplication (i.e. for each form in the language, it checks whether
     it consists of the same substrings being repeated n times (where the substring length is given by the input
     argument minimum_substring_length, which should be equal to the number of meaning features. This constraint is set
-    because we are only interested in cases of reduplication in which the language might be a compositional (or hybrid)
-    language, which means that the minimum substring length should be equal to the number of meaning features, because
-    a compositional language requires at least one character to describe each meaning feature.
+    because we are only interested in cases of reduplication in which the language might be a compositional language,
+    which means that the minimum substring length should be equal to the number of meaning features, because a
+    compositional language requires at least one character to describe each meaning feature.
 
     :param language: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to
     same index in meanings
@@ -491,21 +469,21 @@ def check_diversify_signal(language):
 
 def classify_language_multiple_form_lengths(lang, meaning_list):
     """
-    Classify one particular language as either 0 = degenerate, 1 = holistic, 3 = compositional, 4 = other
-    (Kirby et al., 2015). NOTE FIRSTLY that for the specific case of languages which consist of exactly 4 forms, where
-    each form consists of exactly 2 characters, you can also use the more specific classify_language_four_forms()
-    function above. NOTE SECONDLY that, in contrast to the classify_language_four_forms() function, this function does
-    not distinguish between languages of the 'hybrid' and 'holistic' class; these are both classed as 'holistic'. NOTE
-    FINALLY that this function assumes that a language can be compositional only if reduplication is true for ALL forms,
-    or for NONE of the forms. In other words, the use of reduplication has to be reducible to a single rule (either
-    "reduplicate each segment" or "reduplicate each form") which applies universally across all forms.
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = holistic_diversify_signal,
+    3 = compositional, 4 = class_compositional_reduplicate_segments, 5 = class_compositional_reduplicate_whole_signal,
+    or 6 = class_other (Kirby et al., 2015). NOTE that for the specific case of languages which consist of exactly 4
+    forms, where each form consists of exactly 2 characters, you can also use the more specific
+    classify_language_four_forms() function above. NOTE ALSO that this function assumes that a language can be
+    compositional only if reduplication is true for ALL forms, or for NONE of the forms. In other words, the use of
+    reduplication has to be reducible to a single rule (either "reduplicate each segment" or "reduplicate each form")
+    which applies universally across all forms.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
-    :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 3 = compositional, 4 = other (here I'm following the
-    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    :returns: integer corresponding to category that language belongs to: 0 = degenerate, 1 = holistic,
+    2 = holistic_diversify_signal, 3 = compositional, 4 = class_compositional_reduplicate_segments,
+    5 = class_compositional_reduplicate_whole_signal, or 6 = class_other
     """
     class_degenerate = 0
     class_holistic = 1
@@ -617,22 +595,35 @@ def classify_language_multiple_form_lengths(lang, meaning_list):
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
     """
-    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional,
-    4 = compositional_reverse, and 5 = other
-    (Kirby et al., 2015)
+    Classify all languages as either 0 = degenerate, 1 = holistic, 2 = compositional, 3 = compositional_reverse,
+    and 4 = other (Kirby et al., 2015)
 
     :param language_list: list of all languages
     :param complete_forms: list containing all possible complete forms; corresponds to global variable
     'forms_without_noise'
     :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
-    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = compositional_reverse, and 5 = other (Kirby et al., 2015)
+    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = compositional,
+    3 = compositional_reverse, and 4 = other (Kirby et al., 2015)
     """
+
+    print('')
+    print('')
+    print('')
+    print('This is the classify_all_languages() function:')
+
+
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
+        print('')
+        print("language_list[l] is:")
+        print(language_list[l])
         if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
+            print("classify_language_four_forms(language_list[l], complete_forms, meaning_list) is:")
+            print(classify_language_four_forms(language_list[l], complete_forms, meaning_list))
             class_per_lang[l] = classify_language_four_forms(language_list[l], complete_forms, meaning_list)
+            print("class_per_lang[l] is:")
+            print(class_per_lang[l])
         else:
             class_per_lang[l] = classify_language_multiple_form_lengths(language_list[l], meaning_list)
     return class_per_lang
@@ -664,8 +655,7 @@ def mrf_degenerate(lang, meaning_list):
 
 def mrf_holistic(lang, meaning_list):
     """
-    Takes a holistic OR hybrid language and returns a minimally redundant form description of the language's context
-    free grammar.
+    Takes a holistic language and returns a minimally redundant form description of the language's context free grammar.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
@@ -747,7 +737,9 @@ def mrf_other(lang, meaning_list):
 
 def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     """
-    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
+    Takes a language of any class and returns a minimally redundant form description of its context free grammar,
+    depending on the language's class (0 = degenerate, 1 = holistic, 2 = compositional, 3 = compositional_reverse, or
+    4 = other (Kirby et al., 2015))
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
@@ -761,35 +753,34 @@ def minimally_redundant_form_four_forms(lang, complete_forms, meaning_list):
     lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
     if lang_class == 0:  # the language is 'degenerate'
         mrf_string = mrf_degenerate(lang, meaning_list)
-    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+    elif lang_class == 1:  # the language is 'holistic'
         mrf_string = mrf_holistic(lang, meaning_list)
-    elif lang_class == 3:  # the language is 'compositional'
+    elif lang_class == 2:  # the language is 'compositional'
         mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=False)
-    elif lang_class == 4:  # the language is of the 'compositional_reverse' category
+    elif lang_class == 3:  # the language is of the 'compositional_reverse' category
         mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=True)
-    elif lang_class == 5:  # the language is of the 'other' category
+    elif lang_class == 4:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
 
 
-def minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list):
+def minimally_redundant_form_multiple_forms(lang, meaning_list, possible_form_lengths):
     """
-    Takes a language of any class and returns a minimally redundant form description of its context free grammar.
+    Takes a language of any class and returns a minimally redundant form description of its context free grammar,
+    depending on the language's class (0 = degenerate, 1 = holistic, 2 = holistic_diversify_signal, 3 = compositional,
+    4 = class_compositional_reduplicate_segments, 5 = class_compositional_reduplicate_whole_signal, or 6 = class_other)
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
-    :param complete_forms: list containing all possible complete forms; corresponds to global variable
-    'forms_without_noise'
     :param meaning_list: list of strings corresponding to all possible meanings
     :return: minimally redundant form description of the language's context free grammar (string)
     """
-    if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
-        lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
-    else:
-        lang_class = classify_language_multiple_form_lengths(lang, meaning_list)
+    if len(possible_form_lengths) == 1:
+        raise ValueError("This function should be used only when multiple form lengths are allowed")
+    lang_class = classify_language_multiple_form_lengths(lang, meaning_list)
     if lang_class == 0:  # the language is 'degenerate'
         mrf_string = mrf_degenerate(lang, meaning_list)
-    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic'
         mrf_string = mrf_holistic(lang, meaning_list)
     elif lang_class == 3 or lang_class == 4 or lang_class == 5:  # the language is 'compositional'
         mrf_string = mrf_compositional(lang, meaning_list)
@@ -848,7 +839,7 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
         mrf_string = minimally_redundant_form_four_forms(lang, complete_forms, meaning_list)
     else:
-        mrf_string = minimally_redundant_form_multiple_forms(lang, complete_forms, meaning_list)
+        mrf_string = minimally_redundant_form_multiple_forms(lang, meaning_list, possible_form_lengths)
     coding_len = coding_length(mrf_string)
     prior = 2 ** -coding_len
     return prior
@@ -1594,25 +1585,43 @@ def create_initial_dataset(desired_class, bottleneck, language_list, class_per_l
     the form) from a randomly chosen language of the desired class
     """
     if len(possible_form_lengths) == 1:
-        class_labels = ['degenerate', 'holistic', 'hybrid', 'compositional', 'compositional_reverse', 'other']
+        class_labels = ['degenerate', 'holistic', 'compositional', 'compositional_reverse', 'other']
     else:
         class_labels = ['degenerate', 'holistic', 'holistic_diversify_signal', 'compositional', 'class_compositional_reduplicate_segments', 'class_compositional_reduplicate_whole_signal', 'other']  # if instead there are multiple possible form lengths, language classification
         # distinguishes between these 7 classes
+    print('')
+    print('')
+    print("desired_class is:")
+    print(desired_class)
+    print("class_labels is:")
+    print(class_labels)
     if len(possible_form_lengths) == 1 and desired_class == 'compositional':
-        print(len(possible_form_lengths) == 1 and desired_class == 'compositional')
         candidate_indices = []
         for i in range(len(class_labels)):
             if desired_class in class_labels[i]:
                 candidate_indices.append(i)
         class_index = random.choice(candidate_indices)
     else:
+        print("OK, len(possible_form_lengths) == 1 and desired_class == 'compositional' is NOT True:")
         for i in range(len(class_labels)):
+            print("class_labels[i] is:")
+            print(class_labels[i])
             if class_labels[i] == desired_class:
+                print('Yay! class_labels[i] == desired_class!')
                 class_index = i
+    print("class_index is:")
+    print(class_index)
+    print("class_per_language is:")
+    print(class_per_language)
     language_class_indices = np.where(class_per_language == class_index)[0]
+    print('')
+    print("language_class_indices are:")
+    print(language_class_indices)
     class_languages = []
     for index in language_class_indices:
         class_languages.append(language_list[index])
+    print("class_languages are:")
+    print(class_languages)
     random_language = random.choice(class_languages)
     meaning_form_pairs = dataset_from_language(random_language, meaning_list)
     if bottleneck % len(meaning_form_pairs) != 0:
@@ -1638,9 +1647,9 @@ def language_stats(population, possible_form_lengths, class_per_language):
     population
     """
     if len(possible_form_lengths) == 1:
-        stats = np.zeros(int(max(class_per_language)+1))  # if there's only one possible form length, language classification only distinguishes
-        # between 0 = degenerate, 1 = holistic, 2 = hybrid,  3 = compositional, 4 = compositional_reverse, and 5 = other
-        # (Kirby et al., 2015)
+        stats = np.zeros(int(max(class_per_language)+1))  # if there's only one possible form length, language
+        # classification only distinguishes between 0 = degenerate, 1 = holistic, 3 = compositional,
+        # 4 = compositional_reverse, and 5 = other (Kirby et al., 2015)
     else:
         stats = np.zeros(int(max(class_per_language)+1))  # if instead there are multiple possible form lengths, language classification
         # distinguishes between (0) degenerate, (1) holistic, (2) holistic_diversify_signal, (3) compositional,
@@ -1810,7 +1819,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
