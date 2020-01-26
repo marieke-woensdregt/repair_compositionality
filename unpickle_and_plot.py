@@ -47,7 +47,6 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
@@ -72,7 +71,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 5
+batches = 1
 
 
 ###################################################################################################################
@@ -91,23 +90,22 @@ def language_stats_to_dataframe(results, n_runs, n_gens, possible_form_lengths):
     :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
 
-    print('')
-    print('')
-    print('This is the language_stats_to_dataframe() function:')
-
-    column_proportion = np.array(results)
-    print('')
-    print("column_proportion is:")
-    print(column_proportion)
-    print("column_proportion.shape is:")
-    print(column_proportion.shape)
-    # column_proportion_compositional_summed = np.zeros(())
     if len(possible_form_lengths) == 1:
         n_language_classes = 4
     else:
         n_language_classes = 7  #TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
 
-    column_proportion = column_proportion.flatten()
+    column_proportion = np.array(results)
+
+    if n_language_classes == 4 and column_proportion.shape[2] > n_language_classes:
+        column_proportion_compositional_summed = np.zeros((n_runs*batches, n_gens, n_language_classes))
+        for r in range(len(column_proportion_compositional_summed)):
+            for g in range(len(column_proportion_compositional_summed[0])):
+                column_proportion_compositional_summed[r][g] = np.array([column_proportion[r][g][0], column_proportion[r][g][1], column_proportion[r][g][2]+column_proportion[r][g][3], column_proportion[r][g][4]])
+        column_proportion = column_proportion_compositional_summed.flatten()
+
+    else:
+        column_proportion = column_proportion.flatten()
 
     column_runs = []
     for i in range(n_runs):
@@ -180,11 +178,6 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    n_language_classes = int(max(lang_class_prop_over_gen_df['class'])+1)
-    print('')
-    print("n_language_classes is:")
-    print(n_language_classes)
-
     fig, ax = plt.subplots()
 
     palette = sns.color_palette(["black", "red", "green", "grey"])
@@ -205,7 +198,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     plt.show()
 
 
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
     barplot (excluding the burn-in period)
@@ -222,17 +215,17 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     code that was used, as described above.
     :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
     (i.e. 'holistic', and 'compositional')
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: Nothing. Just saves the plot and then shows it.
     """
 
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    n_language_classes = int(max(lang_class_prop_over_gen_df['class'])+1)
-    print('')
-    print("n_language_classes is:")
-    print(n_language_classes)
-
+    if len(possible_form_lengths) == 1:
+        n_language_classes = 4
+    else:
+        n_language_classes = 7  #TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
 
     proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_batches, n_gens, possible_form_lengths)
 
@@ -309,15 +302,29 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
 ###################################################################################################################
 # THE UNPICKLING HAPPENS HERE:
 
+pickle_file_name = "Pickle_r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
+    rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
+    gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(
+    turnover) + "_bias_" + str(
+    compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(
+    noise_prob) + "_observed_m_" + observed_meaning + "_CS_" + str(
+    communicative_success) + "_" + convert_float_value_to_string(
+    np.around(communicative_success_pressure_strength, decimals=2))
+
 all_results = []
-for i in range(batches):
+if batches > 1:
+    for i in range(batches):
+        language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
+        data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
+        final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
+        for j in range(len(language_stats_over_gens_per_run)):
+            all_results.append(language_stats_over_gens_per_run[j])
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
-
-    language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
-    data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
-    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
-
+else:
+    language_stats_over_gens_per_run = pickle.load(
+        open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "rb"))
+    data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" + ".p", "rb"))
+    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
     for j in range(len(language_stats_over_gens_per_run)):
         all_results.append(language_stats_over_gens_per_run[j])
 
@@ -339,7 +346,7 @@ print(lang_class_prop_over_gen_df)
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
 
-fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 
 if mutual_understanding is False and minimal_effort is False:
@@ -349,7 +356,7 @@ if mutual_understanding is False and minimal_effort is False:
         plot_title = "Expressivity only"
     elif gamma > 0 and turnover is True:
         plot_title = "Learnability and expressivity"
-    if noise:
+    if noise_prob > 0.0:
         plot_title = plot_title + " Plus Noise"
 else:
     if mutual_understanding is True and minimal_effort is False:
@@ -392,4 +399,4 @@ print("baseline_proportions_fully_expressive are:")
 print(baseline_proportions_fully_expressive)
 
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
