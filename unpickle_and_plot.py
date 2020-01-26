@@ -47,10 +47,6 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-n_lang_classes = 6  # the number of language classes that are distinguished (int). This should be 4 if the old code was
-# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-# languages, and 5 if the new code was used which does make this distinction.
-
 noise = False  # parameter that determines whether environmental noise is on or off
 noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
 
@@ -83,7 +79,7 @@ batches = 5
 # ALL FUNCTION DEFINITIONS GO HERE:
 
 # FIRST WE NEED A FUNCTION THAT CONVERTS A DATA LIST INTO A PANDAS DATA FRAME FOR PLOTTING:
-def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
+def language_stats_to_dataframe(results, n_runs, n_gens, possible_form_lengths):
     """
     Takes a results list and puts it in a pandas dataframe together with other relevant variables (runs, generations,
     and language class)
@@ -91,10 +87,7 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
     :param results: a list containing proportions for each of the 5 language classes, for each generation, for each run
     :param n_runs: the number of runs (int); corresponds to global variable 'runs'
     :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
 
@@ -109,8 +102,10 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
     print("column_proportion.shape is:")
     print(column_proportion.shape)
     # column_proportion_compositional_summed = np.zeros(())
-    # if n_language_classes == 6:
-    #
+    if len(possible_form_lengths) == 1:
+        n_language_classes = 4
+    else:
+        n_language_classes = 7  #TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
 
     column_proportion = column_proportion.flatten()
 
@@ -131,17 +126,10 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
     column_type = []
     for i in range(n_runs):
         for j in range(n_gens):
-            if n_language_classes == 4:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('other')
-                column_type.append('compositional')
-            elif n_language_classes == 5 or n_language_classes == 6:
-                column_type.append('degenerate')
-                column_type.append('holistic')
-                column_type.append('hybrid')
-                column_type.append('compositional')
-                column_type.append('other')
+            column_type.append('degenerate')
+            column_type.append('holistic')
+            column_type.append('compositional')
+            column_type.append('other')
 
     data = {'run': column_runs,
             'generation': column_generation,
@@ -155,7 +143,7 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
 
 # And this function turns a pandas dataframe back into a list of lists of lists of language stats, just in case
 # that's needed:
-def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, n_language_classes):
+def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, possible_form_lengths):
     """
     Takes a pandas dataframe of results and turns it back into a simple results array, which only contains the
     populations' posterior probability distributions over generations.
@@ -164,12 +152,13 @@ def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, n_language
     proportions of the different language classes over generations over runs.
     :param n_runs: number of runs (int)
     :param n_gens: number of generations (int)
-    :param n_language_classes: the number of language classes that are distinguished (int); corresponds to global
-    variable 'n_lang_classes'. This should be 4 if the old code was used (from before 13 September 2019, 1:30 pm), which
-    did not yet distinguish between 'holistic' and 'hybrid' languages, and 5 if the new code was used which does make
-    this distinction
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: a numpy array containing the proportions of the different language classes for each generation for each run
     """
+    if len(possible_form_lengths) == 1:
+        n_language_classes = 4
+    else:
+        n_language_classes = 7  #TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
     proportion_column = np.array(dataframe['proportion'])
     proportion_column_as_results = proportion_column.reshape((n_runs*n_batches, n_gens, n_language_classes))
     return proportion_column_as_results
@@ -177,7 +166,7 @@ def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, n_language
 
 # AND NOW FOR THE PLOTTING FUNCTIONS:
 
-def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_language_classes):
+def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
 
@@ -186,20 +175,19 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
     :param title: The title of the condition that should be on the plot (string)
     :param file_path: path to folder in which the figure file should be saved
     :param file_name: The file name that the plot should be saved under
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old
-    code was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and
-    'hybrid' languages, and 5 if the new code was used which does make this distinction.
     :return: Nothing. Just saves the plot and then shows it.
     """
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
+    n_language_classes = int(max(lang_class_prop_over_gen_df['class'])+1)
+    print('')
+    print("n_language_classes is:")
+    print(n_language_classes)
+
     fig, ax = plt.subplots()
 
-    if n_language_classes == 4:
-        palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5 or n_language_classes == 6:
-        palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
+    palette = sns.color_palette(["black", "red", "green", "grey"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
     # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
@@ -217,7 +205,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
     plt.show()
 
 
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, n_language_classes, lang_class_baselines_all, lang_class_baselines_fully_expressive):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
     barplot (excluding the burn-in period)
@@ -230,20 +218,23 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     :param n_runs: the number of runs (int); corresponds to global variable 'runs'
     :param n_gens: the number of generations (int); corresponds to global variable 'generations'
     :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
-    :param n_language_classes: the number of language classes that are distinguished (int). This should be 4 if the old
-    code was used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and
-    'hybrid' languages, and 5 if the new code was used which does make this distinction.
     :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the
     code that was used, as described above.
     :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
-    (i.e. 'holistic', 'hybrid', and 'compositional')
+    (i.e. 'holistic', and 'compositional')
     :return: Nothing. Just saves the plot and then shows it.
     """
 
     sns.set_style("whitegrid")
     sns.set_context("talk")
 
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_batches, n_gens, n_language_classes)
+    n_language_classes = int(max(lang_class_prop_over_gen_df['class'])+1)
+    print('')
+    print("n_language_classes is:")
+    print(n_language_classes)
+
+
+    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_batches, n_gens, possible_form_lengths)
 
     proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
 
@@ -269,15 +260,16 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
             if n_language_classes == 4:
                 class_column_from_start_gen.append('degenerate')
                 class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('other')
                 class_column_from_start_gen.append('compositional')
-            elif n_language_classes == 5:
-                class_column_from_start_gen.append('degen.')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('hybrid')
-                class_column_from_start_gen.append('comp.')
                 class_column_from_start_gen.append('other')
-
+            elif n_language_classes == 6:
+                class_column_from_start_gen.append('degenerate')
+                class_column_from_start_gen.append('holistic')
+                class_column_from_start_gen.append('holistic_diversify_signal')
+                class_column_from_start_gen.append('compositional')
+                class_column_from_start_gen.append('compositional_reduplicate_segments')
+                class_column_from_start_gen.append('compositional_reduplicate_whole_signal')
+                class_column_from_start_gen.append('other')
 
     new_data_dict = {'run': runs_column_from_start_gen,
             'generation': generation_column_from_start_gen,
@@ -286,29 +278,19 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
 
     lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
 
-    if n_language_classes == 4:
-        color_palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
-        color_palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
+
+    color_palette = sns.color_palette(["black", "red", "green", "grey"])
 
     sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=color_palette)
 
-    if n_language_classes == 4:
-        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
-    elif n_language_classes == 5:
-        plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.2, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[1], xmin=0.2, xmax=0.4, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[2], xmin=0.4, xmax=0.6, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[3], xmin=0.6, xmax=0.8, color='k', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_all[4], xmin=0.8, xmax=1.0, color='k', linestyle='--', linewidth=2)
+    plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
+    plt.axhline(y=lang_class_baselines_all[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
+    plt.axhline(y=lang_class_baselines_all[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
+    plt.axhline(y=lang_class_baselines_all[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
 
-        if title == 'Mutual Understanding Only' or title == 'Minimal Effort & Mutual Understanding':
-            plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.2, xmax=0.4, color='0.6', linestyle='--', linewidth=2)
-            plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.4, xmax=0.6, color='0.6', linestyle='--', linewidth=2)
-            plt.axhline(y=lang_class_baselines_fully_expressive[2], xmin=0.6, xmax=0.8, color='0.6', linestyle='--', linewidth=2)
+    if title == 'Mutual Understanding Only' or title == 'Minimal Effort & Mutual Understanding':
+        plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
+        plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
 
 
     plt.tick_params(axis='both', which='major', labelsize=20)
@@ -330,7 +312,7 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
 all_results = []
 for i in range(batches):
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
     language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
     data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
@@ -347,7 +329,7 @@ print(len(all_results[0]))
 print("len(all_results[0][0]) are:")
 print(len(all_results[0][0]))
 
-lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs*batches, generations, n_lang_classes)
+lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs*batches, generations, possible_form_lengths)
 print('')
 print('')
 print("lang_class_prop_over_gen_df is:")
@@ -357,7 +339,7 @@ print(lang_class_prop_over_gen_df)
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
 
-fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_n_lang_classes_"+str(n_lang_classes)+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 
 if mutual_understanding is False and minimal_effort is False:
@@ -378,7 +360,7 @@ else:
         plot_title = "Minimal Effort & Mutual Understanding"
 
 
-plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, n_lang_classes)
+plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name)
 
 
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
@@ -396,18 +378,18 @@ print("np.sum(no_of_each_class) is:")
 print(np.sum(no_of_each_class))
 
 
-baseline_proportions_all = np.divide(no_of_each_class, len(all_possible_languages))  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+baseline_proportions_all = np.divide(no_of_each_class, len(all_possible_languages))  # 0 = degenerate, 1 = holistic, 2 = compositional, 3 = other
 print('')
 print('')
 print("baseline_proportions_all are:")
 print(baseline_proportions_all)
 
 
-baseline_proportions_fully_expressive = np.divide(no_of_each_class[1:4], np.sum(no_of_each_class[1:4]))  # 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
+baseline_proportions_fully_expressive = np.divide(no_of_each_class[1:3], np.sum(no_of_each_class[1:3]))  # 0 = degenerate, 1 = holistic, 2 = compositional, 3 = other
 print('')
 print('')
 print("baseline_proportions_fully_expressive are:")
 print(baseline_proportions_fully_expressive)
 
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, n_lang_classes, baseline_proportions_all, baseline_proportions_fully_expressive)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive)
