@@ -8,7 +8,8 @@ from evolution_compositionality_under_noise import *
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
+possible_form_lengths = np.array([2])  # all possible form lengths
+forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their possible
 # 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
 # all possible noisy variants of the forms above
@@ -22,8 +23,8 @@ b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets t
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 3000  # the number of generations (Kirby et al., 2015 used 100)
+runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 200  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -43,10 +44,10 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 1000  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
+n_lang_classes = 6  # the number of language classes that are distinguished (int). This should be 4 if the old code was
 # used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
 # languages, and 5 if the new code was used which does make this distinction.
 
@@ -96,7 +97,21 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
     this distinction
     :return: a pandas dataframe containing four columns: 'run', 'generation', 'proportion' and 'class'
     """
+
+    print('')
+    print('')
+    print('This is the language_stats_to_dataframe() function:')
+
     column_proportion = np.array(results)
+    print('')
+    print("column_proportion is:")
+    print(column_proportion)
+    print("column_proportion.shape is:")
+    print(column_proportion.shape)
+    # column_proportion_compositional_summed = np.zeros(())
+    # if n_language_classes == 6:
+    #
+
     column_proportion = column_proportion.flatten()
 
     column_runs = []
@@ -121,7 +136,7 @@ def language_stats_to_dataframe(results, n_runs, n_gens, n_language_classes):
                 column_type.append('holistic')
                 column_type.append('other')
                 column_type.append('compositional')
-            elif n_language_classes == 5:
+            elif n_language_classes == 5 or n_language_classes == 6:
                 column_type.append('degenerate')
                 column_type.append('holistic')
                 column_type.append('hybrid')
@@ -183,7 +198,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name, n_
 
     if n_language_classes == 4:
         palette = sns.color_palette(["black", "red", "grey", "green"])
-    elif n_language_classes == 5:
+    elif n_language_classes == 5 or n_language_classes == 6:
         palette = sns.color_palette(["black", "red", "magenta", "green", "grey"])
 
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
