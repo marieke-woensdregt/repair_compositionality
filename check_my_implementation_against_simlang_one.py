@@ -393,7 +393,7 @@ if __name__ == '__main__':
     # print("class_per_lang is:")
     # print(class_per_lang)
     no_of_each_class = np.bincount(class_per_lang.astype(int))
-    no_of_each_class_simlang_order = np.array([no_of_each_class[0], no_of_each_class[1] + no_of_each_class[2], no_of_each_class[5], no_of_each_class[3]+no_of_each_class[4]])
+    no_of_each_class_simlang_order = np.array([no_of_each_class[0], no_of_each_class[1], no_of_each_class[4], no_of_each_class[2]+no_of_each_class[3]])
     print('')
     print("no_of_each_class_simlang_order ACCORDING TO MY CODE, where 0 = degenerate, 1 = holistic, 2 = other, 3 = compositional is:")
     print(no_of_each_class_simlang_order)
@@ -431,20 +431,13 @@ if __name__ == '__main__':
     # underestimates the number of compositional languages. So let's first have a look at which languages it classifies
     # as compositional:
 
-    compositional_langs_indices_my_code = np.concatenate((np.where(class_per_lang==3)[0], np.where(class_per_lang==4)[0]))
+    compositional_langs_indices_my_code = np.concatenate((np.where(class_per_lang==2)[0], np.where(class_per_lang==3)[0]))
     print('')
     print('')
     print("compositional_langs_indices_my_code MY CODE are:")
     print(compositional_langs_indices_my_code)
     print("len(compositional_langs_indices_my_code) MY CODE are:")
     print(len(compositional_langs_indices_my_code))
-
-    # for index in compositional_langs_indices_my_code:
-    #     print('')
-    #     print("index MY CODE is:")
-    #     print(index)
-    #     print("hypothesis_space[index] MY CODE is:")
-    #     print(hypothesis_space[index])
 
     # And now let's do the same for the languages from SimLang Lab 21:
 
@@ -456,34 +449,6 @@ if __name__ == '__main__':
     print("len(compositional_langs_indices_simlang) SIMLANG CODE are:")
     print(len(compositional_langs_indices_simlang))
 
-    # for index in compositional_langs_indices_simlang:
-    #     print('')
-    #     print("index SIMLANG CODE is:")
-    #     print(index)
-    #     print("languages_simlang[index] SIMLANG CODE is:")
-    #     print(languages_simlang[index])
-
-    # # Hmm, so it looks like instead of there being a bug in my code, there might actually be a bug in the SimLang lab 21
-    # # code (or rather, in the code that generated the list of types that was copied into SimLang lab 21)
-    # # Let's check whether maybe the holistic languages that are miscategorised as compositional in the SimLang code
-    # # happen to be the ones I identified as "hybrids" (i.e. kind of in between holistic and compositional) above:
-    #
-    # hybrid_langs_indices_my_code = np.where(class_per_lang==2)[0]
-    # print('')
-    # print('')
-    # print("hybrid_langs_indices_my_code MY CODE are:")
-    # print(hybrid_langs_indices_my_code)
-    # print("len(hybrid_langs_indices_my_code) MY CODE are:")
-    # print(len(hybrid_langs_indices_my_code))
-    #
-    # for index in hybrid_langs_indices_my_code:
-    #     print('')
-    #     print("index MY CODE is:")
-    #     print(index)
-    #     print("hypothesis_space[index] MY CODE is:")
-    #     print(hypothesis_space[index])
-    #
-    # # Nope, that isn't the case.
 
     ###################################################################################################################
     # SECONDLY, LET'S CHECK WHETHER MY FUNCTIONS FOR GENERATING/CALCULATING THE LANGAUGES' REWRITE RULES, MINIMALLY
@@ -518,7 +483,7 @@ if __name__ == '__main__':
     print(compositional_langs_simlang_code)
 
     # And now let's calculate their coding lengths:
-    lang_classes_text = ['degenerate', 'holistic', 'hybrid', 'compositional', 'compositional_reverse', 'other']
+    lang_classes_text = ['degenerate', 'holistic', 'compositional', 'compositional_reverse', 'other']
     for i in range(len(example_languages)):
         lang = example_languages[i]
         print('')
@@ -617,8 +582,7 @@ if __name__ == '__main__':
     print(diff_value_indices_flattened)
 
     # --> Hey, what's striking here is that this list of indices is EXACTLY the same as the list of indices of
-    # languages that are classified as compositional according to the simlang code (four of which, 39, 114, 141, and
-    # 216 are instead classified as holistic in my own code). Let's have a closer look at these languages and the
+    # languages that are classified as compositional. Let's have a closer look at these languages and the
     # priors that are assigned to them:
 
     # (Also note that if numbers in the log_prior and probability version of the prior are allowed to have more decimals
@@ -637,27 +601,9 @@ if __name__ == '__main__':
         print("priors_simlang[index] is:")
         print(priors_simlang[index])
 
-    # My own code assigns slightly lower prior probabilities to those languages which are *also* compositional
-    # according to my own code than the simlang code does, and assigns *much* lower prior probability to those languages
-    # which are classed as holistic instead of compositional according to my code (compared to the prior probability
-    # they are assigned in the simlang code). As we'd expect, all languages that are classed as compositional are
-    # assigned the same prior probability in the simlang code, whereas in my code all languages that are classed as
-    # compositional are assigned the same prior probability, and all languages that are classed as holistic are too.
-
-    # To conclude: the differences we find between the two prior probability distributions actually make a lot of sense
-    # given the differences we found in the classification of the languages.
-
-    # The only thing that still seems a bit puzzling at first sight is the fact that the languages that are classed as
-    # compositional according to my code, receive *less* prior probability than the languages that are classed as
-    # compositional according to the simlang code. This is surprising because the languages that my code classes as
-    # holistic rather than compositional (as opposed to the simlang code) receive *way* lower prior probability, and we
-    # would therefore expect the prior probability that remains from this to be redistributed over the languages that
-    # *are* classed as compositional. However, this difference of course causes a redistribution of the remaining prior
-    # probability over the *whole* hypothesis space, and not just over the four compositional languages.
-
-    # In order to check whether that might indeed be the explanation, I'm just checking that the difference in the sum
-    # prior probability that is assigned to these 8 languages between my code and the simlang code is indeed equal to
-    # the sum difference in prior probability over the remaining languages.
+    # My own code consistently assigns slightly lower prior probabilities to all compositional languages compared to
+    # the simlang code. This is in accordance with the fact that my code consistently assigns slightly longer coding
+    # length to those same languages.
 
     log_priors_my_code = np.array([my_log_prior[i] for i in diff_value_indices_flattened])
     print('')
