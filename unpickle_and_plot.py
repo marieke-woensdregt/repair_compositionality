@@ -24,13 +24,13 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 200  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+generations = 150  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
 cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
-compressibility_bias = True  # determines whether agents have a prior that favours compressibility, or a flat prior
+compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
@@ -47,9 +47,9 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.5  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -59,7 +59,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = False
+minimal_effort = True
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -72,7 +72,6 @@ fig_file_path = "plots/"
 
 
 batches = 1
-
 
 ###################################################################################################################
 # ALL FUNCTION DEFINITIONS GO HERE:
@@ -98,7 +97,7 @@ def language_stats_to_dataframe(results, n_runs, n_gens, possible_form_lengths):
     column_proportion = np.array(results)
 
     if n_language_classes == 4 and column_proportion.shape[2] > n_language_classes:
-        column_proportion_compositional_summed = np.zeros((n_runs*batches, n_gens, n_language_classes))
+        column_proportion_compositional_summed = np.zeros((n_runs, n_gens, n_language_classes))
         for r in range(len(column_proportion_compositional_summed)):
             for g in range(len(column_proportion_compositional_summed[0])):
                 column_proportion_compositional_summed[r][g] = np.array([column_proportion[r][g][0], column_proportion[r][g][1], column_proportion[r][g][2]+column_proportion[r][g][3], column_proportion[r][g][4]])
@@ -377,7 +376,17 @@ print(len(all_possible_languages))
 class_per_lang = classify_all_languages(all_possible_languages, forms_without_noise, meanings)
 print('')
 print('')
+
+if len(possible_form_lengths) == 1:
+    n_language_classes = 4
+else:
+    n_language_classes = 7  # TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
+
 no_of_each_class = np.bincount(class_per_lang.astype(int))
+if n_language_classes == 4 and len(no_of_each_class) > n_language_classes:
+    no_of_each_class_compositional_summed = np.array([no_of_each_class[0], no_of_each_class[1], no_of_each_class[2]+no_of_each_class[3], no_of_each_class[4]])
+    no_of_each_class = no_of_each_class_compositional_summed
+
 print('')
 print("no_of_each_class is:")
 print(no_of_each_class)
