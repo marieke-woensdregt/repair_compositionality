@@ -101,9 +101,9 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 2000  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 3  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
@@ -1089,39 +1089,117 @@ def find_possible_interpretations(language, forms):
     return possible_interpretations
 
 
-def find_partial_meaning(language, noisy_form):
+# def find_partial_meaning(language, noisy_form):
+#     """
+#     Checks whether the noisy_form given as input maps unambiguously to a partial meaning in the language given as
+#     input, and if so, returns that partial meaning.
+#
+#     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
+#     where each form is mapped to the meaning at the corresponding index
+#     :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
+#     :return: a list containing the partial meaning that the noisy_form maps unambiguously to, if there is one
+#     """
+#
+#     print('')
+#     print('')
+#     print('This is the find_partial_meaning() function:')
+#
+#     print('')
+#     print("language is:")
+#     print(language)
+#
+#     print("noisy_form is:")
+#     print(noisy_form)
+#
+#     part_meanings_as_ints = []
+#     for i in range(len(meanings)):
+#         for j in range(len(meanings[0])):
+#             part_meanings_as_ints.append(int(meanings[i][j]))
+#     print('')
+#     print("part_meanings_as_ints are:")
+#     print(part_meanings_as_ints)
+#     max_part_meaning = max(part_meanings_as_ints)
+#     print("max_part_meaning is:")
+#     print(max_part_meaning)
+#     count_per_partial_meaning = np.zeros(max_part_meaning+1)
+#     for i in range(len(noisy_form)):
+#         print('')
+#         print("i is:")
+#         print(i)
+#         print("noisy_form[i] is:")
+#         print(noisy_form[i])
+#         if noisy_form[i] != '_':
+#             for j in range(len(language)):
+#                 print('')
+#                 print("j is:")
+#                 print(j)
+#                 print("language[j][i] is:")
+#                 print(language[j][i])
+#                 if language[j][i] == noisy_form[i]:
+#                     print('YAY! language[j][i] == noisy_form[i]')
+#                     count_per_partial_meaning[int(meanings[j][i])] += 1
+#     print('')
+#     print("count_per_partial_meaning is:")
+#     print(count_per_partial_meaning)
+#     n_features = 0
+#     for i in range(len(meanings)):
+#         if meanings[i][0] == meanings[0][0]:
+#             n_features += 1
+#     print('')
+#     print("n_features are:")
+#     print(n_features)
+#     if np.sum(count_per_partial_meaning) == n_features:
+#         part_meaning_index = np.where(count_per_partial_meaning==n_features)[0]
+#     else:
+#         part_meaning_index = []
+#     print('')
+#     print("part_meaning_index is:")
+#     print(part_meaning_index)
+#     if len(part_meaning_index) == 1:
+#         print('YAY, a part meaning was found!')
+#         return part_meaning_index
+#     else:
+#         print('NAY... NO part meaning was found...')
+#         return []
+
+
+
+def find_partial_meaning_new(language, noisy_form, meaning_list, complete_forms, possible_form_lengths):
     """
-    Checks whether the noisy_form given as input maps unambiguously to a partial meaning in the language given as
-    input, and if so, returns that partial meaning.
 
     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
     where each form is mapped to the meaning at the corresponding index
     :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
-    :return: a list containing the partial meaning that the noisy_form maps unambiguously to, if there is one
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
+    :param complete_forms: The full set of possible complete forms (corresponds to global parameter
+    'forms_without_noise')
+    :param possible_form_lengths: all possible form lengths (global parameter)
+    :return:
     """
-    part_meanings_as_ints = []
-    for i in range(len(meanings)):
-        for j in range(len(meanings[0])):
-            part_meanings_as_ints.append(int(meanings[i][j]))
-    max_part_meaning = max(part_meanings_as_ints)
-    count_per_partial_meaning = np.zeros(max_part_meaning+1)
-    for i in range(len(noisy_form)):
-        if noisy_form[i] != '_':
-            for j in range(len(language)):
-                if language[j][i] == noisy_form[i]:
-                    count_per_partial_meaning[int(meanings[j][i])] += 1
-    n_features = 0
-    for i in range(len(meanings)):
-        if meanings[i][0] == meanings[0][0]:
-            n_features += 1
-    if np.sum(count_per_partial_meaning) == n_features:
-        part_meaning_index = np.where(count_per_partial_meaning==n_features)[0]
+    print('')
+    print('')
+    print('')
+    print('This is the find_partial_meaning_new() function:')
+    print("language is:")
+    print(language)
+    print("noisy_form is:")
+    print(noisy_form)
+    if len(possible_form_lengths) == 1:
+        lang_class = classify_language_four_forms(language, complete_forms, meaning_list)
+        partial_form_index = np.where(np.array(noisy_form) != '_')[0]
+        print("partial_form_index is:")
+        print(partial_form_index)
+        if lang_class == 2:
+            #TODO: Do something here
+            pass
+        elif lang_class == 3:
+            # TODO: Do something else here
+            pass
     else:
-        part_meaning_index = []
-    if len(part_meaning_index) == 1:
-        return part_meaning_index
-    else:
-        return []
+        lang_class = classify_language_multiple_form_lengths(language, meaning_list)
+
+
+
 
 
 #TODO: This has turned into a bit of a monster function. Maybe shorten it by pulling out the code that calculates the
@@ -1154,7 +1232,7 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
         possible_interpretations = find_possible_interpretations(language, compatible_forms)
         if len(possible_interpretations) == 0:
             possible_interpretations = meanings
-        partial_meaning = find_partial_meaning(language, utterance)
+        partial_meaning = find_partial_meaning_new(language, utterance)
         if mutual_understanding_pressure and minimal_effort_pressure:
             prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
             if len(partial_meaning) == 1:
