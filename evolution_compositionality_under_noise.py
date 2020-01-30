@@ -262,8 +262,8 @@ def classify_language_four_forms(lang, forms, meaning_list):
     if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
 
-    # lang is degenerate if it uses the same form for every meaning:
-    if lang[0] == lang[1] and lang[1] == lang[2] and lang[2] == lang[3]:
+    # The language is DEGENERATE if it uses the same form for each meaning:
+    if lang.count(lang[0]) == len(lang):
         return class_degenerate
 
     # If each form is unique, the language is either COMPOSITIONAL or HOLISTIC:
