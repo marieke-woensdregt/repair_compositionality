@@ -24,7 +24,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 2000  # the number of generations (Kirby et al., 2015 used 100)
+generations = 5000  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -44,7 +44,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 1000  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 4000  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
 noise_prob = 0.0  # the probability of environmental noise masking part of an utterance
@@ -71,7 +71,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 2
+batches = 1
 
 ###################################################################################################################
 # ALL FUNCTION DEFINITIONS GO HERE:
