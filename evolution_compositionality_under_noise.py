@@ -982,7 +982,7 @@ def produce(language, topic, ambiguity_penalty, error_prob, prob_of_noise):
     :return: an utterance. That is, a single form chosen from either the global variable "forms_without_noise" (if
     noise is False) or the global variable "all_forms_including_noisy_variants" (if noise is True).
         """
-    if noise_prob > 0.0:
+    if prob_of_noise > 0.0:
         prop_to_prob_per_form_array = production_likelihoods_with_noise(language, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error_prob, prob_of_noise)
         prob_per_form_array = np.divide(prop_to_prob_per_form_array, np.sum(prop_to_prob_per_form_array))
         utterance = np.random.choice(all_forms_including_noisy_variants, p=prob_per_form_array)
@@ -1319,7 +1319,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
     new_log_posterior = []
     for j in range(len(log_posterior)):
         hypothesis = hypotheses[j]
-        if noise_prob > 0.0:
+        if prob_of_noise > 0.0:
             likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, meanings, forms_without_noise, noisy_forms, ambiguity_penalty, error, prob_of_noise)
         else:
             likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, meanings, ambiguity_penalty, error)
