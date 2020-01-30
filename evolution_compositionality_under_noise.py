@@ -1089,82 +1089,7 @@ def find_possible_interpretations(language, forms):
     return possible_interpretations
 
 
-# def find_partial_meaning(language, noisy_form):
-#     """
-#     Checks whether the noisy_form given as input maps unambiguously to a partial meaning in the language given as
-#     input, and if so, returns that partial meaning.
-#
-#     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
-#     where each form is mapped to the meaning at the corresponding index
-#     :param noisy_form: a noisy form (i.e. a string containing '_' as at least one of the characters)
-#     :return: a list containing the partial meaning that the noisy_form maps unambiguously to, if there is one
-#     """
-#
-#     print('')
-#     print('')
-#     print('This is the find_partial_meaning() function:')
-#
-#     print('')
-#     print("language is:")
-#     print(language)
-#
-#     print("noisy_form is:")
-#     print(noisy_form)
-#
-#     part_meanings_as_ints = []
-#     for i in range(len(meanings)):
-#         for j in range(len(meanings[0])):
-#             part_meanings_as_ints.append(int(meanings[i][j]))
-#     print('')
-#     print("part_meanings_as_ints are:")
-#     print(part_meanings_as_ints)
-#     max_part_meaning = max(part_meanings_as_ints)
-#     print("max_part_meaning is:")
-#     print(max_part_meaning)
-#     count_per_partial_meaning = np.zeros(max_part_meaning+1)
-#     for i in range(len(noisy_form)):
-#         print('')
-#         print("i is:")
-#         print(i)
-#         print("noisy_form[i] is:")
-#         print(noisy_form[i])
-#         if noisy_form[i] != '_':
-#             for j in range(len(language)):
-#                 print('')
-#                 print("j is:")
-#                 print(j)
-#                 print("language[j][i] is:")
-#                 print(language[j][i])
-#                 if language[j][i] == noisy_form[i]:
-#                     print('YAY! language[j][i] == noisy_form[i]')
-#                     count_per_partial_meaning[int(meanings[j][i])] += 1
-#     print('')
-#     print("count_per_partial_meaning is:")
-#     print(count_per_partial_meaning)
-#     n_features = 0
-#     for i in range(len(meanings)):
-#         if meanings[i][0] == meanings[0][0]:
-#             n_features += 1
-#     print('')
-#     print("n_features are:")
-#     print(n_features)
-#     if np.sum(count_per_partial_meaning) == n_features:
-#         part_meaning_index = np.where(count_per_partial_meaning==n_features)[0]
-#     else:
-#         part_meaning_index = []
-#     print('')
-#     print("part_meaning_index is:")
-#     print(part_meaning_index)
-#     if len(part_meaning_index) == 1:
-#         print('YAY, a part meaning was found!')
-#         return part_meaning_index
-#     else:
-#         print('NAY... NO part meaning was found...')
-#         return []
-
-
-
-def find_partial_meaning_new(language, noisy_form, meaning_list, possible_form_lengths):
+def find_partial_meaning(language, noisy_form, meaning_list, possible_form_lengths):
     """
     Takes a noisy form and a language and returns a partial meaning that can be interpreted from that noisy form; IF
     there is one.
@@ -1245,7 +1170,7 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
         possible_interpretations = find_possible_interpretations(language, compatible_forms)
         if len(possible_interpretations) == 0:
             possible_interpretations = meanings
-        partial_meaning = find_partial_meaning_new(language, utterance, meaning_list, possible_form_lengths)
+        partial_meaning = find_partial_meaning(language, utterance, meaning_list, possible_form_lengths)
         if partial_meaning != None and len(partial_meaning) == len(meaning_list[0]):
                 response = partial_meaning
         else:
