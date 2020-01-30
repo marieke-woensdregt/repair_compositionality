@@ -33,17 +33,6 @@ interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'.
 n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
 # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
-# proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
-# measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
-# assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
-# language and we count the resulting proportions.
-
-n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
-# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-# languages, and 5 if the new code was used which does make this distinction.
-
-noise = False  # parameter that determines whether environmental noise is on or off
-
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
 # successful interaction is to enter the data set that is passed on to the next generation, compared to a
@@ -51,7 +40,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 
 pickle_file_path = "pickles/"
 
-extra_gens = 1000
+extra_gens = 3000
 
 
 # THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
@@ -111,7 +100,7 @@ if __name__ == '__main__':
 
 
 
-pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 language_stats_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_lang_stats_"+str(batch_number)+".p", "rb"))
 data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(batch_number)+".p", "rb"))
@@ -159,7 +148,7 @@ for r in range(runs):
 
 timestr = time.strftime("%Y%m%d-%H%M%S")
 
-pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations+extra_gens) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type[:5] + "_noise_" + str(noise) + "_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_n_l_classes_" + str(n_lang_classes) +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations+extra_gens) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
 
 pickle.dump(language_stats_over_gens_per_run_new, open(pickle_file_path + pickle_file_name + "_lang_stats_"+str(batch_number)+".p", "wb"))
 pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data_"+str(batch_number)+".p", "wb"))
