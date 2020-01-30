@@ -151,7 +151,7 @@ for r in range(runs):
 
     initial_dataset = data_over_gens_per_run[r][-1]
 
-    language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+    language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, meanings, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
     language_stats_over_gens_per_run_new[r] = np.concatenate((language_stats_over_gens_per_run[r], language_stats_over_gens))
     data_over_gens_per_run_new.append(data_over_gens_per_run[r] + data_over_gens)
