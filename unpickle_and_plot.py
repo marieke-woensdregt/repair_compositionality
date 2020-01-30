@@ -47,7 +47,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.5  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.3  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
