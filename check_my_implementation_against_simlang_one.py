@@ -528,7 +528,7 @@ if __name__ == '__main__':
     print('')
     print('PRIORS FOR COMPOSITIONAL LANGUAGES ACCORDING TO SIMLANG CODE:')
     for i in range(len(compositional_langs_simlang_code)):
-        lang = compositional_langs_simlang_code[i]
+        lang = list(compositional_langs_simlang_code[i])
         print('')
         print(i)
         lang_class = classify_language_four_forms(lang, forms, meanings)
@@ -597,6 +597,12 @@ if __name__ == '__main__':
     print('')
     print("diff_value_indices_flattened are:")
     print(diff_value_indices_flattened)
+
+
+    diff_indices_are_compositional_langs = np.array_equal(compositional_langs_indices_my_code, diff_value_indices_flattened)
+    print('')
+    print("diff_indices_are_compositional_langs is:")
+    print(diff_indices_are_compositional_langs)
 
     # --> Hey, what's striking here is that this list of indices is EXACTLY the same as the list of indices of
     # languages that are classified as compositional. Let's have a closer look at these languages and the
