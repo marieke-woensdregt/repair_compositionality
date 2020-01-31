@@ -18,7 +18,7 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
 runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 2000  # the number of generations (Kirby et al., 2015 used 100)
+generations = 4000  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -40,7 +40,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 
 pickle_file_path = "pickles/"
 
-extra_gens = 3000
+extra_gens = 1000
 
 
 # THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
