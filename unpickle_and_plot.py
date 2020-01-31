@@ -29,7 +29,7 @@ initial_language_type = 'degenerate'  # set the language class that the first ge
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -321,9 +321,9 @@ if batches > 1:
 
 else:
     language_stats_over_gens_per_run = pickle.load(
-        open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "rb"))
-    data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" + ".p", "rb"))
-    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
+        open(pickle_file_path + pickle_file_name + "_lang_stats" +"_NEW" + ".p", "rb"))
+    data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" +"_NEW" + ".p", "rb"))
+    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" +"_NEW" + ".p", "rb"))
     for j in range(len(language_stats_over_gens_per_run)):
         all_results.append(language_stats_over_gens_per_run[j])
 
@@ -345,7 +345,7 @@ print(lang_class_prop_over_gen_df)
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
 
-fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_NEW"
 
 
 if mutual_understanding is False and minimal_effort is False:
