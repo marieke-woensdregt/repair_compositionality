@@ -1102,34 +1102,46 @@ def find_partial_meaning(language, noisy_form, meaning_list, possible_form_lengt
     :return: the meaning feature that is certain given the language and the noisy form received
     """
     if len(possible_form_lengths) == 1:
-        noise_index = noisy_form.index('_')
-        partial_form_indices = list(range(len(noisy_form)))
-        partial_form_indices.remove(noise_index)
-        match_indices = []
-        for i in range(len(language)):
-            form = language[i]
-            match = True
-            for j in partial_form_indices:
-                if form[j] != noisy_form[j]:
-                    match = False
-            if match is True:
-                match_indices.append(i)
-        if len(match_indices) == 0:  # If the speaker has a different language from the listener (or jf the speaker makes a production error), it can happen that the noisy form doesn't match any form in the listener's language
-            return None
-        if len(match_indices) == 1:  # If the listener has a language of the category 'other', it can happen that the noisy form maps uniquely to a full meaning.
-            return meaning_list[match_indices[0]]
-        shared_features = [True for x in range(len(meaning_list[0]))]
-        for k in range(len(meaning_list[0])):
-            feature_values = [int(meaning_list[l][k]) for l in match_indices]
-            for m in range(len(feature_values)):
-                if feature_values[m] != feature_values[0]:
-                    shared_features[k] = False
-        partial_meaning_index = np.where(np.array(shared_features) == True)[0]
-        if len(partial_meaning_index) == 0:
-            return None
+
+
+        lang_class = classify_language_four_forms(language, forms_without_noise, meaning_list)
+        if lang_class != 1:
+
+
+            noise_index = noisy_form.index('_')
+            partial_form_indices = list(range(len(noisy_form)))
+            partial_form_indices.remove(noise_index)
+            match_indices = []
+            for i in range(len(language)):
+                form = language[i]
+                match = True
+                for j in partial_form_indices:
+                    if form[j] != noisy_form[j]:
+                        match = False
+                if match is True:
+                    match_indices.append(i)
+            if len(match_indices) == 0:  # If the speaker has a different language from the listener (or jf the speaker makes a production error), it can happen that the noisy form doesn't match any form in the listener's language
+                return None
+            if len(match_indices) == 1:  # If the listener has a language of the category 'other', it can happen that the noisy form maps uniquely to a full meaning.
+                return meaning_list[match_indices[0]]
+            shared_features = [True for x in range(len(meaning_list[0]))]
+            for k in range(len(meaning_list[0])):
+                feature_values = [int(meaning_list[l][k]) for l in match_indices]
+                for m in range(len(feature_values)):
+                    if feature_values[m] != feature_values[0]:
+                        shared_features[k] = False
+            partial_meaning_index = np.where(np.array(shared_features) == True)[0]
+            if len(partial_meaning_index) == 0:
+                return None
+            else:
+                partial_meaning = meaning_list[match_indices[0]][partial_meaning_index[0]]
+                return partial_meaning
+
+
         else:
-            partial_meaning = meaning_list[match_indices[0]][partial_meaning_index[0]]
-            return partial_meaning
+            return None
+
+
     else:
         lang_class = classify_language_multiple_form_lengths(language, meaning_list)
         #TODO: Write the rest of this function!
