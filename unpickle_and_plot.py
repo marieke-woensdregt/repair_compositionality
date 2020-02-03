@@ -24,7 +24,7 @@ rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 150  # the number of generations (Kirby et al., 2015 used 100)
+generations = 200  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -44,10 +44,10 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.7  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -59,7 +59,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = True
+minimal_effort = False
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
