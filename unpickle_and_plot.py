@@ -29,7 +29,7 @@ initial_language_type = 'degenerate'  # set the language class that the first ge
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -47,7 +47,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.3  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
