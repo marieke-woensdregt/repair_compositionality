@@ -18,7 +18,7 @@ all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all po
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
 # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
@@ -44,10 +44,10 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 50  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 100  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.7  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = True
 if mutual_understanding:
@@ -321,9 +321,9 @@ if batches > 1:
 
 else:
     language_stats_over_gens_per_run = pickle.load(
-        open(pickle_file_path + pickle_file_name + "_lang_stats" +"_NEW" + ".p", "rb"))
-    data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" +"_NEW" + ".p", "rb"))
-    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" +"_NEW" + ".p", "rb"))
+        open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "rb"))
+    data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" + ".p", "rb"))
+    final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "rb"))
     for j in range(len(language_stats_over_gens_per_run)):
         all_results.append(language_stats_over_gens_per_run[j])
 
@@ -345,7 +345,7 @@ print(lang_class_prop_over_gen_df)
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
 
-fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))+"_NEW"
+fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
 
 if mutual_understanding is False and minimal_effort is False:
