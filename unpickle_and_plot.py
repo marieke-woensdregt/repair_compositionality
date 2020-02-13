@@ -49,7 +49,7 @@ burn_in = 400  # the burn-in period that is excluded when calculating the mean d
 
 noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -59,7 +59,7 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = False
+minimal_effort = True
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
