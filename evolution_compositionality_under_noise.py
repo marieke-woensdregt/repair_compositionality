@@ -107,7 +107,7 @@ initial_language_type = 'degenerate'  # set the language class that the first ge
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
@@ -1104,44 +1104,44 @@ def find_partial_meaning(language, noisy_form, meaning_list, possible_form_lengt
     if len(possible_form_lengths) == 1:
 
 
-        # lang_class = classify_language_four_forms(language, forms_without_noise, meaning_list)
-        # if lang_class != 1: # uncommenting these two lines would prevent listeners from finding partial meaning
-        # when they have a holistic language
+        lang_class = classify_language_four_forms(language, forms_without_noise, meaning_list)
+        if lang_class != 1:  # these two lines prevent listeners from finding partial meaning when they have a
+            # holistic language
 
 
-        noise_index = noisy_form.index('_')
-        partial_form_indices = list(range(len(noisy_form)))
-        partial_form_indices.remove(noise_index)
-        match_indices = []
-        for i in range(len(language)):
-            form = language[i]
-            match = True
-            for j in partial_form_indices:
-                if form[j] != noisy_form[j]:
-                    match = False
-            if match is True:
-                match_indices.append(i)
-        if len(match_indices) == 0:  # If the speaker has a different language from the listener (or jf the speaker makes a production error), it can happen that the noisy form doesn't match any form in the listener's language
-            return None
-        if len(match_indices) == 1:  # If the listener has a language of the category 'other', it can happen that the noisy form maps uniquely to a full meaning.
-            return meaning_list[match_indices[0]]
-        shared_features = [True for x in range(len(meaning_list[0]))]
-        for k in range(len(meaning_list[0])):
-            feature_values = [int(meaning_list[l][k]) for l in match_indices]
-            for m in range(len(feature_values)):
-                if feature_values[m] != feature_values[0]:
-                    shared_features[k] = False
-        partial_meaning_index = np.where(np.array(shared_features) == True)[0]
-        if len(partial_meaning_index) == 0:
-            return None
+            noise_index = noisy_form.index('_')
+            partial_form_indices = list(range(len(noisy_form)))
+            partial_form_indices.remove(noise_index)
+            match_indices = []
+            for i in range(len(language)):
+                form = language[i]
+                match = True
+                for j in partial_form_indices:
+                    if form[j] != noisy_form[j]:
+                        match = False
+                if match is True:
+                    match_indices.append(i)
+            if len(match_indices) == 0:  # If the speaker has a different language from the listener (or jf the speaker makes a production error), it can happen that the noisy form doesn't match any form in the listener's language
+                return None
+            if len(match_indices) == 1:  # If the listener has a language of the category 'other', it can happen that the noisy form maps uniquely to a full meaning.
+                return meaning_list[match_indices[0]]
+            shared_features = [True for x in range(len(meaning_list[0]))]
+            for k in range(len(meaning_list[0])):
+                feature_values = [int(meaning_list[l][k]) for l in match_indices]
+                for m in range(len(feature_values)):
+                    if feature_values[m] != feature_values[0]:
+                        shared_features[k] = False
+            partial_meaning_index = np.where(np.array(shared_features) == True)[0]
+            if len(partial_meaning_index) == 0:
+                return None
+            else:
+                partial_meaning = meaning_list[match_indices[0]][partial_meaning_index[0]]
+                return partial_meaning
+
+
         else:
-            partial_meaning = meaning_list[match_indices[0]][partial_meaning_index[0]]
-            return partial_meaning
-
-
-        # else:
-        #     return None # uncommenting these two lines would prevent listeners from finding partial meaning
-        #         # when they have a holistic language
+            return None  # these two lines would prevent listeners from finding partial meaning when they have a
+            # holistic language
 
 
     else:
@@ -1825,9 +1825,9 @@ if __name__ == '__main__':
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
-    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + "_NEW.p", "wb"))
-    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+"_NEW.p", "wb"))
-    pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + "_NEW.p", "wb"))
+    pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
+    pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+    pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
 
     t4 = time.process_time()
 
