@@ -18,7 +18,7 @@ all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all po
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
 # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
@@ -29,7 +29,7 @@ initial_language_type = 'degenerate'  # set the language class that the first ge
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.15, 0.45])  # costs of no repair, restricted request, and open request, respectively
+cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
 compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
@@ -44,12 +44,12 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
 # language and we count the resulting proportions.
 
-burn_in = 800  # the burn-in period that is excluded when calculating the mean distribution over languages after
+burn_in = 750  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.8  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = True
+mutual_understanding = False
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -74,7 +74,7 @@ fig_file_path = "plots/"
 batches = 1
 
 
-holistic_without_partial_meaning = False
+holistic_without_partial_meaning = True
 
 ###################################################################################################################
 # ALL FUNCTION DEFINITIONS GO HERE:
