@@ -18,7 +18,7 @@ all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all po
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
 # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
@@ -47,7 +47,7 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 750  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
 
 mutual_understanding = False
 if mutual_understanding:
@@ -187,8 +187,8 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette)
     # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
 
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.tick_params(axis='both', which='minor', labelsize=18)
     plt.ylim(-0.05, 1.05)
     plt.title(title, fontsize=22)
     plt.xlabel('Generation', fontsize=20)
@@ -288,8 +288,8 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
         plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
 
 
-    plt.tick_params(axis='both', which='major', labelsize=20)
-    plt.tick_params(axis='both', which='minor', labelsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.tick_params(axis='both', which='minor', labelsize=18)
     plt.ylim(-0.05, 1.05)
     plt.title(title, fontsize=22)
     # plt.xlabel('Language class')
