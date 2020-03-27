@@ -87,49 +87,50 @@ def create_all_possible_noisy_forms(all_complete_forms):
 ###################################################################################################################
 # ALL PARAMETER SETTINGS GO HERE:
 
-meanings = ['02', '03', '12', '13']  # all possible meanings
-possible_form_lengths = np.array([2])  # all possible form lengths
-forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
-# possible 'noisy variants'
-noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
-# all possible noisy variants of the forms above
-all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
-# complete forms and noisy variants
+if __name__ == '__main__':
+    meanings = ['02', '03', '12', '13']  # all possible meanings
+    possible_form_lengths = np.array([2])  # all possible form lengths
+    forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
+    # possible 'noisy variants'
+    noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
+    # all possible noisy variants of the forms above
+    all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
+    # complete forms and noisy variants
 
-error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
+    error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
-turnover = True  # determines whether new individuals enter the population or not
-popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
-# a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
+    turnover = True  # determines whether new individuals enter the population or not
+    popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
+    # a pair of agents.
+    runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+    generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+    initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
-production = 'my_code'  # can be set to 'simlang' or 'my_code'
+    production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
-cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
-observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
-# be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
-# where the learner has access to the hearer's interpretation.
-interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
-# used, but NOTE that it only works with a popsize of 2!
-n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
-# previous generation, or from multiple (can be set to either 'single' or 'multiple').
+    cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
+    observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
+    # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
+    # where the learner has access to the hearer's interpretation.
+    interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
+    # used, but NOTE that it only works with a popsize of 2!
+    n_parents = 'single'  # determines whether each generation of learners receives data from a single agent from the
+    # previous generation, or from multiple (can be set to either 'single' or 'multiple').
 
-# proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
-# measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
-# assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
-# language and we count the resulting proportions.
+    # proportion_measure = 'posterior'  # the way in which the proportion of language classes present in the population is
+    # measured. Can be set to either 'posterior' (where we directly measure the total amount of posterior probability
+    # assigned to each language class), or 'sampled' (where at each generation we make all agents in the population pick a
+    # language and we count the resulting proportions.
 
-communicative_success = False  # determines whether there is a pressure for communicative success or not
-communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
-# successful interaction is to enter the data set that is passed on to the next generation, compared to a
-# <meaning, form> pair from a unsuccessful interaction.
+    communicative_success = False  # determines whether there is a pressure for communicative success or not
+    communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
+    # successful interaction is to enter the data set that is passed on to the next generation, compared to a
+    # <meaning, form> pair from a unsuccessful interaction.
 
-burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over
-# languages after convergence
+    burn_in = round(generations / 2)  # the burn-in period that is excluded when calculating the mean distribution over
+    # languages after convergence
 
-pickle_file_path = "pickles/"
+    pickle_file_path = "pickles/"
 
 
 # THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
