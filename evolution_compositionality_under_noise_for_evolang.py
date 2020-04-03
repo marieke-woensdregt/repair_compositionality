@@ -128,7 +128,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 burn_in = generations/2  # the burn-in period that is excluded when calculating the mean distribution over
 # languages after convergence
 
-n_lang_classes = 5  # the number of language classes that are distinguished (int).
+n_lang_classes = 4  # the number of language classes that are distinguished (int).
 
 pickle_file_path = ""  # Use this to specify a path to a folder where you want the pickle (result) files to be stored.
 
@@ -1114,7 +1114,7 @@ def language_stats(population, class_per_language):
     population, where index 0 = degenerate, 1 = holistic, 2 = compositional, 3 = other; these are the category indices
     as hardcoded in the classify_language_four_forms() function.
     """
-    stats = np.zeros(5)
+    stats = np.zeros(n_lang_classes)
     for p in population:
         for i in range(len(p)):
             stats[int(class_per_language[i])] += np.exp(p[i])
