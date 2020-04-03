@@ -261,11 +261,11 @@ def check_all_forms_unique(lang):
     index in meanings
     :return: True if all forms in the language are unique, False otherwise.
     """
-    all_forms_unique = True
-    for form in lang:
-        if lang.count(form) != 1:  # if a particular form occurs more than once in the language, all_forms_unique
-            all_forms_unique = False  # should be set to False
-    return all_forms_unique
+    form_counts = np.unique(np.array(lang), return_counts=True)
+    if np.any(form_counts[1] != 1):  # if any form occurs more than once in the language, all_forms_unique = False
+        return False
+    else:
+        return True
 
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
