@@ -202,24 +202,22 @@ def create_all_possible_languages(meaning_list, forms):
 
 def classify_language_four_forms(lang, forms, meaning_list):
     """
-    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other
-    (Kirby et al., 2015). NOTE that this function is specific to classifying languages that consist of exactly 4 forms,
-    where each form consists of exactly 2 characters. For a more general version of this function, see
-    classify_language_general() below.
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = compositional,
+    3 = compositional_reverse, and 4 = other (Kirby et al., 2015). NOTE that this function is specific to classifying
+    languages that consist of exactly 4 forms, where each form consists of exactly 2 characters. For a more general
+    version of this function, see classify_language_general() below.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :param meaning_list: list of strings corresponding to all possible meanings
-    :returns: integer corresponding to category that language belongs to:
-    0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm following the
-    ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    :returns: integer corresponding to category that language belongs to: 0 = degenerate, 1 = holistic,
+    2 = compositional, 3 = compositional_reverse, and 4 = other (Kirby et al., 2015).
     """
     class_degenerate = 0
     class_holistic = 1
-    class_hybrid = 2  # this is a hybrid between a holistic and a compositional language; where *half* of the partial
-    # forms is mapped consistently to partial meanings (instead of that being the case for *all* partial forms)
-    class_compositional = 3
+    class_compositional = 2
+    class_compositional_reverse = 3
     class_other = 4
 
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
@@ -233,28 +231,19 @@ def classify_language_four_forms(lang, forms, meaning_list):
     if len(lang) != len(meaning_list):
         raise ValueError("Lang should have same length as meanings")
 
-    # lang is degenerate if it uses the same form for every meaning:
-    if lang[0] == lang[1] and lang[1] == lang[2] and lang[2] == lang[3]:
+    # The language is DEGENERATE if it uses the same form for each meaning:
+    if lang.count(lang[0]) == len(lang):
         return class_degenerate
 
-    # lang is compositional if it makes use of all possible forms_without_noisy_variants, *and* each form element maps
-    # to the same meaning element for each form:
-    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[
-        3] in lang and lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][
-        1] == lang[2][1] and lang[1][1] == lang[3][1]:
-        return class_compositional
-
-    # lang is holistic if it is *not* compositional, but *does* make use of all possible forms_without_noisy_variants:
-    elif forms[0] in lang and forms[1] in lang and forms[2] in lang and forms[3] in lang:
-        # within holistic languages, we can distinguish between those in which at least one part form is mapped
-        # consistently onto one part meaning. This class we will call 'hybrid' (because for the purposes of repair, it
-        # is a hybrid between a holistic and a compositional language, because for half of the possible noisy forms that
-        # a listener could receive it allows the listener to figure out *part* of the meaning, and therefore use a
-        # restricted request for repair instead of an open request.
-        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0]:
-            return class_hybrid
-        elif lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
-            return class_hybrid
+    # If each form is unique, the language is either COMPOSITIONAL or HOLISTIC:
+    all_forms_unique = check_all_forms_unique(lang)
+    if all_forms_unique is True:
+        # lang is compositional if each form element maps to the same meaning element for each form:
+        if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
+            return class_compositional
+        elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0] and lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
+            return class_compositional_reverse
+        # lang is holistic if it is *not* compositional, but *does* make use of all possible complete forms:
         else:
             return class_holistic
 
