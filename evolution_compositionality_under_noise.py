@@ -1317,6 +1317,8 @@ def update_posterior_simlang(log_posterior, hypotheses, meaning, signal):
 
 # AND NOW FOR THE FUNCTIONS THAT HANDLE SAMPLING A HYPOTHESIS FROM A POSTERIOR PROBABILITY DISTRIBUTION:
 
+# The function below I borrowed from the code provided in the Simulating Language MSc course that is taught by
+# Simon Kirby and Kenny Smith at the University of Edinburgh:
 def log_roulette_wheel(normedlogs):
     """
     Samples an index from a list of LOG probabilities, where each index has a probability proportional to their
