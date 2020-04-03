@@ -314,8 +314,7 @@ def mrf_degenerate(lang, meaning_list):
 
 def mrf_holistic(lang, meaning_list):
     """
-    Takes a holistic OR hybrid language and returns a minimally redundant form description of the language's context
-    free grammar.
+    Takes a holistic language and returns a minimally redundant form description of the language's context free grammar.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
@@ -333,7 +332,7 @@ def mrf_holistic(lang, meaning_list):
     return mrf_string
 
 
-def mrf_compositional(lang, meaning_list):
+def mrf_compositional(lang, meaning_list, reverse_meanings):
     """
     Takes a compositional language and returns a minimally redundant form description of the language's context free
     grammar.
@@ -341,8 +340,12 @@ def mrf_compositional(lang, meaning_list):
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
+    :param reverse_meanings: Boolean: True if the compositional mappings are to the meaning elements in reverse order
     :return: minimally redundant form description of the language's context free grammar (string)
     """
+    if reverse_meanings:
+        meaning_list_reversed = [meaning[::-1] for meaning in meaning_list]
+        meaning_list = meaning_list_reversed
     n_features = len(meaning_list[0])
     non_terminals = string.ascii_uppercase[:n_features]
     mrf_string = 'S' + non_terminals
@@ -467,10 +470,19 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     return prior
 
 
-def prior(hypothesis_space, complete_forms, meaning_list):
-    logpriors = np.zeros(len(hypothesis_space))
-    for i in range(len(hypothesis_space)):
-        lang_prior = prior_single_lang(hypothesis_space[i], complete_forms, meaning_list)
+def prior(hypotheses, complete_forms, meaning_list):
+    """
+    Calculates the LOG prior over the full hypothesis space
+
+    :param hypotheses: list of all possible languages
+    :param complete_forms: The full set of possible complete forms (corresponds to global parameter
+    'forms_without_noise')
+    :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
+    :return: 1D numpy array containing the LOG prior probability for each hypothesis
+    """
+    logpriors = np.zeros(len(hypotheses))
+    for i in range(len(hypotheses)):
+        lang_prior = prior_single_lang(hypotheses[i], complete_forms, meaning_list)
         logpriors[i] = np.log(lang_prior)
     logpriors_normalized = np.subtract(logpriors, scipy.special.logsumexp(logpriors))
     return logpriors_normalized
