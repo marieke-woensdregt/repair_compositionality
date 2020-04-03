@@ -5,8 +5,7 @@ import string
 import numpy as np
 import itertools
 import random
-from copy import deepcopy
-from math import log, log2
+from math import log2
 import scipy.special
 import pickle
 import time
@@ -129,9 +128,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 burn_in = generations/2  # the burn-in period that is excluded when calculating the mean distribution over
 # languages after convergence
 
-n_lang_classes = 5  # the number of language classes that are distinguished (int). This should be 4 if the old code was
-# used (from before 13 September 2019, 1:30 pm), which did not yet distinguish between 'holistic' and 'hybrid'
-# languages, and 5 if the new code was used which does make this distinction.
+n_lang_classes = 5  # the number of language classes that are distinguished (int).
 
 pickle_file_path = ""  # Use this to specify a path to a folder where you want the pickle (result) files to be stored.
 
@@ -200,23 +197,21 @@ def create_all_possible_languages(meaning_list, forms):
 
 def classify_language_four_forms(lang, forms, meaning_list):
     """
-    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = compositional,
-    3 = compositional_reverse, and 4 = other (Kirby et al., 2015). NOTE that this function is specific to classifying
-    languages that consist of exactly 4 forms, where each form consists of exactly 2 characters. For a more general
-    version of this function, see classify_language_general() below.
+    Classify one particular language as either 0 = degenerate, 1 = holistic, 2 = compositional, and 3 = other
+    (Kirby et al., 2015). NOTE that this function is specific to classifying languages that consist of exactly 4 forms,
+    where each form consists of exactly 2 characters.
 
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param forms: list of strings corresponding to all possible forms_without_noisy_variants
     :param meaning_list: list of strings corresponding to all possible meanings
     :returns: integer corresponding to category that language belongs to: 0 = degenerate, 1 = holistic,
-    2 = compositional, 3 = compositional_reverse, and 4 = other (Kirby et al., 2015).
+    2 = compositional, and 3 = other (Kirby et al., 2015).
     """
     class_degenerate = 0
     class_holistic = 1
     class_compositional = 2
-    class_compositional_reverse = 3
-    class_other = 4
+    class_other = 3
 
     # First check whether some conditions are met, bc this function hasn't been coded up in the most general way yet:
     if len(forms) != 4:
@@ -240,7 +235,7 @@ def classify_language_four_forms(lang, forms, meaning_list):
         if lang[0][0] == lang[1][0] and lang[2][0] == lang[3][0] and lang[0][1] == lang[2][1] and lang[1][1] == lang[3][1]:
             return class_compositional
         elif lang[0][0] == lang[2][0] and lang[1][0] == lang[3][0] and lang[0][1] == lang[1][1] and lang[2][1] == lang[3][1]:
-            return class_compositional_reverse
+            return class_compositional
         # lang is holistic if it is *not* compositional, but *does* make use of all possible complete forms:
         else:
             return class_holistic
@@ -268,7 +263,7 @@ def check_all_forms_unique(lang):
 
 def classify_all_languages(language_list, complete_forms, meaning_list):
     """
-    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'other' (2) or 'compositional' (3)
+    Classify all languages as either 'degenerate' (0), 'holistic' (1), 'compositional' (2) or 'other' (3)
     (Kirby et al., 2015)
 
     :param language_list: list of all languages
@@ -276,9 +271,8 @@ def classify_all_languages(language_list, complete_forms, meaning_list):
     'forms_without_noise'
     :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :returns: 1D numpy array containing integer corresponding to category of corresponding
-    language index as hardcoded in classify_language function: 0 = degenerate, 1 = holistic, 2 = hybrid,
-    3 = compositional, 4 = other (here I'm following the ordering used in the Kirby et al., 2015 paper; NOT the ordering
-    from SimLang lab 21)
+    language index as hardcoded in classify_language_four_forms function: 0 = degenerate, 1 = holistic,
+    2 = compositional, 3 = other
     """
     class_per_lang = np.zeros(len(language_list))
     for l in range(len(language_list)):
@@ -406,11 +400,11 @@ def minimally_redundant_form(lang, complete_forms, meaning_list):
     lang_class = classify_language_four_forms(lang, complete_forms, meaning_list)
     if lang_class == 0:  # the language is 'degenerate'
         mrf_string = mrf_degenerate(lang, meaning_list)
-    elif lang_class == 1 or lang_class == 2:  # the language is 'holistic' or 'hybrid'
+    elif lang_class == 1:  # the language is 'holistic'
         mrf_string = mrf_holistic(lang, meaning_list)
-    elif lang_class == 3:  # the language is 'compositional'
+    elif lang_class == 2:  # the language is 'compositional'
         mrf_string = mrf_compositional(lang, meaning_list)
-    elif lang_class == 4:  # the language is of the 'other' category
+    elif lang_class == 3:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
 
@@ -1073,9 +1067,8 @@ def create_initial_dataset(desired_class, bottleneck, language_list, class_per_l
     """
     Creates a balanced dataset from a randomly chosen language of the desired class.
 
-    :param desired_class: 'degenerate', 'holistic', 'hybrid', 'compositional', or 'other'; category indices as hardcoded
-    in classify_language function are: 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other (here I'm
-    following the ordering used in the Kirby et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    :param desired_class: 'degenerate', 'holistic', 'compositional', or 'other'; category indices as hardcoded
+    in classify_language_four_forms function are: 0 = degenerate, 1 = holistic, 2 = compositional, 3 = other
     :param bottleneck: the transmission bottleneck (int); corresponds to global variable 'b'
     :param language_list: list of all languages
     :param class_per_language: list of len(hypothesis_space) which contains an integer indicating the class of the
@@ -1088,12 +1081,10 @@ def create_initial_dataset(desired_class, bottleneck, language_list, class_per_l
         class_index = 0
     elif desired_class == 'holistic':
         class_index = 1
-    elif desired_class == 'hybrid':
-        class_index = 2
     elif desired_class == 'compositional':
-        class_index = 3
+        class_index = 2
     elif desired_class == 'other':
-        class_index = 4
+        class_index = 3
     language_class_indices = np.where(class_per_language == class_index)[0]
     class_languages = []
     for index in language_class_indices:
@@ -1120,9 +1111,8 @@ def language_stats(population, class_per_language):
     :param class_per_language: list specifying the class for each corresponding language in the global variable
     \'hypothesis_space'
     :return: a list containing the overall average posterior probability assigned to each class of language in the
-    population, where index 0 = degenerate, 1 = holistic, 2 = hybrid, 3 = compositional, 4 = other; these are the
-    category indices as hardcoded in the classify_language() function (where I follow the ordering used in the Kirby
-    et al., 2015 paper; NOT the ordering from SimLang lab 21)
+    population, where index 0 = degenerate, 1 = holistic, 2 = compositional, 3 = other; these are the category indices
+    as hardcoded in the classify_language_four_forms() function.
     """
     stats = np.zeros(5)
     for p in population:
