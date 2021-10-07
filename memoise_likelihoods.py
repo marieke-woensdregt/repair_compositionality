@@ -40,12 +40,12 @@ gamma = 2.0  # parameter that determines strength of ambiguity penalty (Kirby et
 # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
 # conditions
 
-delta = 2.0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
+delta = 0.0  # parameter that determines strength of effort penalty (i.e. how strongly speaker tries to avoid
 # using long utterances)
 
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
-noise_prob = 0.6  # the probability of environmental noise obscuring part of an utterance
+noise_prob = 1.0  # the probability of environmental noise obscuring part of an utterance
 
 ###################################################################################################################
 
