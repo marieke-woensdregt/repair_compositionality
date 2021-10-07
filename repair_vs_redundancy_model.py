@@ -18,8 +18,8 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 10  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+generations = 200  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
@@ -173,9 +173,9 @@ def receive_with_repair_open_only(language, utterance):
     """
     if '_' in utterance:
         compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
-        possible_interpretations = find_possible_interpretations(language, compatible_forms)
+        possible_interpretations = find_possible_interpretations(language, meanings, compatible_forms)
     else:
-        possible_interpretations = find_possible_interpretations(language, [utterance])
+        possible_interpretations = find_possible_interpretations(language, meanings, [utterance])
     if len(possible_interpretations) == 0:
         possible_interpretations = meanings
     if len(possible_interpretations) == 1:
@@ -383,7 +383,7 @@ if __name__ == '__main__':
     print(round((t2-t1)/60., ndigits=2))
 
     if compressibility_bias:
-        priors = prior(hypothesis_space, forms_without_noise, meanings)
+        priors = prior(hypothesis_space, forms_without_noise, meanings, possible_form_lengths)
     else:
         priors = np.ones(len(hypothesis_space))
         priors = np.divide(priors, np.sum(priors))
@@ -418,7 +418,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_delta_" + convert_float_value_to_string(delta) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
