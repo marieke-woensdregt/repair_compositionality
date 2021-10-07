@@ -18,19 +18,19 @@ all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all po
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
-b = 16  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
+b = 20  # the bottleneck (i.e. number of meaning-form pairs the each pair gets to see during training (Kirby et al.
 # used a bottleneck of 20 in the body of the paper.
 rounds = 2*b  # Kirby et al. (2015) used rounds = 2*b, but SimLang lab 21 uses 1*b
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+runs = 20  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
 
 cost_vector = np.array([0.0, 0.2, 0.4])  # costs of no repair, restricted request, and open request, respectively
-compressibility_bias = False  # determines whether agents have a prior that favours compressibility, or a flat prior
+compressibility_bias = True  # determines whether agents have a prior that favours compressibility, or a flat prior
 observed_meaning = 'intended'  # determines which meaning the learner observes when receiving a meaning-form pair; can
 # be set to either 'intended', where the learner has direct access to the speaker's intended meaning, or 'inferred',
 # where the learner has access to the hearer's interpretation.
@@ -47,9 +47,9 @@ n_parents = 'single'  # determines whether each generation of learners receives 
 burn_in = 750  # the burn-in period that is excluded when calculating the mean distribution over languages after
 # convergence
 
-noise_prob = 0.1  # the probability of environmental noise masking part of an utterance
+noise_prob = 0.9  # the probability of environmental noise masking part of an utterance
 
-mutual_understanding = False
+mutual_understanding = True
 if mutual_understanding:
     gamma = 2  # parameter that determines strength of ambiguity penalty (Kirby et al., 2015 used gamma = 0 for
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
@@ -59,7 +59,9 @@ else:
     # "Learnability Only" condition, and gamma = 2 for both "Expressivity Only", and "Learnability and Expressivity"
     # conditions
 
-minimal_effort = True
+minimal_effort = False
+
+noise_only = True
 
 communicative_success = False  # determines whether there is a pressure for communicative success or not
 communicative_success_pressure_strength = (2./3.)  # determines how much more likely a <meaning, form> pair from a
@@ -71,7 +73,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 1
+batches = 4
 
 
 holistic_without_partial_meaning = True
@@ -308,7 +310,7 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
 # THE UNPICKLING HAPPENS HERE:
 
 pickle_file_name = "Pickle_r_" + str(runs) + "_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(
-    rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
+    rounds) + "_size_" + str(popsize) + "_noise_only_" + str(noise_only) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(
     gamma) + "_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(
     turnover) + "_bias_" + str(
     compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(
@@ -357,25 +359,48 @@ print(lang_class_prop_over_gen_df)
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
 
-fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
+fig_file_name = "r_" + str(runs*batches) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_noise_only_" + str(noise_only) + "_mutual_u_"+str(mutual_understanding)+  "_gamma_" + str(gamma) +"_minimal_e_"+str(minimal_effort)+ "_c_"+convert_array_to_string(cost_vector)+ "_turnover_" + str(turnover) + "_bias_" +str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)+"_"+production+"_obs_m_"+observed_meaning+"_CS_"+str(communicative_success)+"_"+convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
-
-if mutual_understanding is False and minimal_effort is False:
-    if gamma == 0 and turnover is True:
-        plot_title = "Learnability only"
-    elif gamma > 0 and turnover is False:
-        plot_title = "Expressivity only"
-    elif gamma > 0 and turnover is True:
-        plot_title = "Learnability and expressivity"
-    if noise_prob > 0.0:
-        plot_title = plot_title + " Plus Noise"
+if noise_only:
+    if mutual_understanding is False and minimal_effort is False:
+        if gamma == 0 and turnover is True and compressibility_bias is True:
+            plot_title = "Learnability only"
+        elif gamma > 0 and turnover is False and compressibility_bias is False:
+            plot_title = "Expressivity only"
+        elif gamma > 0 and turnover is True and compressibility_bias is True:
+            plot_title = "Learnability and expressivity"
+        if noise_prob > 0.0:
+            plot_title = plot_title + " Plus Noise"
+    else:
+        if mutual_understanding is True and minimal_effort is False:
+            plot_title = "Expressivity only"
+        # elif mutual_understanding is False and minimal_effort is True:
+        #     plot_title = "Minimal Effort Only"
+        # elif mutual_understanding is True and minimal_effort is True:
+        #     plot_title = "Minimal Effort & Mutual Understanding"
 else:
-    if mutual_understanding is True and minimal_effort is False:
-        plot_title = "Mutual Understanding Only"
-    elif mutual_understanding is False and minimal_effort is True:
-        plot_title = "Minimal Effort Only"
-    elif mutual_understanding is True and minimal_effort is True:
-        plot_title = "Minimal Effort & Mutual Understanding"
+    if mutual_understanding is False and minimal_effort is False:
+        if gamma == 0 and turnover is True:
+            plot_title = "Learnability only"
+        elif gamma > 0 and turnover is False:
+            plot_title = "Expressivity only"
+        elif gamma > 0 and turnover is True:
+            plot_title = "Learnability and expressivity"
+        if noise_prob > 0.0:
+            plot_title = plot_title + " Plus Noise"
+    else:
+        if mutual_understanding is True and minimal_effort is False:
+            plot_title = "Mutual Understanding Only"
+        elif mutual_understanding is False and minimal_effort is True:
+            plot_title = "Minimal Effort Only"
+        elif mutual_understanding is True and minimal_effort is True:
+            plot_title = "Minimal Effort & Mutual Understanding"
+
+
+print('')
+print('')
+print("plot_title is:")
+print(plot_title)
 
 
 plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name)
