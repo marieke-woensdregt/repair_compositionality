@@ -101,8 +101,8 @@ error = 0.05  # the probability of making a production error (Kirby et al., 2015
 turnover = True  # determines whether new individuals enter the population or not
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+runs = 2  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 100  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -177,6 +177,11 @@ if __name__ == '__main__':
     print("minimal_effort is:")
     print(minimal_effort)
 
+    noise_only = str_to_bool(sys.argv[6])  # Setting the 'noise_only' parameter based on the command-line input
+    # #NOTE: first argument in sys.argv list is always the name of the script
+    print('')
+    print("noise_only is:")
+    print(noise_only)
 
 ###################################################################################################################
 # FIRST SOME FUNCTIONS TO CREATE ALL POSSIBLE LANGUAGES AND CLASSIFY THEM:
@@ -1188,42 +1193,45 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
         if partial_meaning != None and len(partial_meaning) == len(meaning_list[0]):
                 response = partial_meaning
         else:
-            if mutual_understanding_pressure and minimal_effort_pressure:
-                prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
-                if partial_meaning != None:
-                    prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[1]
-                    repair_initiator = str(partial_meaning)+'?'
-                else:
-                    prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[2]
-                    repair_initiator = '??'
-            elif mutual_understanding_pressure and not minimal_effort_pressure:
-                if len(possible_interpretations) > 1:
-                    prop_to_prob_no_repair = 0.
-                    prop_to_prob_repair = 1.
+            if noise_only:
+                response = random.choice(possible_interpretations)
+            else:
+                if mutual_understanding_pressure and minimal_effort_pressure:
+                    prop_to_prob_no_repair = (1./len(possible_interpretations))-cost_vector[0]
+                    if partial_meaning != None:
+                        prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[1]
+                        repair_initiator = str(partial_meaning)+'?'
+                    else:
+                        prop_to_prob_repair = (1.-(1./len(possible_interpretations)))-cost_vector[2]
+                        repair_initiator = '??'
+                elif mutual_understanding_pressure and not minimal_effort_pressure:
+                    if len(possible_interpretations) > 1:
+                        prop_to_prob_no_repair = 0.
+                        prop_to_prob_repair = 1.
+                        if partial_meaning != None:
+                            repair_initiator = str(partial_meaning)+'?'
+                        else:
+                            repair_initiator = '??'
+                    elif len(possible_interpretations) == 1:
+                        prop_to_prob_no_repair = 1.
+                        prop_to_prob_repair = 0.
+                elif not mutual_understanding_pressure and minimal_effort_pressure:
+                    prop_to_prob_no_repair = 1.
+                    prop_to_prob_repair = 0.
                     if partial_meaning != None:
                         repair_initiator = str(partial_meaning)+'?'
                     else:
                         repair_initiator = '??'
-                elif len(possible_interpretations) == 1:
-                    prop_to_prob_no_repair = 1.
-                    prop_to_prob_repair = 0.
-            elif not mutual_understanding_pressure and minimal_effort_pressure:
-                prop_to_prob_no_repair = 1.
-                prop_to_prob_repair = 0.
-                if partial_meaning != None:
-                    repair_initiator = str(partial_meaning)+'?'
-                else:
-                    repair_initiator = '??'
-            prop_to_prob_per_response = np.array([prop_to_prob_no_repair, prop_to_prob_repair])
-            for i in range(len(prop_to_prob_per_response)):
-                if prop_to_prob_per_response[i] < 0.0:
-                    prop_to_prob_per_response[i] = 0.0
-            normalized_response_probs = np.divide(prop_to_prob_per_response, np.sum(prop_to_prob_per_response))
-            selected_response = np.random.choice(np.arange(2), p=normalized_response_probs)
-            if selected_response == 0:
-                response = random.choice(possible_interpretations)
-            elif selected_response == 1:
-                response = repair_initiator
+                prop_to_prob_per_response = np.array([prop_to_prob_no_repair, prop_to_prob_repair])
+                for i in range(len(prop_to_prob_per_response)):
+                    if prop_to_prob_per_response[i] < 0.0:
+                        prop_to_prob_per_response[i] = 0.0
+                normalized_response_probs = np.divide(prop_to_prob_per_response, np.sum(prop_to_prob_per_response))
+                selected_response = np.random.choice(np.arange(2), p=normalized_response_probs)
+                if selected_response == 0:
+                    response = random.choice(possible_interpretations)
+                elif selected_response == 1:
+                    response = repair_initiator
     else:
         response = receive_without_repair(language, utterance)
     return response
@@ -1824,7 +1832,7 @@ if __name__ == '__main__':
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
-    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_noise_only_" + str(noise_only) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
