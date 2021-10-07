@@ -121,7 +121,7 @@ hypothesis_space = create_all_possible_languages(meanings, forms_without_noise)
 class_per_lang = classify_all_languages(hypothesis_space, forms_without_noise, meanings)
 
 if compressibility_bias:
-    priors = prior(hypothesis_space, forms_without_noise, meanings)
+    priors = prior(hypothesis_space, forms_without_noise, meanings, possible_form_lengths)
 else:
     priors = np.ones(len(hypothesis_space))
     priors = np.divide(priors, np.sum(priors))
