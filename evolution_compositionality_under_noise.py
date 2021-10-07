@@ -102,8 +102,8 @@ if __name__ == '__main__':
     turnover = True  # determines whether new individuals enter the population or not
     popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
     # a pair of agents.
-    runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-    generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+    runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+    generations = 100  # the number of generations (Kirby et al., 2015 used 100)
     initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
     production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -758,6 +758,7 @@ def minimally_redundant_form_multiple_forms(lang, meaning_list, possible_form_le
     :param lang: a language; represented as a tuple of forms_without_noisy_variants, where each form index maps to same
     index in meanings
     :param meaning_list: list of strings corresponding to all possible meanings
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: minimally redundant form description of the language's context free grammar (string)
     """
     if len(possible_form_lengths) == 1:
@@ -768,7 +769,7 @@ def minimally_redundant_form_multiple_forms(lang, meaning_list, possible_form_le
     elif lang_class == 1 or lang_class == 2:  # the language is 'holistic'
         mrf_string = mrf_holistic(lang, meaning_list)
     elif lang_class == 3 or lang_class == 4 or lang_class == 5:  # the language is 'compositional'
-        mrf_string = mrf_compositional(lang, meaning_list)
+        mrf_string = mrf_compositional(lang, meaning_list, reverse_meanings=False) #TODO: To be honest, I'm not sure what to do with "reverse_meanings" here
     elif lang_class == 6:  # the language is of the 'other' category
         mrf_string = mrf_other(lang, meaning_list)
     return mrf_string
@@ -809,7 +810,7 @@ def coding_length(mrf_string):
     return -coding_len
 
 
-def prior_single_lang(lang, complete_forms, meaning_list):
+def prior_single_lang(lang, complete_forms, meaning_list, possible_form_lengths):
     """
     Takes a language and returns its PROPORTIONAL prior probability; this still needs to be normalized over all
     languages in order to give the real prior probability.
@@ -819,6 +820,7 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     :param complete_forms: list containing all possible complete forms; corresponds to global variable
     'forms_without_noise'
     :param meaning_list: list of strings corresponding to all possible meanings
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: PROPORTIONAL prior probability (float)
     """
     if len(complete_forms) == 4 and len(complete_forms[0]) == 2:
@@ -830,7 +832,7 @@ def prior_single_lang(lang, complete_forms, meaning_list):
     return prior
 
 
-def prior(hypotheses, complete_forms, meaning_list):
+def prior(hypotheses, complete_forms, meaning_list, possible_form_lengths):
     """
     Calculates the LOG prior over the full hypothesis space
 
@@ -838,11 +840,12 @@ def prior(hypotheses, complete_forms, meaning_list):
     :param complete_forms: The full set of possible complete forms (corresponds to global parameter
     'forms_without_noise')
     :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
+    :param possible_form_lengths: all possible form lengths (global parameter)
     :return: 1D numpy array containing the LOG prior probability for each hypothesis
     """
     logpriors = np.zeros(len(hypotheses))
     for i in range(len(hypotheses)):
-        lang_prior = prior_single_lang(hypotheses[i], complete_forms, meaning_list)
+        lang_prior = prior_single_lang(hypotheses[i], complete_forms, meaning_list, possible_form_lengths)
         logpriors[i] = np.log(lang_prior)
     logpriors_normalized = np.subtract(logpriors, scipy.special.logsumexp(logpriors))
     return logpriors_normalized
@@ -1074,12 +1077,13 @@ def noisy_to_complete_forms(noisy_form, complete_forms):
     return possible_complete_forms
 
 
-def find_possible_interpretations(language, forms):
+def find_possible_interpretations(language, meanings, forms):
     """
     Finds all meanings that the forms given as input are mapped to in the language given as input
 
     :param language: list of forms_without_noisy_variants that has same length as list of meanings (global variable),
     where each form is mapped to the meaning at the corresponding index
+    :param meanings: list of meanings
     :param forms: list of forms
     :return: list of meanings (type: string) that the forms given as input are mapped to in the language given as input
     """
@@ -1182,7 +1186,7 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
             "effort being True")
     if '_' in utterance:
         compatible_forms = noisy_to_complete_forms(utterance, forms_without_noise)
-        possible_interpretations = find_possible_interpretations(language, compatible_forms)
+        possible_interpretations = find_possible_interpretations(language, meanings, compatible_forms)
         if len(possible_interpretations) == 0:
             possible_interpretations = meanings
         partial_meaning = find_partial_meaning(language, utterance, meaning_list, possible_form_lengths)
@@ -1792,7 +1796,7 @@ if __name__ == '__main__':
     print(round((t2-t1)/60., ndigits=2))
 
     if compressibility_bias:
-        priors = prior(hypothesis_space, forms_without_noise, meanings)
+        priors = prior(hypothesis_space, forms_without_noise, meanings, possible_form_lengths)
     else:
         priors = np.ones(len(hypothesis_space))
         priors = np.divide(priors, np.sum(priors))
