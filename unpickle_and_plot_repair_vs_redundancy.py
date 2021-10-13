@@ -22,8 +22,8 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+generations = 5  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
@@ -40,14 +40,14 @@ print('')
 print("b is:")
 print(b)
 
-compressibility_bias = False  # Setting the 'compressibility_bias' parameter based on the
+compressibility_bias = True  # Setting the 'compressibility_bias' parameter based on the
 # command-line input #NOTE: first argument in sys.argv list is always the name of the script; Determines whether
 # agents have a prior that favours compressibility, or a flat prior
 print('')
 print("compressibility_bias (i.e. learnability pressure) is:")
 print(compressibility_bias)
 
-noise_prob = 0.6  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
+noise_prob = 0.5  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
 # argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring
 # part of an utterance
 print('')
@@ -72,7 +72,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 3
+batches = 1
 
 
 holistic_without_partial_meaning = True
@@ -195,7 +195,7 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     if len(possible_form_lengths) == 1:
         palette = sns.color_palette(["black", "red", "green", "grey"])
     else:
-        palette = sns.color_palette([sns.color_palette("colorblind")[6],
+        palette = sns.color_palette(["black",
                                      sns.color_palette("colorblind")[3],
                                      sns.color_palette("colorblind")[1],
                                      sns.color_palette("colorblind")[2],
@@ -213,13 +213,17 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     plt.xlabel('Generation', fontsize=20)
     plt.ylabel('Mean proportion', fontsize=20)
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles=handles[1:], labels=labels[1:])
+
+    labels = ['D', 'H', 'H+Div.', 'C', 'C+Red.-part', 'C+Red.-whole', 'O']
+
+    # ax.legend(handles=handles[1:], labels=labels[1:])
+    ax.legend(handles=handles, labels=labels)
     plt.tight_layout()
     plt.savefig(file_path + "Timecourse_plot_" + file_name + ".png")
     plt.show()
 
 
-def plot_barplot_repair_compositionality(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
+def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
     barplot (excluding the burn-in period)
@@ -295,120 +299,7 @@ def plot_barplot_repair_compositionality(lang_class_prop_over_gen_df, title, fil
     if len(possible_form_lengths) == 1:
         palette = sns.color_palette(["black", "red", "green", "grey"])
     else:
-        palette = sns.color_palette([sns.color_palette("colorblind")[6],
-                                     sns.color_palette("colorblind")[3],
-                                     sns.color_palette("colorblind")[1],
-                                     sns.color_palette("colorblind")[2],
-                                     sns.color_palette("colorblind")[9],
-                                     sns.color_palette("colorblind")[0],
-                                     sns.color_palette("colorblind")[7]])
-
-    sns.barplot(x="class", y="proportion", data=lang_class_prop_over_gen_df_from_starting_gen, palette=palette)
-
-    plt.axhline(y=lang_class_baselines_all[0], xmin=0.0, xmax=0.25, color='k', linestyle='--', linewidth=2)
-    plt.axhline(y=lang_class_baselines_all[1], xmin=0.25, xmax=0.5, color='k', linestyle='--', linewidth=2)
-    plt.axhline(y=lang_class_baselines_all[2], xmin=0.5, xmax=0.75, color='k', linestyle='--', linewidth=2)
-    plt.axhline(y=lang_class_baselines_all[3], xmin=0.75, xmax=1.0, color='k', linestyle='--', linewidth=2)
-
-    if title == 'Mutual Understanding Only' or title == 'Minimal Effort & Mutual Understanding':
-        plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
-        plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
-
-
-    plt.tick_params(axis='both', which='major', labelsize=18)
-    plt.tick_params(axis='both', which='minor', labelsize=18)
-    plt.ylim(-0.05, 1.05)
-    plt.title(title, fontsize=22)
-    # plt.xlabel('Language class')
-    plt.xlabel('', fontsize=20)
-    plt.ylabel('Mean proportion', fontsize=20)
-    plt.tight_layout()
-
-    if holistic_without_partial_meaning is True:
-        plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + ".png")
-    else:
-        plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + "_NEW.png")
-    plt.show()
-
-
-
-def plot_barplot_repair_vs_redundancy(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
-    """
-    Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
-    barplot (excluding the burn-in period)
-
-    :param lang_class_prop_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'proportion'
-    and 'class'
-    :param title: The title of the condition that should be on the plot (string)
-    :param file_path: path to folder in which the figure file should be saved
-    :param file_name: The file name that the plot should be saved under
-    :param n_runs: the number of runs (int); corresponds to global variable 'runs'
-    :param n_gens: the number of generations (int); corresponds to global variable 'generations'
-    :param gen_start: the burn-in period that is excluded when calculating the means and confidence intervals
-    :param lang_class_baselines_all: The baseline proportion for each language class, where the ordering depends on the
-    code that was used, as described above.
-    :param lang_class_baselines_fully_expressive: The baseline proportion for only the fully expressive language classes
-    (i.e. 'holistic', and 'compositional')
-    :param possible_form_lengths: all possible form lengths (global parameter)
-    :return: Nothing. Just saves the plot and then shows it.
-    """
-
-    sns.set_style("darkgrid")
-    sns.set_context("talk")
-
-    if len(possible_form_lengths) == 1:
-        n_language_classes = 4
-    else:
-        n_language_classes = 7  #TODO: or should this be 6 (i.e. collapsing the two different reduplication strategies?)
-
-    proportion_column_as_results = dataframe_to_language_stats(lang_class_prop_over_gen_df, n_runs, n_batches, n_gens, possible_form_lengths)
-
-    proportion_column_from_start_gen = proportion_column_as_results[:, gen_start:]
-
-    proportion_column_from_start_gen = proportion_column_from_start_gen.flatten()
-
-    runs_column_from_start_gen = []
-    for i in range(n_runs*n_batches):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                runs_column_from_start_gen.append(i)
-    runs_column_from_start_gen = np.array(runs_column_from_start_gen)
-
-    generation_column_from_start_gen = []
-    for i in range(n_runs*n_batches):
-        for j in range(gen_start, n_gens):
-            for k in range(n_language_classes):
-                generation_column_from_start_gen.append(j)
-    generation_column_from_start_gen = np.array(generation_column_from_start_gen)
-
-    class_column_from_start_gen = []
-    for i in range(n_runs*n_batches):
-        for j in range(gen_start, n_gens):
-            if n_language_classes == 4:
-                class_column_from_start_gen.append('degenerate')
-                class_column_from_start_gen.append('holistic')
-                class_column_from_start_gen.append('compositional')
-                class_column_from_start_gen.append('other')
-            elif n_language_classes == 7:
-                class_column_from_start_gen.append('D')
-                class_column_from_start_gen.append('H')
-                class_column_from_start_gen.append('H+Div.')
-                class_column_from_start_gen.append('C')
-                class_column_from_start_gen.append('C+Red.-part')
-                class_column_from_start_gen.append('C+Red.-whole')
-                class_column_from_start_gen.append('O')
-
-    new_data_dict = {'run': runs_column_from_start_gen,
-            'generation': generation_column_from_start_gen,
-            'proportion': proportion_column_from_start_gen,
-            'class': class_column_from_start_gen}
-
-    lang_class_prop_over_gen_df_from_starting_gen = pd.DataFrame(new_data_dict)
-
-    if len(possible_form_lengths) == 1:
-        palette = sns.color_palette(["black", "red", "green", "grey"])
-    else:
-        palette = sns.color_palette([sns.color_palette("colorblind")[6],
+        palette = sns.color_palette(["black",
                                      sns.color_palette("colorblind")[3],
                                      sns.color_palette("colorblind")[1],
                                      sns.color_palette("colorblind")[2],
@@ -427,7 +318,6 @@ def plot_barplot_repair_vs_redundancy(lang_class_prop_over_gen_df, title, file_p
     #     plt.axhline(y=lang_class_baselines_fully_expressive[0], xmin=0.25, xmax=0.5, color='0.6', linestyle='--', linewidth=2)
     #     plt.axhline(y=lang_class_baselines_fully_expressive[1], xmin=0.5, xmax=0.75, color='0.6', linestyle='--', linewidth=2)
 
-
     plt.tick_params(axis='both', which='major', labelsize=18)
     plt.tick_params(axis='both', which='minor', labelsize=18)
     plt.ylim(-0.05, 1.05)
@@ -442,6 +332,7 @@ def plot_barplot_repair_vs_redundancy(lang_class_prop_over_gen_df, title, file_p
     else:
         plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + "_NEW.png")
     plt.show()
+
 
 ###################################################################################################################
 # THE UNPICKLING HAPPENS HERE:
@@ -547,4 +438,4 @@ print("baseline_proportions_fully_expressive are:")
 print(baseline_proportions_fully_expressive)
 
 
-plot_barplot_repair_vs_redundancy(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
+plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
