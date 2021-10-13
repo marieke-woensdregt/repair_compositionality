@@ -340,32 +340,40 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
 pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_delta_"+convert_float_value_to_string(delta)+"_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob)
 
 all_results = []
+all_repair_counts = []
 if batches > 1:
     for i in range(batches):
         if holistic_without_partial_meaning is True:
             language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
             data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
+            repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_repairs_"+str(i)+".p", "rb"))
             final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
         else:
             language_stats_over_gens_per_run = pickle.load(
                 open(pickle_file_path + pickle_file_name + "_lang_stats_" + str(i) + "_NEW.p", "rb"))
             data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data_" + str(i) + "_NEW.p", "rb"))
+            repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_repairs_" + str(i) + "_NEW.p", "rb"))
             final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_" + str(i) + "_NEW.p", "rb"))
         for j in range(len(language_stats_over_gens_per_run)):
             all_results.append(language_stats_over_gens_per_run[j])
+            all_repair_counts.append(repair_counts_over_gens_per_run[j])
+
 
 else:
     if holistic_without_partial_meaning is True:
         language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats"+".p", "rb"))
         data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data"+".p", "rb"))
+        repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_repairs"+".p", "rb"))
         final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop"+".p", "rb"))
     else:
         language_stats_over_gens_per_run = pickle.load(
             open(pickle_file_path + pickle_file_name + "_lang_stats" + "_NEW.p", "rb"))
         data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data" + "_NEW.p", "rb"))
+        repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_repairs" + "_NEW.p", "rb"))
         final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop" + "_NEW.p", "rb"))
     for j in range(len(language_stats_over_gens_per_run)):
         all_results.append(language_stats_over_gens_per_run[j])
+        all_repair_counts.append(repair_counts_over_gens_per_run[j])
 
 print('')
 print("len(all_results) are:")
@@ -374,6 +382,12 @@ print("len(all_results[0]) are:")
 print(len(all_results[0]))
 print("len(all_results[0][0]) are:")
 print(len(all_results[0][0]))
+
+print('')
+print("len(all_repair_counts) are:")
+print(len(all_repair_counts))
+print("len(all_repair_counts[0]) are:")
+print(len(all_repair_counts[0]))
 
 lang_class_prop_over_gen_df = language_stats_to_dataframe(all_results, runs*batches, generations, possible_form_lengths)
 print('')
