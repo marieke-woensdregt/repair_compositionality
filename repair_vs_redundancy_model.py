@@ -18,7 +18,7 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 200  # the number of generations (Kirby et al., 2015 used 100)
+generations = 5  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
@@ -247,6 +247,7 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
         random_parent_index = np.random.choice(np.arange(len(population)))  # this determines which agent's productions
         # will form the input for the next generation
     data = []
+    repair_counts = []
     for i in range(n_rounds):
         if interaction == 'taking_turns':
             if len(population) != 2:
@@ -284,8 +285,9 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
                 data.append((topic, utterance))
         elif n_parents == 'multiple':
             data.append((topic, utterance))
+        repair_counts.append(counter)
 
-    return data, counter
+    return data, repair_counts
 
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
@@ -322,6 +324,7 @@ def simulation_repair_vs_redundancy(population, n_gens, n_rounds, bottleneck, po
     """
     language_stats_over_gens = np.zeros((n_gens, int(max(class_per_language)+1)))
     data_over_gens = []
+    repair_count_over_gens = []
     for i in range(n_gens):
 
         print('gen: '+str(i))
@@ -342,11 +345,12 @@ def simulation_repair_vs_redundancy(population, n_gens, n_rounds, bottleneck, po
         data, repair_count = population_communication_mutual_understanding(population, n_rounds, ambiguity_penalty, effort_penalty, prob_of_noise, hypotheses, log_likelihood_cache)
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
+        repair_count_over_gens.append(repair_count)
         if i == n_gens-1:
             final_pop = population
         if turnover:
             population = new_population(pop_size, log_priors)
-    return language_stats_over_gens, data_over_gens, final_pop
+    return language_stats_over_gens, data_over_gens, repair_count_over_gens, final_pop
 
 
 ###################################################################################################################
@@ -401,6 +405,7 @@ if __name__ == '__main__':
 
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
+    repair_count_over_gens_per_run = []
     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
     for r in range(runs):
 
@@ -410,10 +415,11 @@ if __name__ == '__main__':
 
         population = new_population(popsize, priors)
 
-        language_stats_over_gens, data_over_gens, final_pop = simulation_repair_vs_redundancy(population, generations, rounds, b, popsize, hypothesis_space, log_likelihood_cache, class_per_lang, priors, initial_dataset, interaction, gamma, delta, noise_prob, all_forms_including_noisy_variants)
+        language_stats_over_gens, data_over_gens, repair_count_over_gens, final_pop = simulation_repair_vs_redundancy(population, generations, rounds, b, popsize, hypothesis_space, log_likelihood_cache, class_per_lang, priors, initial_dataset, interaction, gamma, delta, noise_prob, all_forms_including_noisy_variants)
 
         language_stats_over_gens_per_run[r] = language_stats_over_gens
         data_over_gens_per_run.append(data_over_gens)
+        repair_count_over_gens_per_run.append(repair_count_over_gens)
         final_pop_per_run[r] = final_pop
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -421,6 +427,7 @@ if __name__ == '__main__':
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_form_lengths_"+convert_array_to_string(possible_form_lengths)+"_b_" + str(b) + "_rounds_" + str(rounds) + "_pop_size_" + str(popsize) + "_gamma_" + convert_float_value_to_string(gamma) + "_delta_" + convert_float_value_to_string(delta) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) + "_" + timestr
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
+    pickle.dump(repair_count_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_repairs" + ".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
 
     t4 = time.process_time()
