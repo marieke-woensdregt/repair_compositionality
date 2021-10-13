@@ -285,7 +285,7 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
         elif n_parents == 'multiple':
             data.append((topic, utterance))
 
-    return data
+    return data, counter
 
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
@@ -339,7 +339,7 @@ def simulation_repair_vs_redundancy(population, n_gens, n_rounds, bottleneck, po
                 else:
                     meaning, signal = random.choice(data)
                 population[j] = update_posterior_from_cache(population[j], log_likelihood_cache, meaning, signal, meanings, all_possible_forms)
-        data = population_communication_mutual_understanding(population, n_rounds, ambiguity_penalty, effort_penalty, prob_of_noise, hypotheses, log_likelihood_cache)
+        data, repair_count = population_communication_mutual_understanding(population, n_rounds, ambiguity_penalty, effort_penalty, prob_of_noise, hypotheses, log_likelihood_cache)
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
         if i == n_gens-1:
