@@ -22,8 +22,8 @@ turnover = True  # determines whether new individuals enter the population or no
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 200  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
+generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
+initial_language_type = 'holistic'  # set the language class that the first generation is trained on
 
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
@@ -47,7 +47,7 @@ print('')
 print("compressibility_bias (i.e. learnability pressure) is:")
 print(compressibility_bias)
 
-noise_prob = 0.5  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
+noise_prob = 0.6  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
 # argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring
 # part of an utterance
 print('')
@@ -72,7 +72,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 1
+batches = 10
 
 
 holistic_without_partial_meaning = True
@@ -346,17 +346,17 @@ if batches > 1:
         if holistic_without_partial_meaning is True:
             language_stats_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_lang_stats_"+str(i)+".p", "rb"))
             data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(i)+".p", "rb"))
-            repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_repairs_"+str(i)+".p", "rb"))
+            # repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_repairs_"+str(i)+".p", "rb"))
             final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(i)+".p", "rb"))
         else:
             language_stats_over_gens_per_run = pickle.load(
                 open(pickle_file_path + pickle_file_name + "_lang_stats_" + str(i) + "_NEW.p", "rb"))
             data_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_data_" + str(i) + "_NEW.p", "rb"))
-            repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_repairs_" + str(i) + "_NEW.p", "rb"))
+            # repair_counts_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_repairs_" + str(i) + "_NEW.p", "rb"))
             final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_" + str(i) + "_NEW.p", "rb"))
         for j in range(len(language_stats_over_gens_per_run)):
             all_results.append(language_stats_over_gens_per_run[j])
-            all_repair_counts.append(repair_counts_over_gens_per_run[j])
+            # all_repair_counts.append(repair_counts_over_gens_per_run[j])
 
 
 else:
