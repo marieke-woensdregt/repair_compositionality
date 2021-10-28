@@ -102,8 +102,8 @@ if __name__ == '__main__':
     turnover = True  # determines whether new individuals enter the population or not
     popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
     # a pair of agents.
-    runs = 10  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-    generations = 100  # the number of generations (Kirby et al., 2015 used 100)
+    runs = 5  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+    generations = 10  # the number of generations (Kirby et al., 2015 used 100)
     initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
     production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -1345,10 +1345,12 @@ def sample(hypotheses, log_posterior):
 
     :param hypotheses: list of all possible languages; corresponds to global variable 'hypothesis_space'
     :param log_posterior: a list of LOG posterior probabilities
-    :return: a language (list of forms_without_noisy_variants that has same length as the global variable meanings,
-    where each form is mapped to the meaning at the corresponding index)
+    :return: (1) a language (list of forms_without_noisy_variants that has same length as the global variable meanings,
+    where each form is mapped to the meaning at the corresponding index); and (2) the index of the language in the hypotheses list
     """
-    return hypotheses[log_roulette_wheel(log_posterior)]
+    index = log_roulette_wheel(log_posterior)
+    language = hypotheses[index]
+    return language, index
 
 
 # NOW THE FUNCTION THAT CREATE A NEW POPULATION, AND MAKES A POPULATION COMMUNICATE (FOR THE INTRA-GENERATIONAL
@@ -1393,7 +1395,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
     :param hypotheses: list of all possible languages; corresponds to global parameter 'hypothesis_space'
     :param meaning_list: list containing all possible meanings; corresponds to global variable 'meanings'
     :param possible_form_lengths: all possible form lengths (global parameter)
-    :return: the data that was produced during the communication rounds, as a list of (topic, utterance) tuples
+    :return: (1) the data that was produced during the communication rounds, as a list of (topic, utterance) tuples; (2) the sampled_languages_array which lists the indices of the languages (in the hypotheses list) that was sampled per agent per round
     """
     if n_parents == 'single':
         if len(population) != 2 or interaction != 'taking_turns':
@@ -1402,6 +1404,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     data_for_just_in_case = []
+    sampled_languages_array = np.zeros((len(population), n_rounds))
     for i in range(n_rounds):
         if interaction == 'taking_turns':
             if len(population) != 2:
@@ -1418,8 +1421,14 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
             speaker_index = pair_indices[0]
             hearer_index = pair_indices[1]
         topic = random.choice(meanings)
-        speaker_language = sample(hypotheses, population[speaker_index])
-        hearer_language = sample(hypotheses, population[hearer_index])
+        speaker_language, speaker_lang_index = sample(hypotheses, population[speaker_index])
+        hearer_language, hearer_lang_index = sample(hypotheses, population[hearer_index])
+        if speaker_index == 0:
+            sampled_languages_array[0][i] = speaker_lang_index
+            sampled_languages_array[1][i] = hearer_lang_index
+        else:
+            sampled_languages_array[0][i] = hearer_lang_index
+            sampled_languages_array[1][i] = speaker_lang_index
         if mutual_understanding_pressure is True:
             if production == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
@@ -1570,7 +1579,7 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
             print("len(data) is:")
             print(len(data))
 
-    return data
+    return data, sampled_languages_array
 
 
 # AND NOW FOR THE FUNCTIONS THAT HANDLE CREATING A DATASET FROM A SPECIFIC LANGUAGE TYPE (IN ORDER TO GENERATE THE DATA
@@ -1667,6 +1676,7 @@ def language_stats(population, possible_form_lengths, class_per_language):
             # if proportion_measure == 'posterior':  # Note that this will only work when the population has a size
             # that is a reasonable multitude of the number of language classes
             # stats[int(class_per_language[i])] += np.exp(p[i]) / len(population)
+
             stats[int(class_per_language[i])] += np.exp(p[i])
             # elif proportion_measure == 'sampled':
             #     sampled_lang_index = log_roulette_wheel(p)
@@ -1708,9 +1718,9 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
     (set to either True or False); corresponds to global variable 'minimal_effort'
     :param communicative_success_pressure: determines whether pressure for communicative success is turned on or off
     (i.e. set to True or False); corresponds to global variable 'communicative_succes'
-    :return: language_stats_over_gens (which contains language stats over generations over runs), data (which contains
-    data over generations over runs), and the final population
+    :return: (1) sampled_languages_over_gens (which contains the indices of the sampled languages per generation per agent per round of interaction); (2) language_stats_over_gens (which contains language stats over generations); (3) data (which contains data over generations over runs); and (4) the final population
     """
+    sampled_languages_over_gens = np.zeros((n_gens, pop_size, n_rounds))
     language_stats_over_gens = np.zeros((n_gens, int(max(class_per_language)+1)))
     data_over_gens = []
     for i in range(n_gens):
@@ -1730,14 +1740,16 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, prob_of_noise, all_possible_forms)
-        data = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, possible_form_lengths)
+        data, sampled_languages_array = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, possible_form_lengths)
+
+        sampled_languages_over_gens[i] = sampled_languages_array
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
         data_over_gens.append(data)
         if i == n_gens-1:
             final_pop = population
         if turnover:
             population = new_population(pop_size, log_priors)
-    return language_stats_over_gens, data_over_gens, final_pop
+    return sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop
 
 
 # AND NOW SOME FUNCTIONS THAT CONVERT VARIABLES TO FORMATS THAT ARE MORE SUITABLE FOR USING IN A FILENAME:
@@ -1812,6 +1824,7 @@ if __name__ == '__main__':
     print("initial_dataset is:")
     print(initial_dataset)
 
+    sampled_languages_over_gens_per_run = np.zeros((runs, generations, popsize, rounds))
     language_stats_over_gens_per_run = np.zeros((runs, generations, int(max(class_per_lang)+1)))
     data_over_gens_per_run = []
     final_pop_per_run = np.zeros((runs, popsize, len(hypothesis_space)))
@@ -1823,8 +1836,9 @@ if __name__ == '__main__':
 
         population = new_population(popsize, priors)
 
-        language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, meanings, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, meanings, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
+        sampled_languages_over_gens_per_run[r] = sampled_languages_over_gens
         language_stats_over_gens_per_run[r] = language_stats_over_gens
         data_over_gens_per_run.append(data_over_gens)
         final_pop_per_run[r] = final_pop
@@ -1832,6 +1846,7 @@ if __name__ == '__main__':
     timestr = time.strftime("%Y%m%d-%H%M%S")
 
     pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2)) + "_" + timestr
+    pickle.dump(sampled_languages_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_sampled_langs" + ".p", "wb"))
     pickle.dump(language_stats_over_gens_per_run, open(pickle_file_path + pickle_file_name + "_lang_stats" + ".p", "wb"))
     pickle.dump(data_over_gens_per_run, open(pickle_file_path+pickle_file_name+"_data"+".p", "wb"))
     pickle.dump(final_pop_per_run, open(pickle_file_path + pickle_file_name + "_final_pop" + ".p", "wb"))
