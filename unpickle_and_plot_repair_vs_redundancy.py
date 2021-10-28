@@ -40,14 +40,14 @@ print('')
 print("b is:")
 print(b)
 
-compressibility_bias = True  # Setting the 'compressibility_bias' parameter based on the
+compressibility_bias = False  # Setting the 'compressibility_bias' parameter based on the
 # command-line input #NOTE: first argument in sys.argv list is always the name of the script; Determines whether
 # agents have a prior that favours compressibility, or a flat prior
 print('')
 print("compressibility_bias (i.e. learnability pressure) is:")
 print(compressibility_bias)
 
-noise_prob = 0.5  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
+noise_prob = 0.4  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
 # argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring
 # part of an utterance
 print('')
@@ -72,7 +72,7 @@ pickle_file_path = "pickles/"
 fig_file_path = "plots/"
 
 
-batches = 7
+batches = 10
 
 
 holistic_without_partial_meaning = True
@@ -460,3 +460,5 @@ print(baseline_proportions_fully_expressive)
 
 
 plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
+
+# sns.lineplot(all_repair_counts)
