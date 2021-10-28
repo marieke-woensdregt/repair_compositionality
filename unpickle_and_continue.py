@@ -144,7 +144,7 @@ for r in range(runs):
 
     initial_dataset = data_over_gens_per_run[r][-1]
 
-    sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+    sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, error, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
     sampled_languages_over_gens_per_run_new[r] = np.concatenate((sampled_languages_over_gens_per_run[r], sampled_languages_over_gens))
     language_stats_over_gens_per_run_new[r] = np.concatenate((language_stats_over_gens_per_run[r], language_stats_over_gens))
