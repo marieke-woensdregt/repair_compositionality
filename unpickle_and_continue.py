@@ -102,6 +102,7 @@ if __name__ == '__main__':
 
 pickle_file_name = "Pickle_r_" + str(runs) +"_g_" + str(generations) + "_b_" + str(b) + "_rounds_" + str(rounds) + "_size_" + str(popsize) + "_mutual_u_" + str(mutual_understanding) + "_gamma_" + str(gamma) +"_minimal_e_" + str(minimal_effort) + "_c_" + convert_array_to_string(cost_vector) + "_turnover_" + str(turnover) + "_bias_" + str(compressibility_bias) + "_init_" + initial_language_type + "_noise_prob_" + convert_float_value_to_string(noise_prob) +"_observed_m_" + observed_meaning +"_CS_" + str(communicative_success) + "_" + convert_float_value_to_string(np.around(communicative_success_pressure_strength, decimals=2))
 
+sampled_languages_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_sampled_langs_"+str(batch_number)+".p", "rb"))
 language_stats_over_gens_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_lang_stats_"+str(batch_number)+".p", "rb"))
 data_over_gens_per_run = pickle.load(open(pickle_file_path+pickle_file_name+"_data_"+str(batch_number)+".p", "rb"))
 final_pop_per_run = pickle.load(open(pickle_file_path + pickle_file_name + "_final_pop_"+str(batch_number)+".p", "rb"))
@@ -127,6 +128,7 @@ else:
     priors = np.divide(priors, np.sum(priors))
     priors = np.log(priors)
 
+sampled_languages_over_gens_per_run_new = np.zeros((runs, generations+extra_gens, popsize, rounds))
 language_stats_over_gens_per_run_new = np.zeros((runs, generations+extra_gens, int(max(class_per_lang)+1)))
 data_over_gens_per_run_new = []
 final_pop_per_run_new = np.zeros((runs, popsize, len(hypothesis_space)))
@@ -140,8 +142,9 @@ for r in range(runs):
 
     initial_dataset = data_over_gens_per_run[r][-1]
 
-    language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, meanings, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+    sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(final_pop, extra_gens, rounds, b, popsize, meanings, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
+    sampled_languages_over_gens_per_run_new[r] = np.concatenate((sampled_languages_over_gens_per_run[r], sampled_languages_over_gens))
     language_stats_over_gens_per_run_new[r] = np.concatenate((language_stats_over_gens_per_run[r], language_stats_over_gens))
     data_over_gens_per_run_new.append(data_over_gens_per_run[r] + data_over_gens)
     final_pop_per_run_new[r] = final_pop
