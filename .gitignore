@@ -1,3 +1,6 @@
+.ipynb_checkpoints
+pickles
+plots
 shell_scripts
 calculate_data_probs.py
 check_my_implementation_against_simlang_one.py
