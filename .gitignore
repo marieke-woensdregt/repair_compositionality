@@ -2,7 +2,6 @@
 pickles
 plots
 shell_scripts
-calculate_data_probs.py
 check_my_implementation_against_simlang_one.py
 evolution_compositionality_under_noise.html
 evolution_compositionality_under_noise.pdf
