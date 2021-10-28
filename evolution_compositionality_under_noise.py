@@ -1380,7 +1380,7 @@ def new_population(pop_size, log_priors):
 #  separate functions (e.g. for the different possible settings of the mutual_understanding and minimal_effort
 #  parameters. Also, there has to be a way to not have exactly the same lines of code for doing the communicative
 #  success pressure stuff in there twice (should probably be a separate function)!
-def population_communication(population, n_parents, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths):
+def population_communication(population, n_parents, n_rounds, interaction_order, production_implementation, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, error_prob, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths):
     """
     Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
     is updated every time the agent gets assigned the role of hearer)
@@ -1390,10 +1390,14 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
     :param n_parents: determines whether each generation of learners receives data from a single agent from the previous generation, or from multiple (can be set to either 'single' or 'multiple').
     :param n_rounds: the number of rounds for which the population should communicate; corresponds to global variable
     'rounds'
+    :param interaction_order: the order in which agents take turns in interaction (can be set to either 'taking_turns'
+    or 'random')
+    :param production_implementation: can be set to either 'my_code' or 'simlang'
     :param mutual_understanding_pressure: turns mutual understanding on or off (set to either True or False);
     corresponds to global variable 'mutual_understanding'
     :param ambiguity_penalty: parameter which determines the extent to which the speaker tries to avoid ambiguity;
     corresponds to global variable 'gamma'
+    :param error_prob: the probability of making an error in production
     :param prob_of_noise: the probability of noise happening; corresponds to global variable 'noise_prob'
     :param communicative_success_pressure: determines whether pressure for communicative success is switched on or off
     (i.e. set to True or False); corresponds to global variable 'communicative_success'
@@ -1405,18 +1409,18 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
     :return: (1) the data that was produced during the communication rounds, as a list of (topic, utterance) tuples; (2) the sampled_languages_array which lists the indices of the languages (in the hypotheses list) that was sampled per agent per round
     """
     if n_parents == 'single':
-        if len(population) != 2 or interaction != 'taking_turns':
+        if len(population) != 2 or interaction_order != 'taking_turns':
             raise ValueError(
-                "OOPS! n_parents = 'single' only works if popsize = 2 and interaction = 'taking_turns'.")
+                "OOPS! n_parents = 'single' only works if popsize = 2 and interaction_order = 'taking_turns'.")
         random_parent_index = np.random.choice(np.arange(len(population)))
     data = []
     data_for_just_in_case = []
     sampled_languages_array = np.zeros((len(population), n_rounds))
     for i in range(n_rounds):
-        if interaction == 'taking_turns':
+        if interaction_order == 'taking_turns':
             if len(population) != 2:
                 raise ValueError(
-                "OOPS! interaction = 'taking_turns' only works if popsize = 2.")
+                "OOPS! interaction_order = 'taking_turns' only works if popsize = 2.")
             if i % 2 == 0:
                 speaker_index = 0
                 hearer_index = 1
@@ -1427,7 +1431,7 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
             pair_indices = np.random.choice(np.arange(len(population)), size=2, replace=False)
             speaker_index = pair_indices[0]
             hearer_index = pair_indices[1]
-        topic = random.choice(meanings)
+        topic = random.choice(meaning_list)
         speaker_language, speaker_lang_index = sample(hypotheses, population[speaker_index])
         hearer_language, hearer_lang_index = sample(hypotheses, population[hearer_index])
         if speaker_index == 0:
@@ -1437,10 +1441,10 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
             sampled_languages_array[0][i] = hearer_lang_index
             sampled_languages_array[1][i] = speaker_lang_index
         if mutual_understanding_pressure is True:
-            if production == 'simlang':
+            if production_implementation == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
-                utterance = produce(speaker_language, topic, ambiguity_penalty, error, prob_of_noise)
+                utterance = produce(speaker_language, topic, ambiguity_penalty, error_prob, prob_of_noise)
                 # whenever a speaker is called upon to produce a utterance, they first sample a language from their
                 # posterior probability distribution. So each agent keeps updating their language according to the data
                 # received from their communication partner.
@@ -1449,15 +1453,15 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
             while '?' in listener_response:
                 if counter == 3:  # After 3 attempts, the listener stops trying to do repair
                     break
-                if production == 'simlang':
+                if production_implementation == 'simlang':
                     utterance = produce_simlang(speaker_language, topic)
                 else:
-                    utterance = produce(speaker_language, topic, ambiguity_penalty, error, prob_of_noise=0.0)
+                    utterance = produce(speaker_language, topic, ambiguity_penalty, error_prob, prob_of_noise=0.0)
                     # For now, we assume that the speaker's response to a repair initiator always comes through without
                     # noise.
                 listener_response = receive_with_repair(hearer_language, utterance, mutual_understanding_pressure, minimal_effort_pressure, meaning_list, possible_form_lengths)
                 counter += 1
-            if production == 'simlang':
+            if production_implementation == 'simlang':
                 if observed_meaning == 'intended':
                     population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, topic,
                                                                     utterance)  # (Thus, in this simplified version of
@@ -1474,14 +1478,14 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
                     population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
 
         elif mutual_understanding_pressure is False:
-            if production == 'simlang':
+            if production_implementation == 'simlang':
                 utterance = produce_simlang(speaker_language, topic)
             else:
-                utterance = produce(speaker_language, topic, ambiguity_penalty, error, prob_of_noise)
+                utterance = produce(speaker_language, topic, ambiguity_penalty, error_prob, prob_of_noise)
                 # whenever a speaker is called upon to produce a utterance, they first sample a language from their
                 # posterior probability distribution. So each agent keeps updating their language according to the data
                 # they receive from their communication partner.
-            if production == 'simlang':
+            if production_implementation == 'simlang':
                 if observed_meaning == 'intended':
                     population[hearer_index] = update_posterior_simlang(population[hearer_index], hypotheses, topic, utterance)
                     # Thus, in this simplified version of the model, agents are still able to "track changes in their
@@ -1494,10 +1498,10 @@ def population_communication(population, n_parents, n_rounds, mutual_understandi
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error_prob, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error_prob, prob_of_noise, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
 
@@ -1751,7 +1755,7 @@ def simulation(population, n_gens, n_parents, n_rounds, bottleneck, pop_size, me
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, meaning_list, forms, noisy_variants, signal, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms)
-        data, sampled_languages_array = population_communication(population, n_parents, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths)
+        data, sampled_languages_array = population_communication(population, n_parents, n_rounds, interaction_order, production_implementation, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, error_prob, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths)
 
         sampled_languages_over_gens[i] = sampled_languages_array
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
