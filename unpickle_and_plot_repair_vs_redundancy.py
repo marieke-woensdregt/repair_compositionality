@@ -40,14 +40,14 @@ print('')
 print("b is:")
 print(b)
 
-compressibility_bias = False  # Setting the 'compressibility_bias' parameter based on the
+compressibility_bias = True  # Setting the 'compressibility_bias' parameter based on the
 # command-line input #NOTE: first argument in sys.argv list is always the name of the script; Determines whether
 # agents have a prior that favours compressibility, or a flat prior
 print('')
 print("compressibility_bias (i.e. learnability pressure) is:")
 print(compressibility_bias)
 
-noise_prob = 0.4  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
+noise_prob = 0.5  # Setting the 'noise_prob' parameter based on the command-line input #NOTE: first
 # argument in sys.argv list is always the name of the script  # the probability of environmental noise obscuring
 # part of an utterance
 print('')
@@ -174,9 +174,45 @@ def dataframe_to_language_stats(dataframe, n_runs, n_batches, n_gens, possible_f
     return proportion_column_as_results
 
 
+def repair_counts_to_dataframe(all_repair_counts, n_runs, n_gens, n_rounds):
+
+    column_runs = []
+    for i in range(n_runs):
+        for j in range(n_gens):
+            column_runs.append(i)
+    column_runs = np.array(column_runs)
+
+    column_generation = []
+    for i in range(n_runs):
+        for j in range(n_gens):
+            column_generation.append(j)
+    column_generation = np.array(column_generation)
+
+    column_independent_repair_proportion = []
+    column_total_repair_proportion = []
+    for i in range(n_runs):
+        for j in range(n_gens):
+            independent_repair_count = len(np.where(np.array(all_repair_counts[i][j]) > 0)[0])
+            total_repair_count = np.sum(np.array(all_repair_counts[i][j]))
+            proportion_independent = independent_repair_count / float(n_rounds)
+            proportion_total = total_repair_count/float(n_rounds)
+            column_independent_repair_proportion.append(proportion_independent)
+            column_total_repair_proportion.append(proportion_total)
+    column_independent_repair_proportion = np.array(column_independent_repair_proportion)
+    column_total_repair_proportion = np.array(column_total_repair_proportion)
+
+    repair_count_dict = {'run': column_runs,
+            'generation': column_generation,
+            'independent_repair_proportion': column_independent_repair_proportion,
+            'total_repair_proportion': column_total_repair_proportion}
+
+    repair_counts_over_gen_df = pd.DataFrame(repair_count_dict)
+    return repair_counts_over_gen_df
+
+
 # AND NOW FOR THE PLOTTING FUNCTIONS:
 
-def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
+def plot_timecourse_language_types(lang_class_prop_over_gen_df, title, file_path, file_name):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
 
@@ -219,11 +255,11 @@ def plot_timecourse(lang_class_prop_over_gen_df, title, file_path, file_name):
     # ax.legend(handles=handles[1:], labels=labels[1:])
     ax.legend(handles=handles, labels=labels)
     plt.tight_layout()
-    plt.savefig(file_path + "Timecourse_plot_" + file_name + ".png")
+    plt.savefig(file_path + "Timecourse_plot_lang_types_" + file_name + ".png")
     plt.show()
 
 
-def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
+def plot_barplot_language_types(lang_class_prop_over_gen_df, title, file_path, file_name, n_runs, n_batches, n_gens, gen_start, lang_class_baselines_all, lang_class_baselines_fully_expressive, possible_form_lengths):
     """
     Takes a pandas dataframe which contains the proportions of language classes over generations and generates a
     barplot (excluding the burn-in period)
@@ -328,10 +364,51 @@ def plot_barplot(lang_class_prop_over_gen_df, title, file_path, file_name, n_run
     plt.tight_layout()
 
     if holistic_without_partial_meaning is True:
-        plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + ".png")
+        plt.savefig(file_path + "Barplot_lang_types_" + file_name + "_burn_in_" + str(gen_start) + ".png")
     else:
-        plt.savefig(file_path + "Barplot_" + file_name + "_burn_in_" + str(gen_start) + "_NEW.png")
+        plt.savefig(file_path + "Barplot_lang_types_" + file_name + "_burn_in_" + str(gen_start) + "_NEW.png")
     plt.show()
+
+
+
+def plot_timecourse_repair_counts(repair_counts_over_gen_df, title, file_path, file_name):
+    """
+    Takes a pandas dataframe which contains the proportions of language classes over generations and plots timecourses
+
+    :param repair_counts_over_gen_df: a pandas dataframe containing four columns: 'run', 'generation', 'independent_repair_proportion'
+    and 'total_repair_proportion'
+    :param title: The title of the condition that should be on the plot (string)
+    :param file_path: path to folder in which the figure file should be saved
+    :param file_name: The file name that the plot should be saved under
+    :return: Nothing. Just saves the plot and then shows it.
+    """
+    sns.set_style("darkgrid")
+    sns.set_context("talk")
+
+    fig, ax = plt.subplots()
+
+    palette = sns.color_palette("colorblind")
+
+    sns.lineplot(x="generation", y="independent_repair_proportion", data=repair_counts_over_gen_df, palette=palette)
+    # sns.lineplot(x="generation", y="proportion", hue="class", data=lang_class_prop_over_gen_df, palette=palette, ci=95, err_style="bars")
+
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.tick_params(axis='both', which='minor', labelsize=18)
+    plt.ylim(-0.05, 1.05)
+    plt.title(title, fontsize=22)
+    plt.xlabel('Generation', fontsize=20)
+    plt.ylabel('Mean proportion', fontsize=20)
+    # handles, labels = ax.get_legend_handles_labels()
+    #
+    # labels = ['D', 'H', 'H+Div.', 'C', 'C+Red.-part', 'C+Red.-whole', 'O']
+
+    # # ax.legend(handles=handles[1:], labels=labels[1:])
+    # ax.legend(handles=handles, labels=labels)
+    plt.tight_layout()
+    plt.savefig(file_path + "Timecourse_plot_repairs_" + file_name + ".png")
+    plt.show()
+
+
 
 
 ###################################################################################################################
@@ -402,6 +479,12 @@ print('')
 print("lang_class_prop_over_gen_df is:")
 print(lang_class_prop_over_gen_df)
 
+repair_counts_over_gen_df = repair_counts_to_dataframe(all_repair_counts, runs*batches, generations, rounds)
+print('')
+print('')
+print("repair_counts_over_gen_df is:")
+print(repair_counts_over_gen_df)
+
 
 ###################################################################################################################
 # THE PLOTTING HAPPENS HERE:
@@ -417,7 +500,7 @@ elif delta == 0.0 and compressibility_bias is True:
 elif delta > 0.0 and compressibility_bias is True:
     plot_title = "Learnability & Minimal Effort"
 
-plot_timecourse(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name)
+plot_timecourse_language_types(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name)
 
 
 all_possible_languages = create_all_possible_languages(meanings, forms_without_noise)
@@ -459,6 +542,8 @@ print("baseline_proportions_fully_expressive are:")
 print(baseline_proportions_fully_expressive)
 
 
-plot_barplot(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
+plot_barplot_language_types(lang_class_prop_over_gen_df, plot_title, fig_file_path, fig_file_name, runs, batches, generations, burn_in, baseline_proportions_all, baseline_proportions_fully_expressive, possible_form_lengths)
 
-# sns.lineplot(all_repair_counts)
+
+
+plot_timecourse_repair_counts(repair_counts_over_gen_df, plot_title, fig_file_path, fig_file_name)
