@@ -1236,7 +1236,7 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
 
 # AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
-def update_posterior(log_posterior, hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, prob_of_noise, all_possible_forms):
+def update_posterior(log_posterior, hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
     distribution accordingly
@@ -1251,6 +1251,7 @@ def update_posterior(log_posterior, hypotheses, topic, meanings, forms, noisy_va
     True)
     :param ambiguity_penalty: parameter that determines extent to which speaker tries to avoid ambiguity; corresponds
     to global variable 'gamma'
+    :param error_prob: the probability of making an error in production
     :param prob_of_noise: the probability of noise; corresponds to global variable 'noise_prob'
     :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
     'all_forms_including_noisy_variants'
@@ -1267,7 +1268,7 @@ def update_posterior(log_posterior, hypotheses, topic, meanings, forms, noisy_va
     for j in range(len(log_posterior)):
         hypothesis = hypotheses[j]
         if prob_of_noise > 0.0:
-            likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, meanings, forms, noisy_variants, ambiguity_penalty, error, prob_of_noise)
+            likelihood_per_form_array = production_likelihoods_with_noise(hypothesis, topic, meanings, forms, noisy_variants, ambiguity_penalty, error_prob, prob_of_noise)
         else:
             likelihood_per_form_array = production_likelihoods_kirby_et_al(hypothesis, topic, meanings, ambiguity_penalty, error)
         log_likelihood_per_form_array = np.log(likelihood_per_form_array)
@@ -1467,9 +1468,9 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, meanings, forms, noisy_variants, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
 
         elif mutual_understanding_pressure is False:
             if production == 'simlang':
@@ -1492,10 +1493,10 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, meanings, forms, noisy_variants, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, meanings, forms, noisy_variants, utterance, ambiguity_penalty, error, prob_of_noise, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
 
@@ -1692,7 +1693,7 @@ def language_stats(population, possible_form_lengths, class_per_language):
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list, forms, noisy_variants, possible_form_lengths, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
+def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list, forms, noisy_variants, possible_form_lengths, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
@@ -1716,6 +1717,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
     :param production_implementation: can be set to either 'my_code' or 'simlang'
     :param ambiguity_penalty: parameter that determines the extent to which the speaker tries to avoid ambiguity;
     corresponds to global variable 'gamma'
+    :param error_prob: the probability of making an error in production
     :param prob_of_noise: probability of noise; corresponds to global variable 'noise_prob'
     :param all_possible_forms: list of all possible forms INCLUDING noisy variants; corresponds to global variable
     'all_forms_including_noisy_variants'
@@ -1746,7 +1748,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
                 if production_implementation == 'simlang':
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
-                    population[j] = update_posterior(population[j], hypotheses, meaning, meaning_list, forms, noisy_variants, signal, ambiguity_penalty, prob_of_noise, all_possible_forms)
+                    population[j] = update_posterior(population[j], hypotheses, meaning, meaning_list, forms, noisy_variants, signal, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms)
         data, sampled_languages_array = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths)
 
         sampled_languages_over_gens[i] = sampled_languages_array
@@ -1843,7 +1845,7 @@ if __name__ == '__main__':
 
         population = new_population(popsize, priors)
 
-        sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, error, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
         sampled_languages_over_gens_per_run[r] = sampled_languages_over_gens
         language_stats_over_gens_per_run[r] = language_stats_over_gens
