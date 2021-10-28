@@ -1380,13 +1380,14 @@ def new_population(pop_size, log_priors):
 #  separate functions (e.g. for the different possible settings of the mutual_understanding and minimal_effort
 #  parameters. Also, there has to be a way to not have exactly the same lines of code for doing the communicative
 #  success pressure stuff in there twice (should probably be a separate function)!
-def population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths):
+def population_communication(population, n_parents, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths):
     """
     Takes a population, makes it communicate for a number of rounds (where agents' posterior probability distribution
     is updated every time the agent gets assigned the role of hearer)
 
     :param population: a population (1D numpy array), where each agent is simply a LOG posterior probability
     distribution
+    :param n_parents: determines whether each generation of learners receives data from a single agent from the previous generation, or from multiple (can be set to either 'single' or 'multiple').
     :param n_rounds: the number of rounds for which the population should communicate; corresponds to global variable
     'rounds'
     :param mutual_understanding_pressure: turns mutual understanding on or off (set to either True or False);
@@ -1693,13 +1694,14 @@ def language_stats(population, possible_form_lengths, class_per_language):
 
 # AND NOW FINALLY FOR THE FUNCTION THAT RUNS THE ACTUAL SIMULATION:
 
-def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list, forms, noisy_variants, possible_form_lengths, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
+def simulation(population, n_gens, n_parents, n_rounds, bottleneck, pop_size, meaning_list, forms, noisy_variants, possible_form_lengths, hypotheses, class_per_language, log_priors, data, interaction_order, production_implementation, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms, mutual_understanding_pressure, minimal_effort_pressure, communicative_success_pressure):
     """
     Runs the full simulation and returns the total amount of posterior probability that is assigned to each language
     class over generations (language_stats_over_gens) as well as the data that each generation produced (data)
 
     :param population: the population at generation 0
     :param n_gens: the desired number of generations (int); corresponds to global variable 'generations'
+    :param n_parents: determines whether each generation of learners receives data from a single agent from the previous generation, or from multiple (can be set to either 'single' or 'multiple').
     :param n_rounds: the desired number of communication rounds *within* each generation; corresponds to global variable
     'rounds'
     :param bottleneck: the amount of data (<meaning, form> pairs) that each learner receives
@@ -1749,7 +1751,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
                     population[j] = update_posterior(population[j], hypotheses, meaning, meaning_list, forms, noisy_variants, signal, ambiguity_penalty, error_prob, prob_of_noise, all_possible_forms)
-        data, sampled_languages_array = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths)
+        data, sampled_languages_array = population_communication(population, n_parents, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, forms, noisy_variants, possible_form_lengths)
 
         sampled_languages_over_gens[i] = sampled_languages_array
         language_stats_over_gens[i] = language_stats(population, possible_form_lengths, class_per_language)
@@ -1845,7 +1847,7 @@ if __name__ == '__main__':
 
         population = new_population(popsize, priors)
 
-        sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, error, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
+        sampled_languages_over_gens, language_stats_over_gens, data_over_gens, final_pop = simulation(population, generations, n_parents, rounds, b, popsize, meanings, forms_without_noise, noisy_forms, possible_form_lengths, hypothesis_space, class_per_lang, priors, initial_dataset, interaction, production, gamma, error, noise_prob, all_forms_including_noisy_variants, mutual_understanding, minimal_effort, communicative_success)
 
         sampled_languages_over_gens_per_run[r] = sampled_languages_over_gens
         language_stats_over_gens_per_run[r] = language_stats_over_gens
