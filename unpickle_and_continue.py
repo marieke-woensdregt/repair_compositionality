@@ -5,20 +5,22 @@ from evolution_compositionality_under_noise import *
 # ALL PARAMETER SETTINGS GO HERE:
 
 meanings = ['02', '03', '12', '13']  # all possible meanings
-forms_without_noise = create_all_possible_forms(2, [2])  # all possible forms, excluding their possible
-# 'noisy variants'
+possible_form_lengths = np.array([2])  # all possible form lengths
+forms_without_noise = create_all_possible_forms(2, possible_form_lengths)  # all possible forms, excluding their
+# possible 'noisy variants'
 noisy_forms = create_all_possible_noisy_forms(forms_without_noise)
 # all possible noisy variants of the forms above
 all_forms_including_noisy_variants = forms_without_noise + noisy_forms  # all possible forms, including both
 # complete forms and noisy variants
+
 error = 0.05  # the probability of making a production error (Kirby et al., 2015 use 0.05)
 
 turnover = True  # determines whether new individuals enter the population or not
 
 popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a population size of 2: each generation is simply
             # a pair of agents.
-runs = 100  # the number of independent simulation runs (Kirby et al., 2015 used 100)
-generations = 800  # the number of generations (Kirby et al., 2015 used 100)
+runs = 5  # the number of independent simulation runs (Kirby et al., 2015 used 100)
+generations = 10  # the number of generations (Kirby et al., 2015 used 100)
 initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 production = 'my_code'  # can be set to 'simlang' or 'my_code'
@@ -40,7 +42,7 @@ communicative_success_pressure_strength = (2./3.)  # determines how much more li
 
 pickle_file_path = "pickles/"
 
-extra_gens = 200
+extra_gens = 10
 
 
 # THE FOLLOWING PARAMETERS SHOULD ONLY BE SET IF __name__ == '__main__', BECAUSE THEY ARE RETRIEVED FROM THE INPUT
