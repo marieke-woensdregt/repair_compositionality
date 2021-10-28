@@ -1,0 +1,11 @@
+shell_scripts
+calculate_data_probs.py
+check_my_implementation_against_simlang_one.py
+evolution_compositionality_under_noise.html
+evolution_compositionality_under_noise.pdf
+instructions_running_simulation_on_ponyland.txt
+Notes_on_Gibbs_Sampling.ipynb
+repair_sequence_from_podcast.mp3
+repair_vs_redundancy.html
+repair_vs_redundancy.pdf
+try_multiprocessing.py
