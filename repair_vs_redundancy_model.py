@@ -247,8 +247,7 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
         random_parent_index = np.random.choice(np.arange(len(population)))  # this determines which agent's productions
         # will form the input for the next generation
     data = []
-    independent_repairs_count = 0
-    total_repairs_count = 0
+    repair_counts = []
     sampled_languages_array = np.zeros((len(population), n_rounds))
     for i in range(n_rounds):
         if interaction == 'taking_turns':
@@ -293,12 +292,8 @@ def population_communication_mutual_understanding(population, n_rounds, ambiguit
                 data.append((topic, utterance))
         elif n_parents == 'multiple':
             data.append((topic, utterance))
+        repair_counts.append(counter)
 
-        if counter > 0:
-            independent_repairs_count += 1
-        total_repairs_count += counter
-
-    repair_counts = np.array([independent_repairs_count, total_repairs_count])
     return data, sampled_languages_array, repair_counts
 
 
