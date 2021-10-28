@@ -19,7 +19,7 @@ popsize = 2  # If I understand it correctly, Kirby et al. (2015) used a populati
 # a pair of agents.
 runs = 1  # the number of independent simulation runs (Kirby et al., 2015 used 100)
 generations = 1000  # the number of generations (Kirby et al., 2015 used 100)
-initial_language_type = 'holistic'  # set the language class that the first generation is trained on
+initial_language_type = 'degenerate'  # set the language class that the first generation is trained on
 
 interaction = 'taking_turns'  # can be set to either 'random' or 'taking_turns'. The latter is what Kirby et al. (2015)
 # used, but NOTE that it only works with a popsize of 2!
