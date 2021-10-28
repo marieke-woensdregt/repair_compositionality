@@ -1236,7 +1236,7 @@ def receive_with_repair(language, utterance, mutual_understanding_pressure, mini
 
 # AND NOW FOR THE FUNCTIONS THAT DO THE BAYESIAN LEARNING:
 
-def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_penalty, prob_of_noise, all_possible_forms):
+def update_posterior(log_posterior, hypotheses, topic, meanings, utterance, ambiguity_penalty, prob_of_noise, all_possible_forms):
     """
     Takes a LOG posterior probability distribution and a <topic, utterance> pair, and updates the posterior probability
     distribution accordingly
@@ -1244,6 +1244,7 @@ def update_posterior(log_posterior, hypotheses, topic, utterance, ambiguity_pena
     :param log_posterior: 1D numpy array containing LOG posterior probability values for each hypothesis
     :param hypotheses: list of all possible languages
     :param topic: a topic (string from the global variable meanings)
+    :param meanings: list of all possible meanings; corresponds to global variable 'meanings'
     :param utterance: an utterance (string from the global variable forms (can be a noisy form if parameter noise is
     True)
     :param ambiguity_penalty: parameter that determines extent to which speaker tries to avoid ambiguity; corresponds
@@ -1462,9 +1463,9 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, listener_response, meanings, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
 
         elif mutual_understanding_pressure is False:
             if production == 'simlang':
@@ -1487,10 +1488,10 @@ def population_communication(population, n_rounds, mutual_understanding_pressure
                     # time
             else:
                 if observed_meaning == 'intended':
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, topic, meanings, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
                 elif observed_meaning == 'inferred':
                     inferred_meaning = receive_without_repair(hearer_language, utterance)
-                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
+                    population[hearer_index] = update_posterior(population[hearer_index], hypotheses, inferred_meaning, meanings, utterance, ambiguity_penalty, prob_of_noise, all_forms_including_noisy_variants)
 
         if n_parents == 'single':
 
@@ -1739,7 +1740,7 @@ def simulation(population, n_gens, n_rounds, bottleneck, pop_size, meaning_list,
                 if production_implementation == 'simlang':
                     population[j] = update_posterior_simlang(population[j], hypotheses, meaning, signal)
                 else:
-                    population[j] = update_posterior(population[j], hypotheses, meaning, signal, ambiguity_penalty, prob_of_noise, all_possible_forms)
+                    population[j] = update_posterior(population[j], hypotheses, meaning, meaning_list, signal, ambiguity_penalty, prob_of_noise, all_possible_forms)
         data, sampled_languages_array = population_communication(population, n_rounds, mutual_understanding_pressure, minimal_effort_pressure, ambiguity_penalty, prob_of_noise, communicative_success_pressure, hypotheses, meaning_list, possible_form_lengths)
 
         sampled_languages_over_gens[i] = sampled_languages_array
